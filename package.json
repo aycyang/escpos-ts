@@ -10,6 +10,8 @@
   "author": "",
   "license": "BSD-3-Clause",
   "devDependencies": {
+    "@types/node": "^24.9.1",
+    "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
