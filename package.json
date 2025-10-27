@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "check": "tsc --noEmit",
-    "test": "tsx src/tests/all.ts"
+    "test": "tsx tests/all.ts"
   },
   "author": "",
   "license": "BSD-3-Clause",

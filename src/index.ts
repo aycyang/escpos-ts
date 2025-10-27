@@ -1,3 +1,5 @@
+import assert from 'node:assert'
+
 type Ascii = 
 'NUL' |
 'SOH' |
@@ -128,7 +130,7 @@ type Ascii =
 '~' |
 'DEL'
 
-const ascii: Record<Ascii, number> = {
+const kAsciiToByte: Record<Ascii, number> = {
   'NUL': 0x00,
   'SOH': 0x01,
   'STX': 0x02,
@@ -259,12 +261,108 @@ const ascii: Record<Ascii, number> = {
   'DEL': 0x7f,
 }
 
-interface Cmd {
-  desc: string
+type ArgType = 'u8' | 'u16' | 'u32'
+class Arg {
+  name: string
+  value: number
+  type: ArgType
+  static from(buf: Buffer, name: string, type: ArgType) {
+    const arg = new Arg()
+    arg.name = name
+    arg.type = type
+    // TODO convenience function for reading to/writing from buffer
+    switch (type) {
+      case 'u8':
+        arg.value = buf.readUint8()
+        break
+      case 'u16':
+        arg.value = buf.readUint16LE()
+        break
+      case 'u32':
+        arg.value = buf.readUint32LE()
+        break
+    }
+    return arg
+  }
+  serialize(): Buffer {
+    const buf = Buffer.alloc(4)
+    switch (this.type) {
+      case 'u8':
+        buf.writeUint8(this.value)
+        break
+      case 'u16':
+        buf.writeUint16LE(this.value)
+        break
+      case 'u32':
+        buf.writeUint32LE(this.value)
+        break
+    }
+    return buf
+  }
 }
 
-class InitPrinter {
+// Command should statically define its prelude
+// Command should statically define its arg list
+// Command should encapsulate its to_bytes procedure, which needs to know prelude and argument rules
+// Command instance should encode the command type and arg values
+// To build the parse tree, need to be able to iterate over all commands and know the prelude for each command
+
+// Maybe we want prelude and args to be static, and then have a generic method
+// to serializes the in-mem representation to bytes, and then subclasses must
+// override the static class member.
+// To get the static class member of a subclass, ChatGPT suggests taking
+// `this.constructor` and typecasting it as an interface that tells Typescript
+// that it has all the static members. I don't like this because I have to
+// write the class members twice, once for the interface and once on the
+// subclass.
+
+// type definition is coupled with in-memory representation. should it be part of the same class?
+// type definition needs to be readable by parser and serializer
+// maybe code generation is the solution?
+
+
+
+interface BaseConstructor<T extends CmdBase> {
+  new(...args: any[]): T
+  desc: string
+  prelude: Ascii[]
+  args: Arg[]
+}
+
+abstract class CmdBase {
+  toBytes(): Buffer {
+    const ctor = this.constructor as BaseConstructor<CmdBase>
+    return Buffer.from(ctor.prelude.map(a => kAsciiToByte[a]))
+  }
+}
+
+export class InitPrinter extends CmdBase {
   static desc: string = 'Initialize printer'
+  static prelude: Ascii[] = ['ESC', '@']
+}
+
+export enum EmphasizedMode {
+  Off = 0,
+  On = 1,
+}
+
+export class SetEmphasizedMode extends CmdBase {
+  mode: EmphasizedMode
+  constructor(mode: EmphasizedMode) {
+    super()
+    this.mode = mode
+  }
+  override desc(): string {
+    return 'Turn emphasized mode on/off'
+  }
+  override prelude(): Ascii[] {
+    return ['ESC', 'E']
+  }
+  static override argRules(): ArgRule[] {
+    return [
+      { name: 'n', size: 1, isValid: (n) => 0 <= n && n <= 255 },
+    ]
+  }
 }
 
 enum UnderlineMode {
@@ -300,8 +398,6 @@ class SelectBitImageMode {
 
 type ArgRule = {
   name: string,
-  // Position of first byte of argument relative to the start of the command.
-  offset: number,
   // Size of the argument in bytes. If more than one, the bytes are to be
   // interpreted as a single little-endian number. If a function, the args
   // parameter is an object containing the arguments parsed thus far, keyed by
@@ -313,6 +409,7 @@ type ArgRule = {
   isValid?: (value: number, args: object) => boolean,
 }
 
+/*
 type CmdRule = {
   cmd: Cmd,
   prelude: Ascii[],
@@ -344,3 +441,19 @@ const rules: CmdRule[] = [
     ],
   },
 ]
+*/
+
+const cmds: CmdBase[] = [
+  InitPrinter,
+  SetEmphasizedMode,
+]
+
+const parseTree = {}
+
+for (const cmd of cmds) {
+}
+
+export function parse(buf: Buffer): CmdBase[] {
+  return []
+}
+
