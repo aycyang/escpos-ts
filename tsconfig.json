@@ -1,7 +1,10 @@
 // Copied from https://tsx.is/typescript#recommendation and modified
 {
 	"compilerOptions": {
-    "target": "es2015",
+    "target": "ES5",
+
+    // for decorator support
+    "experimentalDecorators": true,
 
 		// Treat files as modules even if it doesn't use import/export
 		"moduleDetection": "force",
