@@ -270,21 +270,65 @@ function asciiArrayToBytes(ascii: Ascii[]): number[] {
   return ascii.map(a => kAsciiToByte[a])
 }
 
-abstract class CmdBase {
-  abstract desc: string
-}
-
-class InitPrinter extends CmdBase {
-  override desc: string = 'Initialize printer'
-}
-
+// --- DECORATORS ---
 const kSerialMetadataKey = Symbol('serial')
 const kPreludeMetadataKey = Symbol('prelude')
 const kRegisterMetadataKey = Symbol('register')
+// --- END OF DECORATORS ---
+
+class CmdBase {
+  static desc: string
+
+  serialize(): Buffer {
+    const prelude = Reflect.getMetadata(kPreludeMetadataKey, this.constructor)
+    const bytes = asciiArrayToBytes(prelude)
+    const members = Reflect.getMetadata(kRegisterMetadataKey, this)
+    for (const member of members) {
+      const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
+      bytes.push(...toBytesLE(this[member], format))
+    }
+    return Buffer.from(bytes)
+  }
+
+  evalFormat(format: SerialFormat): UnsignedInt | number {
+    switch (format) {
+      case 'u32':
+      case 'u16':
+      case 'u8':
+        return format
+      default:
+        return this[format.member] + (format.offset ?? 0)
+    }
+  }
+
+  static from(buf: Buffer) {
+    // NOTE prelude has already been consumed at this point; just populate the
+    // args now.
+    const instance = new this()
+    const members = Reflect.getMetadata(kRegisterMetadataKey, this.prototype)
+    console.log('members=', members)
+    let offset = 0
+    for (const member of members) {
+      const format = Reflect.getMetadata(kSerialMetadataKey, this.prototype, member)
+      // TODO there must be a better way to differentiate behavior between buffers and uints
+      const normalizedFormat = instance.evalFormat(format)
+      const [value, newOffset] = fromBytesLE(buf, normalizedFormat, offset)
+      instance[member] = value
+      offset = newOffset
+    }
+    return instance
+  }
+
+
+}
+
+export class InitPrinter extends CmdBase {
+  static override desc: string = 'Initialize printer'
+}
 
 @prelude(['ESC', '*'])
-class SelectBitImageMode extends CmdBase {
-  override desc: string = 'Select bit-image mode'
+export class SelectBitImageMode extends CmdBase {
+  static override desc: string = 'Select bit-image mode'
 
   @serial('u8')
   m: number
@@ -303,48 +347,6 @@ class SelectBitImageMode extends CmdBase {
     // TODO n: infer from buffer length
     this.n = n
     this.d = d
-  }
-
-  // TODO this is fully generic; move this to parent class
-  serialize(): Buffer {
-    const prelude = Reflect.getMetadata(kPreludeMetadataKey, this.constructor)
-    const bytes = asciiArrayToBytes(prelude)
-    const members = Reflect.getMetadata(kRegisterMetadataKey, this)
-    for (const member of members) {
-      const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
-      bytes.push(...toBytesLE(this[member], format))
-    }
-    return Buffer.from(bytes)
-  }
-
-  static from(buf: Buffer) {
-    // NOTE prelude has already been consumed at this point; just populate the
-    // args now.
-    // TODO don't need to pass args when this is moved to parent class
-    const instance = new this(0, 0, Buffer.alloc(0))
-    const members = Reflect.getMetadata(kRegisterMetadataKey, this.prototype)
-    console.log('members=', members)
-    let offset = 0
-    for (const member of members) {
-      const format = Reflect.getMetadata(kSerialMetadataKey, this.prototype, member)
-      // TODO there must be a better way to differentiate behavior between buffers and uints
-      const normalizedFormat = instance.evalFormat(format)
-      const [value, newOffset] = fromBytesLE(buf, normalizedFormat, offset)
-      instance[member] = value
-      offset = newOffset
-    }
-    return instance
-  }
-
-  evalFormat(format: SerialFormat): UnsignedInt | number {
-    switch (format) {
-      case 'u32':
-      case 'u16':
-      case 'u8':
-        return format
-      default:
-        return this[format.member] + (format.offset ?? 0)
-    }
   }
 
 }
@@ -387,6 +389,7 @@ function toBytesLE(n: any, format: string): number[] {
 }
 
 // --- DECORATORS ---
+
 type Decorator = (target, propertyKey: string) => (void)
 type UnsignedInt = 'u8' | 'u16' | 'u32'
 type VariableSize = { member: string, offset?: number }
