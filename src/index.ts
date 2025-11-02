@@ -303,6 +303,7 @@ class CmdBase {
     }
   }
 
+  // TODO throw parse error if end of buffer is reached prematurely
   static from(buf: Buffer): [any, number] {
     // NOTE prelude has already been consumed at this point; just populate the
     // args now.
@@ -439,8 +440,6 @@ function prelude(arg: Ascii[]) {
 }
 // --- END OF DECORATORS ---
 
-console.log(SelectBitImageMode.from(Buffer.from([0x01, 0x03, 0x00, 0x05, 0x06, 0x07]))[0].serialize())
-
 class ParseError extends Error {}
 
 export function parse(buf: Buffer) {
@@ -462,6 +461,9 @@ export function parse(buf: Buffer) {
     } else {
       i++
     }
+  }
+  if (cur !== kParseTree) {
+    throw new ParseError(`unexpected end of buffer`)
   }
   return cmds
 }
