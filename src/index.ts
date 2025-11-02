@@ -6,12 +6,58 @@ import { Ascii, asciiToByte } from './ascii'
 // writing: https://github.com/tc39/proposal-decorator-metadata
 import 'reflect-metadata'
 
+// TODO this can probably be made non-global
 const kParseTree = []
 
 // --- DECORATORS ---
+
 const kSerialMetadataKey = Symbol('serial')
 const kPreludeMetadataKey = Symbol('prelude')
 const kRegisterMetadataKey = Symbol('register')
+
+type Decorator = (target, propertyKey: string) => (void)
+type UnsignedInt = 'u8' | 'u16' | 'u32'
+type VariableSize = { member: string, offset?: number }
+type SerialFormat = UnsignedInt | VariableSize
+
+function compose(decorators: Decorator[]): Decorator {
+  return (target, propertyKey) => {
+    for (const decorator of decorators) {
+      decorator(target, propertyKey)
+    }
+  }
+}
+
+function register(target, propertyKey: string) {
+  const memberList = Reflect.getMetadata(kRegisterMetadataKey, target) ?? []
+  memberList.push(propertyKey)
+  Reflect.defineMetadata(kRegisterMetadataKey, memberList, target)
+}
+
+function serial(arg: SerialFormat) {
+  return compose([register, Reflect.metadata(kSerialMetadataKey, arg)])
+}
+
+function registerCmd(prelude: Ascii[], target) {
+  let cur = kParseTree
+  let i = 0
+  while (i < prelude.length - 1) {
+    const b = asciiToByte(prelude[i])
+    cur[b] ??= []
+    cur = cur[b]
+    i++
+  }
+  const b = asciiToByte(prelude[i])
+  cur[b] = target
+}
+
+function prelude(arg: Ascii[]) {
+  return target => {
+    registerCmd(arg, target)
+    Reflect.defineMetadata(kPreludeMetadataKey, arg, target)
+  }
+}
+
 // --- END OF DECORATORS ---
 
 class CmdBase {
@@ -129,52 +175,6 @@ function toBytesLE(n: any, format: string): number[] {
   }
   return Array.from(buf)
 }
-
-// --- DECORATORS ---
-
-type Decorator = (target, propertyKey: string) => (void)
-type UnsignedInt = 'u8' | 'u16' | 'u32'
-type VariableSize = { member: string, offset?: number }
-type SerialFormat = UnsignedInt | VariableSize
-
-function compose(decorators: Decorator[]): Decorator {
-  return (target, propertyKey) => {
-    for (const decorator of decorators) {
-      decorator(target, propertyKey)
-    }
-  }
-}
-
-function register(target, propertyKey: string) {
-  const memberList = Reflect.getMetadata(kRegisterMetadataKey, target) ?? []
-  memberList.push(propertyKey)
-  Reflect.defineMetadata(kRegisterMetadataKey, memberList, target)
-}
-
-function serial(arg: SerialFormat) {
-  return compose([register, Reflect.metadata(kSerialMetadataKey, arg)])
-}
-
-function registerCmd(prelude: Ascii[], target) {
-  let cur = kParseTree
-  let i = 0
-  while (i < prelude.length - 1) {
-    const b = asciiToByte(prelude[i])
-    cur[b] ??= []
-    cur = cur[b]
-    i++
-  }
-  const b = asciiToByte(prelude[i])
-  cur[b] = target
-}
-
-function prelude(arg: Ascii[]) {
-  return target => {
-    registerCmd(arg, target)
-    Reflect.defineMetadata(kPreludeMetadataKey, arg, target)
-  }
-}
-// --- END OF DECORATORS ---
 
 class ParseError extends Error {}
 
