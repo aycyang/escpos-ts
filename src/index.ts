@@ -1,8 +1,8 @@
 import assert from 'node:assert'
 
-// TODO eventually, this will be made obsolete by Decorator Metadata,
-// which is one stage away from standardization at the time of writing:
-// https://github.com/tc39/proposal-decorator-metadata
+// TODO eventually, this will be made obsolete by the Decorator Metadata
+// feature, which is one stage away from standardization at the time of
+// writing: https://github.com/tc39/proposal-decorator-metadata
 import 'reflect-metadata'
 
 type Ascii = 
@@ -266,6 +266,10 @@ const kAsciiToByte: Record<Ascii, number> = {
   'DEL': 0x7f,
 }
 
+function asciiArrayToBytes(ascii: Ascii[]): number[] {
+  return ascii.map(a => kAsciiToByte[a])
+}
+
 abstract class CmdBase {
   abstract desc: string
 }
@@ -274,36 +278,40 @@ class InitPrinter extends CmdBase {
   override desc: string = 'Initialize printer'
 }
 
-const serFmtMetadataKey = Symbol('serFmt')
+const kSerialMetadataKey = Symbol('serial')
+const kPreludeMetadataKey = Symbol('prelude')
 const kRegisterMetadataKey = Symbol('register')
 
+@prelude(['ESC', '*'])
 class SelectBitImageMode extends CmdBase {
   override desc: string = 'Select bit-image mode'
 
-  @register
-  @serFmt('u8')
+  @serial('u8')
   m: number
 
-  @register
-  @serFmt('u16')
+  @serial('u16')
   n: number
 
-  @register
-  @serFmt('u8[]')
+  // TODO change type to Uint8Array
+  @serial('u8[]')
   d: Buffer
 
-  // TODO need a constructor for when we are building an ESC/POS command
-  // sequence. should take string-backed enums instead of raw numbers, but
-  // maybe it's ok to start with raw numbers since it might be easier to
-  // generate that code? then each ctor can be tweaked per command.
+  constructor(m, n, d: Buffer) {
+    super()
+    // TODO m: replace with string-backed enum
+    this.m = m
+    // TODO n: infer from buffer length
+    this.n = n
+    this.d = d
+  }
 
+  // TODO this is fully generic; move this to parent class
   serialize(): Buffer {
-    // TODO need to get the prelude, which is static in nature but this is a
-    // non-static context. so it probably needs to come from reflect metadata
+    const prelude = Reflect.getMetadata(kPreludeMetadataKey, this.constructor)
+    const bytes = asciiArrayToBytes(prelude)
     const members = Reflect.getMetadata(kRegisterMetadataKey, this)
-    const bytes: number[] = []
     for (const member of members) {
-      const format = Reflect.getMetadata(serFmtMetadataKey, this, member)
+      const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
       if (format === 'u8[]') {
         bytes.push(...this[member])
       } else {
@@ -316,10 +324,8 @@ class SelectBitImageMode extends CmdBase {
   static from(buf: Buffer) {
     // NOTE prelude has already been consumed at this point; just populate the
     // args now.
-    const self = new SelectBitImageMode()
-    self.m = 0
-    self.n = 0
-    self.d = Buffer.from([1, 2, 3])
+    // TODO consume args
+    const self = new SelectBitImageMode(0, 0, Buffer.from([]))
     return self
   }
 }
@@ -345,17 +351,33 @@ function toBytesLE(n: number, format: string): number[] {
   return Array.from(buf)
 }
 
+// --- DECORATORS ---
+type Decorator = (target, propertyKey: string) => void
+
+function compose(decorators: Decorator[]): Decorator {
+  return (target, propertyKey) => {
+    for (const decorator of decorators) {
+      decorator(target, propertyKey)
+    }
+  }
+}
+
 function register(target, propertyKey: string) {
   const memberList = Reflect.getMetadata(kRegisterMetadataKey, target) ?? []
   memberList.push(propertyKey)
   Reflect.defineMetadata(kRegisterMetadataKey, memberList, target)
 }
 
-function serFmt(arg: string) {
-  return Reflect.metadata(serFmtMetadataKey, arg)
+function serial(arg: string) {
+  return compose([register, Reflect.metadata(kSerialMetadataKey, arg)])
 }
 
-console.log(SelectBitImageMode.from(Buffer.from([0x1b, 0x2a, 0x00, 0x01, 0x01, 0x05, 0x06, 0x07])).serialize())
+function prelude(arg: Ascii[]) {
+  return Reflect.metadata(kPreludeMetadataKey, arg)
+}
+// --- END OF DECORATORS ---
+
+console.log(SelectBitImageMode.from(Buffer.from([0x00, 0x03, 0x00, 0x05, 0x06, 0x07])).serialize())
 
 export function parse(buf: Buffer) {
   return []
