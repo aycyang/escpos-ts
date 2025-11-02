@@ -286,6 +286,8 @@ const kRegisterMetadataKey = Symbol('register')
 class SelectBitImageMode extends CmdBase {
   override desc: string = 'Select bit-image mode'
 
+  // TODO consider letting argument be of type 'u8' | 'u16' | 'u32' | VariableSize
+  // where VariableSize = { member: string, offset: number }
   @serial('u8')
   m: number
 
@@ -293,7 +295,7 @@ class SelectBitImageMode extends CmdBase {
   n: number
 
   // TODO change type to Uint8Array
-  @serial('u8[]')
+  @serial('[n]')
   d: Buffer
 
   constructor(m, n, d: Buffer) {
@@ -312,7 +314,7 @@ class SelectBitImageMode extends CmdBase {
     const members = Reflect.getMetadata(kRegisterMetadataKey, this)
     for (const member of members) {
       const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
-      if (format === 'u8[]') {
+      if (format === '[n]') {
         bytes.push(...this[member])
       } else {
         bytes.push(...toBytesLE(this[member], format))
@@ -324,9 +326,33 @@ class SelectBitImageMode extends CmdBase {
   static from(buf: Buffer) {
     // NOTE prelude has already been consumed at this point; just populate the
     // args now.
-    // TODO consume args
-    const self = new SelectBitImageMode(0, 0, Buffer.from([]))
-    return self
+    // TODO don't need to pass args when this is moved to parent class
+    const instance = new this(0, 0, Buffer.alloc(0))
+    const members = Reflect.getMetadata(kRegisterMetadataKey, this.prototype)
+    console.log('members=', members)
+    let offset = 0
+    for (const member of members) {
+      const format: string = Reflect.getMetadata(kSerialMetadataKey, this.prototype, member)
+      if (format === '[n]') {
+        const sizeExpr = 'n'
+        const size = instance[sizeExpr]
+        console.log('size=', size)
+        instance[member] = buf.subarray(offset, offset + size)
+        offset += size
+      } else {
+        [instance[member], offset] = fromBytesLE(buf, format, offset)
+      }
+    }
+    return instance
+  }
+}
+
+function fromBytesLE(buf: Buffer, format: string, offset: number): [number, number] {
+  switch (format) {
+    case 'u8':
+      return [buf.readUint8(offset), offset + 1]
+    case 'u16':
+      return [buf.readUint16LE(offset), offset + 2]
   }
 }
 
@@ -377,7 +403,7 @@ function prelude(arg: Ascii[]) {
 }
 // --- END OF DECORATORS ---
 
-console.log(SelectBitImageMode.from(Buffer.from([0x00, 0x03, 0x00, 0x05, 0x06, 0x07])).serialize())
+console.log(SelectBitImageMode.from(Buffer.from([0x01, 0x03, 0x00, 0x05, 0x06, 0x07])).serialize())
 
 export function parse(buf: Buffer) {
   return []
