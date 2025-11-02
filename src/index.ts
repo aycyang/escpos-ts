@@ -286,8 +286,6 @@ const kRegisterMetadataKey = Symbol('register')
 class SelectBitImageMode extends CmdBase {
   override desc: string = 'Select bit-image mode'
 
-  // TODO consider letting argument be of type 'u8' | 'u16' | 'u32' | VariableSize
-  // where VariableSize = { member: string, offset: number }
   @serial('u8')
   m: number
 
@@ -295,7 +293,7 @@ class SelectBitImageMode extends CmdBase {
   n: number
 
   // TODO change type to Uint8Array
-  @serial('[n]')
+  @serial({ member: 'n' })
   d: Buffer
 
   constructor(m, n, d: Buffer) {
@@ -314,11 +312,7 @@ class SelectBitImageMode extends CmdBase {
     const members = Reflect.getMetadata(kRegisterMetadataKey, this)
     for (const member of members) {
       const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
-      if (format === '[n]') {
-        bytes.push(...this[member])
-      } else {
-        bytes.push(...toBytesLE(this[member], format))
-      }
+      bytes.push(...toBytesLE(this[member], format))
     }
     return Buffer.from(bytes)
   }
@@ -332,33 +326,46 @@ class SelectBitImageMode extends CmdBase {
     console.log('members=', members)
     let offset = 0
     for (const member of members) {
-      const format: string = Reflect.getMetadata(kSerialMetadataKey, this.prototype, member)
-      if (format === '[n]') {
-        const sizeExpr = 'n'
-        const size = instance[sizeExpr]
-        console.log('size=', size)
-        instance[member] = buf.subarray(offset, offset + size)
-        offset += size
-      } else {
-        [instance[member], offset] = fromBytesLE(buf, format, offset)
-      }
+      const format = Reflect.getMetadata(kSerialMetadataKey, this.prototype, member)
+      // TODO there must be a better way to differentiate behavior between buffers and uints
+      const normalizedFormat = instance.evalFormat(format)
+      const [value, newOffset] = fromBytesLE(buf, normalizedFormat, offset)
+      instance[member] = value
+      offset = newOffset
     }
     return instance
   }
+
+  evalFormat(format: SerialFormat): UnsignedInt | number {
+    switch (format) {
+      case 'u32':
+      case 'u16':
+      case 'u8':
+        return format
+      default:
+        return this[format.member] + (format.offset ?? 0)
+    }
+  }
+
 }
 
-function fromBytesLE(buf: Buffer, format: string, offset: number): [number, number] {
+
+function fromBytesLE(buf: Buffer, format: UnsignedInt | number, offset: number): [number | Buffer, number] {
   switch (format) {
     case 'u8':
       return [buf.readUint8(offset), offset + 1]
     case 'u16':
       return [buf.readUint16LE(offset), offset + 2]
+    case 'u32':
+      return [buf.readUint32LE(offset), offset + 4]
+    default:
+      return [buf.subarray(offset, offset + format), offset + format]
   }
 }
 
 // TODO use UInt8Array instead of Buffer so browsers can use it too without
 // needing a polyfill
-function toBytesLE(n: number, format: string): number[] {
+function toBytesLE(n: any, format: string): number[] {
   let buf: Buffer
   switch (format) {
     case 'u8':
@@ -373,12 +380,17 @@ function toBytesLE(n: number, format: string): number[] {
       buf = Buffer.alloc(4)
       buf.writeUInt32LE(n)
       break
+    default:
+      buf = n
   }
   return Array.from(buf)
 }
 
 // --- DECORATORS ---
-type Decorator = (target, propertyKey: string) => void
+type Decorator = (target, propertyKey: string) => (void)
+type UnsignedInt = 'u8' | 'u16' | 'u32'
+type VariableSize = { member: string, offset?: number }
+type SerialFormat = UnsignedInt | VariableSize
 
 function compose(decorators: Decorator[]): Decorator {
   return (target, propertyKey) => {
@@ -394,7 +406,7 @@ function register(target, propertyKey: string) {
   Reflect.defineMetadata(kRegisterMetadataKey, memberList, target)
 }
 
-function serial(arg: string) {
+function serial(arg: SerialFormat) {
   return compose([register, Reflect.metadata(kSerialMetadataKey, arg)])
 }
 
