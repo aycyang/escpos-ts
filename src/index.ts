@@ -454,7 +454,7 @@ export function parse(buf: Buffer) {
     cur = cur[b]
     if (typeof cur === 'function') { // ctor
       const ctor = cur as any
-      const [instance, bytesRead] = ctor.from(buf.subarray(i))
+      const [instance, bytesRead] = ctor.from(buf.subarray(i + 1))
       cmds.push(instance)
       i += bytesRead + 1
       cur = kParseTree

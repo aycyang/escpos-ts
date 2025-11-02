@@ -39,3 +39,19 @@ test('InitPrinter', t => {
   assert.strictEqual(cmds.length, 1)
   assert(cmds[0] instanceof InitPrinter)
 })
+
+test('SelectBitImageMode', t => {
+  const buf = Buffer.from([
+    0x1b, 0x2a,
+    0x01,
+    0x03, 0x00,
+    0x05, 0x06, 0x07,
+  ])
+  const cmds = parse(buf)
+  assert.strictEqual(cmds.length, 1)
+  const cmd = cmds[0]
+  assert(cmd instanceof SelectBitImageMode)
+  assert.strictEqual(cmd.m, 1)
+  assert.strictEqual(cmd.n, 3)
+  assert.deepStrictEqual(cmd.d, Buffer.from([5,6,7]))
+})
