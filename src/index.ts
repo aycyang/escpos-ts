@@ -270,6 +270,8 @@ function asciiArrayToBytes(ascii: Ascii[]): number[] {
   return ascii.map(a => kAsciiToByte[a])
 }
 
+const kParseTree = []
+
 // --- DECORATORS ---
 const kSerialMetadataKey = Symbol('serial')
 const kPreludeMetadataKey = Symbol('prelude')
@@ -301,12 +303,14 @@ class CmdBase {
     }
   }
 
-  static from(buf: Buffer) {
+  static from(buf: Buffer): [any, number] {
     // NOTE prelude has already been consumed at this point; just populate the
     // args now.
     const instance = new this()
     const members = Reflect.getMetadata(kRegisterMetadataKey, this.prototype)
-    console.log('members=', members)
+    if (!members) {
+      return [instance, 0]
+    }
     let offset = 0
     for (const member of members) {
       const format = Reflect.getMetadata(kSerialMetadataKey, this.prototype, member)
@@ -316,12 +320,13 @@ class CmdBase {
       instance[member] = value
       offset = newOffset
     }
-    return instance
+    return [instance, offset]
   }
 
 
 }
 
+@prelude(['ESC', '@'])
 export class InitPrinter extends CmdBase {
   static override desc: string = 'Initialize printer'
 }
@@ -413,13 +418,50 @@ function serial(arg: SerialFormat) {
   return compose([register, Reflect.metadata(kSerialMetadataKey, arg)])
 }
 
+function registerCmd(prelude: Ascii[], target) {
+  let cur = kParseTree
+  let i = 0
+  while (i < prelude.length - 1) {
+    const b = kAsciiToByte[prelude[i]]
+    cur[b] ??= []
+    cur = cur[b]
+    i++
+  }
+  const b = kAsciiToByte[prelude[i]]
+  cur[b] = target
+}
+
 function prelude(arg: Ascii[]) {
-  return Reflect.metadata(kPreludeMetadataKey, arg)
+  return target => {
+    registerCmd(arg, target)
+    Reflect.defineMetadata(kPreludeMetadataKey, arg, target)
+  }
 }
 // --- END OF DECORATORS ---
 
-console.log(SelectBitImageMode.from(Buffer.from([0x01, 0x03, 0x00, 0x05, 0x06, 0x07])).serialize())
+console.log(SelectBitImageMode.from(Buffer.from([0x01, 0x03, 0x00, 0x05, 0x06, 0x07]))[0].serialize())
+
+class ParseError extends Error {}
 
 export function parse(buf: Buffer) {
-  return []
+  const cmds = []
+  let cur = kParseTree
+  let i = 0
+  while (i < buf.length) {
+    const b = buf[i]
+    if (!(b in cur)) {
+      throw new ParseError(`unexpected token: ${b}`)
+    }
+    cur = cur[b]
+    if (typeof cur === 'function') { // ctor
+      const ctor = cur as any
+      const [instance, bytesRead] = ctor.from(buf.subarray(i))
+      cmds.push(instance)
+      i += bytesRead + 1
+      cur = kParseTree
+    } else {
+      i++
+    }
+  }
+  return cmds
 }
