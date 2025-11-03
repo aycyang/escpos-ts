@@ -1,5 +1,5 @@
 import { asciiToByte } from './ascii'
-import { kSerialMetadataKey, kPreludeMetadataKey, kRegisterMetadataKey } from './symbols'
+import { kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
 
 // TODO eventually, this will be made obsolete by the Decorator Metadata
 // feature, which is one stage away from standardization at the time of
@@ -10,8 +10,8 @@ export class CmdBase {
   static desc: string
 
   serialize(): Buffer {
-    const prelude = Reflect.getMetadata(kPreludeMetadataKey, this.constructor)
-    const bytes = prelude.map(asciiToByte)
+    const prefix = Reflect.getMetadata(kPrefixMetadataKey, this.constructor)
+    const bytes = prefix.map(asciiToByte)
     const members = Reflect.getMetadata(kRegisterMetadataKey, this)
     for (const member of members) {
       const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
@@ -31,10 +31,11 @@ export class CmdBase {
     }
   }
 
-  // TODO throw parse error if end of buffer is reached prematurely
   static from(buf: Buffer): [any, number] {
-    // NOTE prelude has already been consumed at this point; just populate the
-    // args now.
+    // Assumption: the prefix bytes have already been consumed. The passed-in
+    // buffer begins just after the prefix bytes. The buffer may contain more
+    // bytes than expected, but any fewer would be unexpected.
+    // TODO throw parse error if end of buffer is reached prematurely
     const instance = new this()
     const members = Reflect.getMetadata(kRegisterMetadataKey, this.prototype)
     if (!members) {
