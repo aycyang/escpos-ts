@@ -1,7 +1,12 @@
 import { register, parse } from './parse'
+import { serial } from './decorators'
 export { parse } from './parse'
 import { CmdBase } from './cmd'
-import { serial } from './decorators'
+
+@register(['HT'])
+export class HorizontalTab extends CmdBase {
+  static override desc: string = 'Horizontal tab'
+}
 
 @register(['ESC', '@'])
 export class InitPrinter extends CmdBase {

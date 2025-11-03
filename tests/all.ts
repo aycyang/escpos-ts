@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
+  HorizontalTab,
   InitPrinter,
   SelectBitImageMode,
   parse,
@@ -31,6 +32,13 @@ test('ParseError', async (t) => {
     })
   })
 
+})
+
+test('HorizontalTab', t => {
+  const buf = Buffer.from([0x09])
+  const cmds = parse(buf)
+  assert.strictEqual(cmds.length, 1)
+  assert(cmds[0] instanceof HorizontalTab)
 })
 
 test('InitPrinter', t => {
