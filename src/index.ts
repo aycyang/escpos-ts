@@ -6,9 +6,6 @@ import { Ascii, asciiToByte } from './ascii'
 // writing: https://github.com/tc39/proposal-decorator-metadata
 import 'reflect-metadata'
 
-// TODO this can probably be made non-global
-const kParseTree = []
-
 // --- DECORATORS ---
 
 const kSerialMetadataKey = Symbol('serial')
@@ -28,36 +25,15 @@ function compose(decorators: Decorator[]): Decorator {
   }
 }
 
-function register(target, propertyKey: string) {
+function registerMember(target, propertyKey: string) {
   const memberList = Reflect.getMetadata(kRegisterMetadataKey, target) ?? []
   memberList.push(propertyKey)
   Reflect.defineMetadata(kRegisterMetadataKey, memberList, target)
 }
 
 function serial(arg: SerialFormat) {
-  return compose([register, Reflect.metadata(kSerialMetadataKey, arg)])
+  return compose([registerMember, Reflect.metadata(kSerialMetadataKey, arg)])
 }
-
-function registerCmd(prelude: Ascii[], target) {
-  let cur = kParseTree
-  let i = 0
-  while (i < prelude.length - 1) {
-    const b = asciiToByte(prelude[i])
-    cur[b] ??= []
-    cur = cur[b]
-    i++
-  }
-  const b = asciiToByte(prelude[i])
-  cur[b] = target
-}
-
-function prelude(arg: Ascii[]) {
-  return target => {
-    registerCmd(arg, target)
-    Reflect.defineMetadata(kPreludeMetadataKey, arg, target)
-  }
-}
-
 // --- END OF DECORATORS ---
 
 class CmdBase {
@@ -105,16 +81,62 @@ class CmdBase {
     }
     return [instance, offset]
   }
-
-
 }
 
-@prelude(['ESC', '@'])
+class ParseError extends Error {}
+
+export class Parser {
+  static tree: object = []
+
+  static register(prelude: Ascii[]) {
+    return target => {
+      let cur = this.tree
+      let i = 0
+      while (i < prelude.length - 1) {
+        const b = asciiToByte(prelude[i])
+        cur[b] ??= []
+        cur = cur[b]
+        i++
+      }
+      const b = asciiToByte(prelude[i])
+      cur[b] = target
+      Reflect.defineMetadata(kPreludeMetadataKey, prelude, target)
+    }
+  }
+
+  static parse(buf: Buffer): CmdBase[] {
+    const cmds: CmdBase[] = []
+    let cur = this.tree
+    let i = 0
+    while (i < buf.length) {
+      const b = buf[i]
+      if (!(b in cur)) {
+        throw new ParseError(`unexpected token: ${b}`)
+      }
+      cur = cur[b]
+      if (typeof cur === 'function') { // ctor
+        const ctor = cur as any
+        const [instance, bytesRead] = ctor.from(buf.subarray(i + 1))
+        cmds.push(instance)
+        i += bytesRead + 1
+        cur = this.tree
+      } else {
+        i++
+      }
+    }
+    if (cur !== this.tree) {
+      throw new ParseError(`unexpected end of buffer`)
+    }
+    return cmds
+  }
+}
+
+@Parser.register(['ESC', '@'])
 export class InitPrinter extends CmdBase {
   static override desc: string = 'Initialize printer'
 }
 
-@prelude(['ESC', '*'])
+@Parser.register(['ESC', '*'])
 export class SelectBitImageMode extends CmdBase {
   static override desc: string = 'Select bit-image mode'
 
@@ -176,30 +198,3 @@ function toBytesLE(n: any, format: string): number[] {
   return Array.from(buf)
 }
 
-class ParseError extends Error {}
-
-export function parse(buf: Buffer) {
-  const cmds = []
-  let cur = kParseTree
-  let i = 0
-  while (i < buf.length) {
-    const b = buf[i]
-    if (!(b in cur)) {
-      throw new ParseError(`unexpected token: ${b}`)
-    }
-    cur = cur[b]
-    if (typeof cur === 'function') { // ctor
-      const ctor = cur as any
-      const [instance, bytesRead] = ctor.from(buf.subarray(i + 1))
-      cmds.push(instance)
-      i += bytesRead + 1
-      cur = kParseTree
-    } else {
-      i++
-    }
-  }
-  if (cur !== kParseTree) {
-    throw new ParseError(`unexpected end of buffer`)
-  }
-  return cmds
-}

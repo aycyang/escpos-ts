@@ -1,15 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
-  SelectBitImageMode,
   InitPrinter,
-  parse,
+  SelectBitImageMode,
+  Parser,
 } from '../src/index'
 
 test('ParseError', async (t) => {
   await t.test('unrecognized prelude', t => {
     assert.throws(() => {
-      parse(Buffer.from([0x1b, 0x1b]))
+      Parser.parse(Buffer.from([0x1b, 0x1b]))
     }, error => {
       return true
     })
@@ -17,7 +17,7 @@ test('ParseError', async (t) => {
 
   await t.test('incomplete command', t => {
     assert.throws(() => {
-      parse(Buffer.from([0x1b]))
+      Parser.parse(Buffer.from([0x1b]))
     }, error => {
       return true
     })
@@ -25,7 +25,7 @@ test('ParseError', async (t) => {
 
   await t.test('incomplete command after complete command', t => {
     assert.throws(() => {
-      parse(Buffer.from([0x1b, 0x40, 0x1b]))
+      Parser.parse(Buffer.from([0x1b, 0x40, 0x1b]))
     }, error => {
       return true
     })
@@ -35,7 +35,7 @@ test('ParseError', async (t) => {
 
 test('InitPrinter', t => {
   const buf = Buffer.from([0x1b, 0x40])
-  const cmds = parse(buf)
+  const cmds = Parser.parse(buf)
   assert.strictEqual(cmds.length, 1)
   assert(cmds[0] instanceof InitPrinter)
 })
@@ -47,7 +47,7 @@ test('SelectBitImageMode', t => {
     0x03, 0x00,
     0x05, 0x06, 0x07,
   ])
-  const cmds = parse(buf)
+  const cmds = Parser.parse(buf)
   assert.strictEqual(cmds.length, 1)
   const cmd = cmds[0]
   assert(cmd instanceof SelectBitImageMode)
