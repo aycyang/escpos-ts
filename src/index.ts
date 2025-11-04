@@ -8,25 +8,24 @@ export class HorizontalTab extends CmdBase {
   static override desc: string = 'Horizontal tab'
 }
 
-@register(['ESC', '@'])
-export class InitPrinter extends CmdBase {
-  static override desc: string = 'Initialize printer'
-}
+export class SetCharacterSpacing extends CmdBase {}
+export class SelectPrintMode extends CmdBase {}
+export class SetAbsolutePrintPosition extends CmdBase {}
+export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {}
+export class DefineUserDefinedCharacters extends CmdBase {}
+export class ControlBeeperTones extends CmdBase {}
+export class ModelSpecificBuzzerControl extends CmdBase {}
 
 @register(['ESC', '*'])
 export class SelectBitImageMode extends CmdBase {
   static override desc: string = 'Select bit-image mode'
-
   @serial('u8')
   m: number
-
   @serial('u16')
   n: number
-
   // TODO change type to Uint8Array
   @serial({ member: 'n' })
   d: Buffer
-
   constructor(m, n, d: Buffer) {
     super()
     // TODO m: replace with string-backed enum
@@ -35,8 +34,43 @@ export class SelectBitImageMode extends CmdBase {
     this.n = n
     this.d = d
   }
-
 }
+
+export class SetUnderlineMode extends CmdBase {}
+export class SelectDefaultLineSpacing extends CmdBase {}
+export class SetLineSpacing extends CmdBase {}
+export class SelectPeripheralDevice extends CmdBase {}
+export class CancelUserDefinedCharacters extends CmdBase {}
+
+@register(['ESC', '@'])
+export class InitPrinter extends CmdBase {
+  static override desc: string = 'Initialize printer'
+}
+
+export class SetHorizontalTabPositions extends CmdBase {}
+export class SetEmphasizedMode extends CmdBase {}
+export class SetDoubleStrikeMode extends CmdBase {}
+export class PrintAndFeedPaper extends CmdBase {}
+export class SelectPageMode extends CmdBase {}
+export class SelectCharacterFont extends CmdBase {}
+export class SelectInternationalCharacterSet extends CmdBase {}
+export class SelectStandardMode extends CmdBase {}
+export class SelectPrintDirectionInPageMode extends CmdBase {}
+export class SetRotationMode extends CmdBase {}
+export class SetPrintAreaInPageMode extends CmdBase {}
+export class SetRelativePrintPosition extends CmdBase {}
+export class SelectJustification extends CmdBase {}
+export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {}
+export class SelectPaperSensorsToStopPrinting extends CmdBase {}
+export class EnableOrDisablePanelButtons extends CmdBase {}
+export class PrintAndFeedNLines extends CmdBase {}
+export class PartialCutOnePointLeftUncut extends CmdBase {}
+export class PartialCutThreePointsLeftUncut extends CmdBase {}
+export class GeneratePulse extends CmdBase {}
+export class SelectCharacterCodeTable extends CmdBase {}
+export class TransmitPeripheralDeviceStatus extends CmdBase {}
+export class TransmitPaperSensorStatus extends CmdBase {}
+export class SetUpsideDownPrintMode extends CmdBase {}
 
 @registerMultiFn(['FS', '(', 'A'], { skip: 2, fn: 48 })
 export class SelectKanjiCharacterFont extends CmdBase {
@@ -50,7 +84,7 @@ export class SelectKanjiCharacterFont extends CmdBase {
 }
 
 @registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 60 })
-export class CancelSetValuesForTopBottomLogoPrinting extends CmdBase {
+export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Cancel set values for top/bottom logo printing'
   @serial('u16')
   p: number
@@ -69,7 +103,7 @@ export class CancelSetValuesForTopBottomLogoPrinting extends CmdBase {
 }
 
 @registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 61 })
-export class TransmitSetValuesForTopBottomLogoPrinting extends CmdBase {
+export class TransmitSetValuesForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Transmit set values for top/bottom logo printing'
   @serial('u16')
   p: number
@@ -113,7 +147,7 @@ export class SetBottomLogoPrinting extends CmdBase {
 }
 
 @registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 64 })
-export class MakeExtendedSettingsForTopBottomLogoPrinting extends CmdBase {
+export class MakeExtendedSettingsForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Make extended settings for top/bottom logo printing'
   @serial('u16')
   p: number
@@ -125,7 +159,7 @@ export class MakeExtendedSettingsForTopBottomLogoPrinting extends CmdBase {
 }
 
 @registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 65 })
-export class EnableDisableTopBottomLogoPrinting extends CmdBase {
+export class EnableDisableTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Enable/disable top/bottom logo printing'
   @serial('u16')
   p: number
@@ -138,3 +172,7 @@ export class EnableDisableTopBottomLogoPrinting extends CmdBase {
   @serial('u8')
   n: number
 }
+
+export class SelectCharacterSize extends CmdBase {}
+export class SetInvertColorMode extends CmdBase {}
+export class SelectCutModeAndCutPaper extends CmdBase {}
