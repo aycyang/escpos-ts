@@ -7,6 +7,10 @@ import {
   SelectKanjiCharacterFont,
   CancelSetValuesForTopBottomLogoPrinting,
   TransmitSetValuesForTopBottomLogoPrinting,
+  SetTopLogoPrinting,
+  SetBottomLogoPrinting,
+  MakeExtendedSettingsForTopBottomLogoPrinting,
+  EnableDisableTopBottomLogoPrinting,
   parse,
 } from '../src/index'
 
@@ -94,6 +98,15 @@ const testCases: TestCase[] = [
       0x30,
       0x43, 0x4c, 0x52,
     ]),
+    checks: {
+      p: 6,
+      fn: 0x3c,
+      m: 2,
+      c: 0x30,
+      d1: 0x43,
+      d2: 0x4c,
+      d3: 0x52,
+    }
   },
   {
     class: TransmitSetValuesForTopBottomLogoPrinting,
@@ -104,6 +117,54 @@ const testCases: TestCase[] = [
       0x02,
       0x30,
     ]),
+    checks: {
+      p: 3,
+      fn: 0x3d,
+      m: 2,
+      c: 0x30,
+    }
+  },
+  {
+    class: SetTopLogoPrinting,
+    example: Buffer.from([
+      0x1c, 0x28, 0x45,
+      0x06, 0x00,
+      0x3e,
+      0x02,
+      0x20,
+      0x20,
+      0x30,
+      0x00,
+    ]),
+    checks: {
+      p: 6,
+      fn: 0x3e,
+      m: 2,
+      kc1: 0x20,
+      kc2: 0x20,
+      a: 0x30,
+      n: 0x00,
+    }
+  },
+  { class: SetBottomLogoPrinting },
+  { class: MakeExtendedSettingsForTopBottomLogoPrinting },
+  {
+    class: EnableDisableTopBottomLogoPrinting,
+    example: Buffer.from([
+      0x1c, 0x28, 0x45,
+      0x04, 0x00,
+      0x41,
+      0x02,
+      0x30,
+      0x30,
+    ]),
+    checks: {
+      p: 4,
+      fn: 0x41,
+      m: 2,
+      a: 0x30,
+      n: 0x30,
+    }
   },
 ]
 
@@ -118,7 +179,7 @@ for (const testCase of testCases) {
     const cmd = cmds[0]
     assert(cmd instanceof testCase.class)
     for (const [ key, value ] of Object.entries(testCase.checks ?? {})) {
-      assert.deepStrictEqual(cmd[key], value)
+      assert.deepStrictEqual(cmd[key], value, `member ${key} is ${cmd[key]}, but expected ${value}`)
     }
   })
 }

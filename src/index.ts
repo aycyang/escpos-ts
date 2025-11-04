@@ -80,3 +80,61 @@ export class TransmitSetValuesForTopBottomLogoPrinting extends CmdBase {
   @serial('u8')
   c: number
 }
+
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 62 })
+export class SetTopLogoPrinting extends CmdBase {
+  static override desc: string = 'Set top logo printing'
+  @serial('u16')
+  p: number
+  @serial('u8')
+  fn: number
+  @serial('u8')
+  m: number
+  @serial('u8')
+  kc1: number
+  @serial('u8')
+  kc2: number
+  @serial('u8')
+  a: number
+  @serial('u8')
+  n: number
+}
+
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 63 })
+export class SetBottomLogoPrinting extends CmdBase {
+  static override desc: string = 'Set bottom logo printing'
+  @serial('u16')
+  p: number
+  @serial('u8')
+  fn: number
+  @serial('u8')
+  m: number
+  // TODO
+}
+
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 64 })
+export class MakeExtendedSettingsForTopBottomLogoPrinting extends CmdBase {
+  static override desc: string = 'Make extended settings for top/bottom logo printing'
+  @serial('u16')
+  p: number
+  @serial('u8')
+  fn: number
+  @serial('u8')
+  m: number
+  // TODO
+}
+
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 65 })
+export class EnableDisableTopBottomLogoPrinting extends CmdBase {
+  static override desc: string = 'Enable/disable top/bottom logo printing'
+  @serial('u16')
+  p: number
+  @serial('u8')
+  fn: number
+  @serial('u8')
+  m: number
+  @serial('u8')
+  a: number
+  @serial('u8')
+  n: number
+}
