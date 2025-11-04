@@ -12,7 +12,7 @@ export class CmdBase {
   serialize(): Buffer {
     const prefix = Reflect.getMetadata(kPrefixMetadataKey, this.constructor)
     const bytes = prefix.map(asciiToByte)
-    const members = Reflect.getMetadata(kRegisterMetadataKey, this)
+    const members = Reflect.getMetadata(kRegisterMetadataKey, this) ?? []
     for (const member of members) {
       const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
       bytes.push(...toBytesLE(this[member], format))

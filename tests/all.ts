@@ -259,5 +259,7 @@ for (const testCase of testCases) {
     for (const [ key, value ] of Object.entries(testCase.checks ?? {})) {
       assert.deepStrictEqual(cmd[key], value, `member ${key} is ${cmd[key]}, but expected ${value}`)
     }
+    const buf = cmd.serialize()
+    assert.deepStrictEqual(buf, testCase.example)
   })
 }
