@@ -15,7 +15,7 @@ import {
   SetLineSpacing,
   SelectPeripheralDevice,
   CancelUserDefinedCharacters,
-  InitPrinter,
+  InitializePrinter,
   SetHorizontalTabPositions,
   SetEmphasizedMode,
   SetDoubleStrikeMode,
@@ -93,7 +93,16 @@ const testCases: TestCase[] = [
       0x09,
     ]),
   },
-  { class: SetCharacterSpacing },
+  {
+    class: SetCharacterSpacing,
+    example: Buffer.from([
+      0x1b, 0x20,
+      0x10,
+    ]),
+    checks: {
+      n: 16,
+    }
+  },
   { class: SelectPrintMode },
   { class: SetAbsolutePrintPosition },
   { class: SelectOrCancelUserDefinedCharacterSet },
@@ -114,19 +123,37 @@ const testCases: TestCase[] = [
       d: Buffer.from([0x05, 0x06, 0x07]),
     },
   },
-  { class: SetUnderlineMode },
+  {
+    class: SetUnderlineMode,
+    example: Buffer.from([
+      0x1b, 0x2d,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    }
+  },
   { class: SelectDefaultLineSpacing },
   { class: SetLineSpacing },
   { class: SelectPeripheralDevice },
   { class: CancelUserDefinedCharacters },
   {
-    class: InitPrinter,
+    class: InitializePrinter,
     example: Buffer.from([
       0x1b, 0x40,
     ]),
   },
   { class: SetHorizontalTabPositions },
-  { class: SetEmphasizedMode },
+  {
+    class: SetEmphasizedMode,
+    example: Buffer.from([
+      0x1b, 0x45,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    }
+  },
   { class: SetDoubleStrikeMode },
   { class: PrintAndFeedPaper },
   { class: SelectPageMode },
@@ -137,7 +164,16 @@ const testCases: TestCase[] = [
   { class: SetRotationMode },
   { class: SetPrintAreaInPageMode },
   { class: SetRelativePrintPosition },
-  { class: SelectJustification },
+  {
+    class: SelectJustification,
+    example: Buffer.from([
+      0x1b, 0x61,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    },
+  },
   { class: SelectPaperSensorsToOutputPaperEndSignals },
   { class: SelectPaperSensorsToStopPrinting },
   { class: EnableOrDisablePanelButtons },
@@ -241,9 +277,36 @@ const testCases: TestCase[] = [
       n: 0x30,
     }
   },
-  { class: SelectCharacterSize },
-  { class: SetInvertColorMode },
-  { class: SelectCutModeAndCutPaper },
+  {
+    class: SelectCharacterSize,
+    example: Buffer.from([
+      0x1d, 0x21,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    },
+  },
+  {
+    class: SetInvertColorMode,
+    example: Buffer.from([
+      0x1d, 0x42,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    },
+  },
+  {
+    class: SelectCutModeAndCutPaper,
+    example: Buffer.from([
+      0x1d, 0x56,
+      0x01,
+    ]),
+    checks: {
+      m: 1,
+    },
+  },
 ]
 
 for (const testCase of testCases) {

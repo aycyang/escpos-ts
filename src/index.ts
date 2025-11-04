@@ -8,7 +8,12 @@ export class HorizontalTab extends CmdBase {
   static override desc: string = 'Horizontal tab'
 }
 
-export class SetCharacterSpacing extends CmdBase {}
+@register(['ESC', 'SP'])
+export class SetCharacterSpacing extends CmdBase {
+  static override desc: string = 'Set right-side character spacing'
+  @serial('u8')
+  n: number
+}
 export class SelectPrintMode extends CmdBase {}
 export class SetAbsolutePrintPosition extends CmdBase {}
 export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {}
@@ -36,19 +41,32 @@ export class SelectBitImageMode extends CmdBase {
   }
 }
 
-export class SetUnderlineMode extends CmdBase {}
+
+@register(['ESC', '-'])
+export class SetUnderlineMode extends CmdBase {
+  static override desc: string = 'Turn underline mode on/off'
+  @serial('u8')
+  n: number
+}
 export class SelectDefaultLineSpacing extends CmdBase {}
 export class SetLineSpacing extends CmdBase {}
 export class SelectPeripheralDevice extends CmdBase {}
 export class CancelUserDefinedCharacters extends CmdBase {}
 
 @register(['ESC', '@'])
-export class InitPrinter extends CmdBase {
+export class InitializePrinter extends CmdBase {
   static override desc: string = 'Initialize printer'
 }
 
 export class SetHorizontalTabPositions extends CmdBase {}
-export class SetEmphasizedMode extends CmdBase {}
+
+@register(['ESC', 'E'])
+export class SetEmphasizedMode extends CmdBase {
+  static override desc: string = 'Turn emphasized mode on/off'
+  @serial('u8')
+  n: number
+}
+
 export class SetDoubleStrikeMode extends CmdBase {}
 export class PrintAndFeedPaper extends CmdBase {}
 export class SelectPageMode extends CmdBase {}
@@ -59,7 +77,16 @@ export class SelectPrintDirectionInPageMode extends CmdBase {}
 export class SetRotationMode extends CmdBase {}
 export class SetPrintAreaInPageMode extends CmdBase {}
 export class SetRelativePrintPosition extends CmdBase {}
-export class SelectJustification extends CmdBase {}
+
+@register(['ESC', 'a'])
+export class SelectJustification extends CmdBase {
+  static override desc: string = 'Select justification'
+  @serial('u8')
+  @range(0, 2)
+  @range(48, 50)
+  n: number
+}
+
 export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {}
 export class SelectPaperSensorsToStopPrinting extends CmdBase {}
 export class EnableOrDisablePanelButtons extends CmdBase {}
@@ -173,6 +200,23 @@ export class EnableDisableTopOrBottomLogoPrinting extends CmdBase {
   n: number
 }
 
-export class SelectCharacterSize extends CmdBase {}
-export class SetInvertColorMode extends CmdBase {}
-export class SelectCutModeAndCutPaper extends CmdBase {}
+@register(['GS', '!'])
+export class SelectCharacterSize extends CmdBase {
+  static override desc: string = 'Select character size'
+  @serial('u8')
+  n: number
+}
+
+@register(['GS', 'B'])
+export class SetInvertColorMode extends CmdBase {
+  static override desc: string = 'Turn white/black reverse print mode on/off'
+  @serial('u8')
+  n: number
+}
+
+@register(['GS', 'V'])
+export class SelectCutModeAndCutPaper extends CmdBase {
+  static override desc: string = 'Select cut mode and cut paper'
+  @serial('u8')
+  m: number
+}
