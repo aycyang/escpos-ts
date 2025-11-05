@@ -1,5 +1,7 @@
 import { asciiToByte } from './ascii'
-import { kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
+import { kValidMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
+import { ParseError } from './parse'
+import assert from 'node:assert'
 
 // TODO eventually, this will be made obsolete by the Decorator Metadata
 // feature, which is one stage away from standardization at the time of
@@ -47,6 +49,19 @@ export class CmdBase {
       // TODO there must be a better way to differentiate behavior between buffers and uints
       const normalizedFormat = instance.evalFormat(format)
       const [value, newOffset] = fromBytesLE(buf, normalizedFormat, offset)
+
+      // Check if value is in any valid range.
+      const ranges: any[] = Reflect.getMetadata(kValidMetadataKey, this.prototype, member) ?? []
+      if (typeof value === 'number') {
+        if (!ranges.some(range => range.contains(value))) {
+          throw new ParseError(`Parsed value ${value} for member '${member}' is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
+        }
+      } else { // Buffer
+        const offendingIndex = value.findIndex(byte => !ranges.some(range => range.contains(byte)))
+        if (offendingIndex !== -1) {
+          throw new ParseError(`Parsed buffer for member '${member}' has a byte ${value[offendingIndex]} at index ${offendingIndex} that is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
+        }
+      }
       instance[member] = value
       offset = newOffset
     }

@@ -46,7 +46,7 @@ import {
   SetTopLogoPrinting,
   SetBottomLogoPrinting,
   MakeExtendedSettingsForTopOrBottomLogoPrinting,
-  EnableDisableTopOrBottomLogoPrinting,
+  EnableOrDisableTopOrBottomLogoPrinting,
   SelectCharacterSize,
   SetInvertColorMode,
   SelectCutModeAndCutPaper,
@@ -257,10 +257,45 @@ const testCases: TestCase[] = [
       n: 0x00,
     }
   },
-  { class: SetBottomLogoPrinting },
-  { class: MakeExtendedSettingsForTopOrBottomLogoPrinting },
   {
-    class: EnableDisableTopOrBottomLogoPrinting,
+    class: SetBottomLogoPrinting,
+    example: Buffer.from([
+      0x1c, 0x28, 0x45,
+      0x05, 0x00,
+      0x3f,
+      0x02,
+      0x20,
+      0x20,
+      0x30,
+    ]),
+    checks: {
+      p: 5,
+      fn: 0x3f,
+      m: 2,
+      kc1: 0x20,
+      kc2: 0x20,
+      a: 0x30,
+    }
+  },
+  {
+    class: MakeExtendedSettingsForTopOrBottomLogoPrinting,
+    example: Buffer.from([
+      0x1c, 0x28, 0x45,
+      0x06, 0x00,
+      0x40,
+      0x02,
+      0x30, 0x31,
+      0x40, 0x30,
+    ]),
+    checks: {
+      p: 6,
+      fn: 0x40,
+      m: 2,
+      settings: Buffer.from([0x30, 0x31, 0x40, 0x30]),
+    }
+  },
+  {
+    class: EnableOrDisableTopOrBottomLogoPrinting,
     example: Buffer.from([
       0x1c, 0x28, 0x45,
       0x04, 0x00,

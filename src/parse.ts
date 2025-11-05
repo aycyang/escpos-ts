@@ -1,5 +1,5 @@
 import { Ascii, asciiToByte } from './ascii'
-import { kPrefixMetadataKey } from './symbols'
+import { kRegisterMetadataKey, kPrefixMetadataKey } from './symbols'
 import { CmdBase } from './cmd'
 import assert from 'node:assert'
 
@@ -10,7 +10,7 @@ import 'reflect-metadata'
 
 const kPrefixTree = []
 
-class ParseError extends Error {}
+export class ParseError extends Error {}
 
 function getFromTree(prefix: Ascii[]): any {
   let cur = kPrefixTree
