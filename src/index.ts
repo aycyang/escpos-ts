@@ -43,28 +43,6 @@ const EmphasizedModeToNumber: Record<EmphasizedMode, number> = {
   [EmphasizedMode.On]: 1,
 }
 
-export enum CharacterSize {
-  X1 = 'CharacterSize.X1',
-  X2 = 'CharacterSize.X2',
-  X3 = 'CharacterSize.X3',
-  X4 = 'CharacterSize.X4',
-  X5 = 'CharacterSize.X5',
-  X6 = 'CharacterSize.X6',
-  X7 = 'CharacterSize.X7',
-  X8 = 'CharacterSize.X8',
-}
-
-const CharacterSizeToNumber: Record<CharacterSize, number> = {
-  [CharacterSize.X1]: 0,
-  [CharacterSize.X2]: 1,
-  [CharacterSize.X3]: 2,
-  [CharacterSize.X4]: 3,
-  [CharacterSize.X5]: 4,
-  [CharacterSize.X6]: 5,
-  [CharacterSize.X7]: 6,
-  [CharacterSize.X8]: 7,
-}
-
 export enum CharacterFont {
   A = 'CharacterFont.A',
   B = 'CharacterFont.B',
@@ -495,9 +473,16 @@ export class SelectCharacterSize extends CmdBase {
   @range(0, 119)
   n: number
 
-  constructor(width: CharacterSize, height: CharacterSize) {
-    const lower = CharacterSizeToNumber[height]
-    const upper = CharacterSizeToNumber[width]
+  /**
+   * Pass in the desired magnification for character width and height. These
+   * should be numbers in the range 1-8. For example, a value of 2 means each
+   * character will be twice as wide.
+   */
+  constructor(config: { width: number, height: number }) {
+    // TODO should validate these inputs. maybe could get this for free if a 'u4'
+    // type were supported
+    const upper = (config.width - 1) & 0b0111
+    const lower = (config.height - 1) & 0b0111
     const n = (upper << 4) | lower
     super({ n })
   }

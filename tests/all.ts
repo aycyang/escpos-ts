@@ -4,7 +4,6 @@ import {
   BitImageMode,
   UnderlineMode,
   EmphasizedMode,
-  CharacterSize,
   CharacterFont,
   WhiteAndBlackReversePrintMode,
   Justification,
@@ -343,7 +342,7 @@ const testCases: TestCase[] = [
   },
   {
     class: SelectCharacterSize,
-    constructed: new SelectCharacterSize(CharacterSize.X2, CharacterSize.X3),
+    constructed: new SelectCharacterSize({ width: 2, height: 3 }),
     bytes: Buffer.from([
       0x1d, 0x21,
       0x12,
