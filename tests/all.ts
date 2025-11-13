@@ -157,7 +157,16 @@ const testCases: TestCase[] = [
   { class: SetDoubleStrikeMode },
   { class: PrintAndFeedPaper },
   { class: SelectPageMode },
-  { class: SelectCharacterFont },
+  {
+    class: SelectCharacterFont,
+    example: Buffer.from([
+      0x1b, 0x4d,
+      0x01,
+    ]),
+    checks: {
+      n: 0x01,
+    },
+  },
   { class: SelectInternationalCharacterSet },
   { class: SelectStandardMode },
   { class: SelectPrintDirectionInPageMode },

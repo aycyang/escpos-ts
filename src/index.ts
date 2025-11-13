@@ -103,7 +103,18 @@ export class SetEmphasizedMode extends CmdBase {
 export class SetDoubleStrikeMode extends CmdBase {}
 export class PrintAndFeedPaper extends CmdBase {}
 export class SelectPageMode extends CmdBase {}
-export class SelectCharacterFont extends CmdBase {}
+
+@register(['ESC', 'M'])
+export class SelectCharacterFont extends CmdBase {
+  static override desc: string = 'Select character font'
+
+  @serial('u8')
+  @range(0, 1)
+  @range(48, 49)
+  @range(97, 98)
+  n: number
+}
+
 export class SelectInternationalCharacterSet extends CmdBase {}
 export class SelectStandardMode extends CmdBase {}
 export class SelectPrintDirectionInPageMode extends CmdBase {}
