@@ -1,4 +1,4 @@
-import { kSerialMetadataKey, kRegisterMetadataKey, kValidMetadataKey } from './symbols'
+import { kSerialMetadataKey, kRegisterMetadataKey, kRangeMetadataKey } from './symbols'
 import assert from 'node:assert'
 
 // TODO eventually, this will be made obsolete by the Decorator Metadata
@@ -31,7 +31,7 @@ function compose(decorators: Decorator[]): Decorator {
 
 function registerMember(target, propertyKey: string) {
   // Assert that there is at least one valid range
-  assert(Reflect.hasMetadata(kValidMetadataKey, target, propertyKey),
+  assert(Reflect.hasMetadata(kRangeMetadataKey, target, propertyKey),
     `${target.constructor.name}.${propertyKey}: Please specify one or more valid ranges. Reminder: decorator order matters!`)
   const memberList = Reflect.getMetadata(kRegisterMetadataKey, target) ?? []
   memberList.push(propertyKey)
@@ -47,8 +47,8 @@ export function range(min: number, max?: number) {
     max = min
   }
   return (target, propertyKey) => {
-    const ranges = Reflect.getMetadata(kValidMetadataKey, target, propertyKey) ?? []
+    const ranges = Reflect.getMetadata(kRangeMetadataKey, target, propertyKey) ?? []
     ranges.push(new Range(min, max))
-    Reflect.defineMetadata(kValidMetadataKey, ranges, target, propertyKey)
+    Reflect.defineMetadata(kRangeMetadataKey, ranges, target, propertyKey)
   }
 }

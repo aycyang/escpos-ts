@@ -26,6 +26,20 @@ export class DefineUserDefinedCharacters extends CmdBase {}
 export class ControlBeeperTones extends CmdBase {}
 export class ModelSpecificBuzzerControl extends CmdBase {}
 
+enum BitImageMode {
+  EightDotSingleDensity = 'EightDotSingleDensity',
+  EightDotDoubleDensity = 'EightDotDoubleDensity',
+  TwentyFourDotSingleDensity = 'TwentyFourDotSingleDensity',
+  TwentyFourDotDoubleDensity = 'TwentyFourDotDoubleDensity',
+}
+
+const BitImageMode2m: Record<BitImageMode, number> = {
+  [BitImageMode.EightDotDoubleDensity]: 0,
+  [BitImageMode.EightDotSingleDensity]: 1,
+  [BitImageMode.TwentyFourDotDoubleDensity]: 32,
+  [BitImageMode.TwentyFourDotSingleDensity]: 33,
+}
+
 @register(['ESC', '*'])
 export class SelectBitImageMode extends CmdBase {
   static override desc: string = 'Select bit-image mode'
@@ -42,16 +56,15 @@ export class SelectBitImageMode extends CmdBase {
   @serial({ member: 'n' })
   @range(0, 255)
   d: Buffer
-  constructor(m, n, d: Buffer) {
-    super()
-    // TODO m: replace with string-backed enum
-    this.m = m
-    // TODO n: infer from buffer length
-    this.n = n
-    this.d = d
+
+  constructor(mode: BitImageMode, d: Buffer) {
+    super({
+      m: BitImageMode2m[mode],
+      n: d.length,
+      d: d,
+    })
   }
 }
-
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_minus.html

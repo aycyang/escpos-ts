@@ -1,5 +1,5 @@
 import { asciiToByte } from './ascii'
-import { kValidMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
+import { kRangeMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
 import { ParseError } from './parse'
 import assert from 'node:assert'
 
@@ -10,6 +10,31 @@ import 'reflect-metadata'
 
 export class CmdBase {
   static desc: string
+
+  constructor(members: object) {
+    for (const [key, value] of Object.entries(members)) {
+      this[key] = value
+    }
+    this.validate()
+  }
+
+  validate() {
+    const members = Reflect.getMetadata(kRegisterMetadataKey, this) ?? []
+    for (const member of members) {
+      const value: number | Buffer = this[member]
+      const ranges: any[] = Reflect.getMetadata(kRangeMetadataKey, this, member) ?? []
+      if (typeof value === 'number') {
+        if (!ranges.some(range => range.contains(value))) {
+          throw new ParseError(`Parsed value ${value} for member '${member}' is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
+        }
+      } else { // Buffer
+        const offendingIndex = value.findIndex(byte => !ranges.some(range => range.contains(byte)))
+        if (offendingIndex !== -1) {
+          throw new ParseError(`Parsed buffer for member '${member}' has a byte ${value[offendingIndex]} at index ${offendingIndex} that is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
+        }
+      }
+    }
+  }
 
   serialize(): Buffer {
     const prefix = Reflect.getMetadata(kPrefixMetadataKey, this.constructor)
@@ -33,12 +58,22 @@ export class CmdBase {
     }
   }
 
+  /**
+   * Assumption: the prefix bytes have already been consumed. The passed-in
+   * buffer begins just after the prefix bytes. The buffer may contain more
+   * bytes than expected, but any fewer would be unexpected.
+   *
+   * TODO throw parse error if end of buffer is reached prematurely
+   */
   static from(buf: Buffer): [any, number] {
-    // Assumption: the prefix bytes have already been consumed. The passed-in
-    // buffer begins just after the prefix bytes. The buffer may contain more
-    // bytes than expected, but any fewer would be unexpected.
-    // TODO throw parse error if end of buffer is reached prematurely
-    const instance = new this()
+    // The goal here is to create an object with the subclass's prototype, but
+    // without invoking the subclass's constructor. The object's prototype must
+    // be that of the subclass so that it can access its reflection metadata in
+    // instance methods such as `serialize()`. The constructor must be bypassed
+    // because subclasses may define arbitrary constructors which cannot be
+    // handled generically. To achieve this goal, `Object.create()` is used
+    // here.
+    const instance = Object.create(this.prototype)
     const members = Reflect.getMetadata(kRegisterMetadataKey, this.prototype)
     if (!members) {
       return [instance, 0]
@@ -50,21 +85,10 @@ export class CmdBase {
       const normalizedFormat = instance.evalFormat(format)
       const [value, newOffset] = fromBytesLE(buf, normalizedFormat, offset)
 
-      // Check if value is in any valid range.
-      const ranges: any[] = Reflect.getMetadata(kValidMetadataKey, this.prototype, member) ?? []
-      if (typeof value === 'number') {
-        if (!ranges.some(range => range.contains(value))) {
-          throw new ParseError(`Parsed value ${value} for member '${member}' is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
-        }
-      } else { // Buffer
-        const offendingIndex = value.findIndex(byte => !ranges.some(range => range.contains(byte)))
-        if (offendingIndex !== -1) {
-          throw new ParseError(`Parsed buffer for member '${member}' has a byte ${value[offendingIndex]} at index ${offendingIndex} that is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
-        }
-      }
       instance[member] = value
       offset = newOffset
     }
+    instance.validate()
     return [instance, offset]
   }
 }
