@@ -1,10 +1,10 @@
 // Copied from https://tsx.is/typescript#recommendation and modified
 {
 	"compilerOptions": {
-    "target": "ES5",
-
-    // for decorator support
-    "experimentalDecorators": true,
+    // Fixes type error: metadata not defined on SymbolConstructor (i.e. Symbol.metadata)
+    // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-2.html#decorator-metadata
+    "target": "es2022",
+    "lib": ["es2022", "esnext.decorators", "dom"]
 
 		// Treat files as modules even if it doesn't use import/export
 		"moduleDetection": "force",

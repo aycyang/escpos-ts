@@ -1,12 +1,8 @@
+import '@tsmetadata/polyfill'
 import { asciiToByte } from './ascii'
 import { kRangeMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
 import { ParseError } from './parse'
 import assert from 'node:assert'
-
-// TODO eventually, this will be made obsolete by the Decorator Metadata
-// feature, which is one stage away from standardization at the time of
-// writing: https://github.com/tc39/proposal-decorator-metadata
-import 'reflect-metadata'
 
 export class CmdBase {
   static desc: string
@@ -19,30 +15,31 @@ export class CmdBase {
   }
 
   validate() {
-    const members = Reflect.getMetadata(kRegisterMetadataKey, this) ?? []
-    for (const member of members) {
-      const value: number | Buffer = this[member]
-      const ranges: any[] = Reflect.getMetadata(kRangeMetadataKey, this, member) ?? []
+    const metadata = this.constructor[Symbol.metadata]
+    assert(metadata)
+    for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields ?? {})) {
+      const value: number | Buffer = this[fieldName]
+      const ranges: any[] = fieldMetadata.ranges as any[] ?? []
       if (typeof value === 'number') {
         if (!ranges.some(range => range.contains(value))) {
-          throw new ParseError(`Parsed value ${value} for member '${member}' is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
+          throw new ParseError(`Parsed value ${value} for field '${fieldName}' is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
         }
       } else { // Buffer
         const offendingIndex = value.findIndex(byte => !ranges.some(range => range.contains(byte)))
         if (offendingIndex !== -1) {
-          throw new ParseError(`Parsed buffer for member '${member}' has a byte ${value[offendingIndex]} at index ${offendingIndex} that is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
+          throw new ParseError(`Parsed buffer for field '${fieldName}' has a byte ${value[offendingIndex]} at index ${offendingIndex} that is not within a valid range.\nValid ranges: ${ranges ? ranges.map(range => range.toString()).join(', ') : '<no ranges specified>'}`)
         }
       }
     }
   }
 
   serialize(): Buffer {
-    const prefix = Reflect.getMetadata(kPrefixMetadataKey, this.constructor)
+    const metadata = this.constructor[Symbol.metadata]
+    assert(metadata)
+    const prefix = metadata.prefix as any[]
     const bytes = prefix.map(asciiToByte)
-    const members = Reflect.getMetadata(kRegisterMetadataKey, this) ?? []
-    for (const member of members) {
-      const format = Reflect.getMetadata(kSerialMetadataKey, this, member)
-      bytes.push(...toBytesLE(this[member], format))
+    for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields ?? {})) {
+      bytes.push(...toBytesLE(this[fieldName], fieldMetadata.serial))
     }
     return Buffer.from(bytes)
   }
@@ -66,6 +63,8 @@ export class CmdBase {
    * TODO throw parse error if end of buffer is reached prematurely
    */
   static from(buf: Buffer): [any, number] {
+    const metadata = this[Symbol.metadata]
+    assert(metadata)
     // The goal here is to create an object with the subclass's prototype, but
     // without invoking the subclass's constructor. The object's prototype must
     // be that of the subclass so that it can access its reflection metadata in
@@ -74,18 +73,16 @@ export class CmdBase {
     // handled generically. To achieve this goal, `Object.create()` is used
     // here.
     const instance = Object.create(this.prototype)
-    const members = Reflect.getMetadata(kRegisterMetadataKey, this.prototype)
-    if (!members) {
+    if (!metadata.fields) {
       return [instance, 0]
     }
     let offset = 0
-    for (const member of members) {
-      const format = Reflect.getMetadata(kSerialMetadataKey, this.prototype, member)
+    for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields ?? {})) {
       // TODO there must be a better way to differentiate behavior between buffers and uints
-      const normalizedFormat = instance.evalFormat(format)
+      const normalizedFormat = instance.evalFormat(fieldMetadata.serial)
       const [value, newOffset] = fromBytesLE(buf, normalizedFormat, offset)
 
-      instance[member] = value
+      instance[fieldName] = value
       offset = newOffset
     }
     instance.validate()

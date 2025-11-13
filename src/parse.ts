@@ -3,11 +3,6 @@ import { kRegisterMetadataKey, kPrefixMetadataKey } from './symbols'
 import { CmdBase } from './cmd'
 import assert from 'node:assert'
 
-// TODO eventually, this will be made obsolete by the Decorator Metadata
-// feature, which is one stage away from standardization at the time of
-// writing: https://github.com/tc39/proposal-decorator-metadata
-import 'reflect-metadata'
-
 const kPrefixTree = []
 
 export class ParseError extends Error {}
@@ -45,7 +40,9 @@ type FnLookahead = {
 }
 
 export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: number }): Decorator {
-  return target => {
+  return (value, context) => {
+    assert.strictEqual(context.kind, 'class')
+    assert(value)
     let obj = getFromTree(prefix)
     if (!obj) {
       obj = {
@@ -57,9 +54,9 @@ export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: num
       `skip value should be fixed for a given multi-function command.
       Tried to define skip value of: ${config.skip}
       Previously defined skip value: ${obj.skip}`)
-    obj.fns[config.fn] = target
+    obj.fns[config.fn] = value
     addToTree(prefix, obj)
-    Reflect.defineMetadata(kPrefixMetadataKey, prefix, target)
+    context.metadata.prefix = prefix
   }
 }
 
@@ -69,12 +66,15 @@ export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: num
  * decorator.
  */
 export function register(prefix: Ascii[]): Decorator {
-  return target => {
-    addToTree(prefix, target)
-    Reflect.defineMetadata(kPrefixMetadataKey, prefix, target)
+  return (value, context) => {
+    assert.strictEqual(context.kind, 'class')
+    assert(value)
+    addToTree(prefix, value)
+    context.metadata.prefix = prefix
   }
 }
 
+// TODO return interface Cmd instead of CmdBase.
 /**
  * Parses a buffer into a list of ESC/POS commands.
  */
