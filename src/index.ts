@@ -75,6 +75,43 @@ const CharacterFontToNumber: Record<CharacterFont, number> = {
   [CharacterFont.B]: 1,
 }
 
+export enum WhiteAndBlackReversePrintMode {
+  Off = 'WhiteAndBlackReversePrintMode.Off',
+  On = 'WhiteAndBlackReversePrintMode.On',
+}
+
+const WhiteAndBlackReversePrintModeToNumber: Record<WhiteAndBlackReversePrintMode, number> = {
+  [WhiteAndBlackReversePrintMode.Off]: 0,
+  [WhiteAndBlackReversePrintMode.On]: 1,
+}
+
+export enum Justification {
+  Left = 'Justification.Left',
+  Center = 'Justification.Center',
+  Right = 'Justification.Right',
+}
+
+const JustificationToNumber: Record<Justification, number> = {
+  [Justification.Left]: 0,
+  [Justification.Center]: 1,
+  [Justification.Right]: 2,
+}
+
+export enum CutMode {
+  CutPaper = 'CutMode.CutPaper',
+  FeedAndCutPaper = 'CutMode.FeedAndCutPaper',
+}
+
+const CutModeToNumber: Record<CutMode, number> = {
+  [CutMode.CutPaper]: 0,
+  [CutMode.FeedAndCutPaper]: 65,
+}
+
+export enum CutShape {
+  FullCut = 'CutShape.FullCut',
+  PartialCut = 'CutShape.PartialCut',
+}
+
 
 // --- COMMANDS ---
 
@@ -159,6 +196,10 @@ export class CancelUserDefinedCharacters extends CmdBase {}
 @register(['ESC', '@'])
 export class InitializePrinter extends CmdBase {
   static override desc: string = 'Initialize printer'
+
+  constructor() {
+    super({})
+  }
 }
 
 export class SetHorizontalTabPositions extends CmdBase {}
@@ -212,10 +253,17 @@ export class SetRelativePrintPosition extends CmdBase {}
 @register(['ESC', 'a'])
 export class SelectJustification extends CmdBase {
   static override desc: string = 'Select justification'
+
   @serial('u8')
   @range(0, 2)
   @range(48, 50)
   n: number
+
+  constructor(justification: Justification) {
+    super({
+      n: JustificationToNumber[justification],
+    })
+  }
 }
 
 export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {}
@@ -459,12 +507,18 @@ export class SelectCharacterSize extends CmdBase {
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cb.html
  */
 @register(['GS', 'B'])
-export class SetInvertColorMode extends CmdBase {
+export class SetWhiteAndBlackReversePrintMode extends CmdBase {
   static override desc: string = 'Turn white/black reverse print mode on/off'
 
   @serial('u8')
   @range(0, 255)
   n: number
+
+  constructor(mode: WhiteAndBlackReversePrintMode) {
+    super({
+      n: WhiteAndBlackReversePrintModeToNumber[mode],
+    })
+  }
 }
 
 /**
@@ -481,4 +535,12 @@ export class SelectCutModeAndCutPaper extends CmdBase {
   m: number
 
   // TODO parse n if m is 65 or 66
+
+  constructor(mode: CutMode, shape: CutShape) {
+    let m = CutModeToNumber[mode]
+    if (shape === CutShape.PartialCut) {
+      m++
+    }
+    super({ m })
+  }
 }

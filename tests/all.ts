@@ -6,6 +6,10 @@ import {
   EmphasizedMode,
   CharacterSize,
   CharacterFont,
+  WhiteAndBlackReversePrintMode,
+  Justification,
+  CutMode,
+  CutShape,
 
   HorizontalTab,
   SetCharacterSpacing,
@@ -54,7 +58,7 @@ import {
   MakeExtendedSettingsForTopOrBottomLogoPrinting,
   EnableOrDisableTopOrBottomLogoPrinting,
   SelectCharacterSize,
-  SetInvertColorMode,
+  SetWhiteAndBlackReversePrintMode,
   SelectCutModeAndCutPaper,
   parse,
 } from '../src/index'
@@ -151,6 +155,7 @@ const testCases: TestCase[] = [
   { class: CancelUserDefinedCharacters },
   {
     class: InitializePrinter,
+    constructed: new InitializePrinter(),
     bytes: Buffer.from([
       0x1b, 0x40,
     ]),
@@ -189,6 +194,7 @@ const testCases: TestCase[] = [
   { class: SetRelativePrintPosition },
   {
     class: SelectJustification,
+    constructed: new SelectJustification(Justification.Center),
     bytes: Buffer.from([
       0x1b, 0x61,
       0x01,
@@ -347,7 +353,8 @@ const testCases: TestCase[] = [
     },
   },
   {
-    class: SetInvertColorMode,
+    class: SetWhiteAndBlackReversePrintMode,
+    constructed: new SetWhiteAndBlackReversePrintMode(WhiteAndBlackReversePrintMode.On),
     bytes: Buffer.from([
       0x1d, 0x42,
       0x01,
@@ -358,6 +365,7 @@ const testCases: TestCase[] = [
   },
   {
     class: SelectCutModeAndCutPaper,
+    constructed: new SelectCutModeAndCutPaper(CutMode.CutPaper, CutShape.PartialCut),
     bytes: Buffer.from([
       0x1d, 0x56,
       0x01,
@@ -379,7 +387,7 @@ for (const testCase of testCases) {
     const cmd = cmds[0]
     assert(cmd instanceof testCase.class)
     if (testCase.constructed) {
-      assert.deepStrictEqual(cmd, testCase.constructed)
+      assert.deepStrictEqual(cmd, testCase.constructed, 'parsed (actual) differs from constructed (expected)')
     }
     for (const [ key, value ] of Object.entries(testCase.checks ?? {})) {
       assert.deepStrictEqual(cmd[key], value, `member ${key} is ${cmd[key]}, but expected ${value}`)
