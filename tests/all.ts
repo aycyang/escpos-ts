@@ -1,6 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
+  BitImageMode,
+  UnderlineMode,
+  EmphasizedMode,
+  CharacterSize,
+  CharacterFont,
+
   HorizontalTab,
   SetCharacterSpacing,
   SelectPrintMode,
@@ -82,20 +88,22 @@ test('ParseError', async (t) => {
 
 type TestCase = {
   class: Function,
-  example?: Buffer,
+  constructed?: object,
+  bytes?: Buffer,
   checks?: object,
 }
 
 const testCases: TestCase[] = [
   {
     class: HorizontalTab,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x09,
     ]),
   },
   {
     class: SetCharacterSpacing,
-    example: Buffer.from([
+    constructed: new SetCharacterSpacing(16),
+    bytes: Buffer.from([
       0x1b, 0x20,
       0x10,
     ]),
@@ -111,7 +119,10 @@ const testCases: TestCase[] = [
   { class: ModelSpecificBuzzerControl },
   {
     class: SelectBitImageMode,
-    example: Buffer.from([
+    constructed: new SelectBitImageMode(
+      BitImageMode.EightDotSingleDensity,
+      Buffer.from([0x05, 0x06, 0x07])),
+    bytes: Buffer.from([
       0x1b, 0x2a,
       0x01,
       0x03, 0x00,
@@ -125,7 +136,8 @@ const testCases: TestCase[] = [
   },
   {
     class: SetUnderlineMode,
-    example: Buffer.from([
+    constructed: new SetUnderlineMode(UnderlineMode.OneDotThick),
+    bytes: Buffer.from([
       0x1b, 0x2d,
       0x01,
     ]),
@@ -139,14 +151,15 @@ const testCases: TestCase[] = [
   { class: CancelUserDefinedCharacters },
   {
     class: InitializePrinter,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1b, 0x40,
     ]),
   },
   { class: SetHorizontalTabPositions },
   {
     class: SetEmphasizedMode,
-    example: Buffer.from([
+    constructed: new SetEmphasizedMode(EmphasizedMode.On),
+    bytes: Buffer.from([
       0x1b, 0x45,
       0x01,
     ]),
@@ -159,7 +172,8 @@ const testCases: TestCase[] = [
   { class: SelectPageMode },
   {
     class: SelectCharacterFont,
-    example: Buffer.from([
+    constructed: new SelectCharacterFont(CharacterFont.B),
+    bytes: Buffer.from([
       0x1b, 0x4d,
       0x01,
     ]),
@@ -175,7 +189,7 @@ const testCases: TestCase[] = [
   { class: SetRelativePrintPosition },
   {
     class: SelectJustification,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1b, 0x61,
       0x01,
     ]),
@@ -196,7 +210,7 @@ const testCases: TestCase[] = [
   { class: SetUpsideDownPrintMode },
   {
     class: SelectKanjiCharacterFont,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1c, 0x28, 0x41,
       0x02, 0x00,
       0x30,
@@ -210,7 +224,7 @@ const testCases: TestCase[] = [
   },
   {
     class: CancelSetValuesForTopOrBottomLogoPrinting,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1c, 0x28, 0x45,
       0x06, 0x00,
       0x3c,
@@ -230,7 +244,7 @@ const testCases: TestCase[] = [
   },
   {
     class: TransmitSetValuesForTopOrBottomLogoPrinting,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1c, 0x28, 0x45,
       0x03, 0x00,
       0x3d,
@@ -246,7 +260,7 @@ const testCases: TestCase[] = [
   },
   {
     class: SetTopLogoPrinting,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1c, 0x28, 0x45,
       0x06, 0x00,
       0x3e,
@@ -268,7 +282,7 @@ const testCases: TestCase[] = [
   },
   {
     class: SetBottomLogoPrinting,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1c, 0x28, 0x45,
       0x05, 0x00,
       0x3f,
@@ -288,7 +302,7 @@ const testCases: TestCase[] = [
   },
   {
     class: MakeExtendedSettingsForTopOrBottomLogoPrinting,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1c, 0x28, 0x45,
       0x06, 0x00,
       0x40,
@@ -305,7 +319,7 @@ const testCases: TestCase[] = [
   },
   {
     class: EnableOrDisableTopOrBottomLogoPrinting,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1c, 0x28, 0x45,
       0x04, 0x00,
       0x41,
@@ -323,17 +337,18 @@ const testCases: TestCase[] = [
   },
   {
     class: SelectCharacterSize,
-    example: Buffer.from([
+    constructed: new SelectCharacterSize(CharacterSize.X2, CharacterSize.X3),
+    bytes: Buffer.from([
       0x1d, 0x21,
-      0x01,
+      0x12,
     ]),
     checks: {
-      n: 1,
+      n: 18,
     },
   },
   {
     class: SetInvertColorMode,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1d, 0x42,
       0x01,
     ]),
@@ -343,7 +358,7 @@ const testCases: TestCase[] = [
   },
   {
     class: SelectCutModeAndCutPaper,
-    example: Buffer.from([
+    bytes: Buffer.from([
       0x1d, 0x56,
       0x01,
     ]),
@@ -355,18 +370,21 @@ const testCases: TestCase[] = [
 
 for (const testCase of testCases) {
   test(testCase.class.name, t => {
-    if (!testCase.example) {
+    if (!testCase.bytes) {
       t.skip()
       return
     }
-    const cmds = parse(testCase.example)
+    const cmds = parse(testCase.bytes)
     assert.strictEqual(cmds.length, 1)
     const cmd = cmds[0]
     assert(cmd instanceof testCase.class)
+    if (testCase.constructed) {
+      assert.deepStrictEqual(cmd, testCase.constructed)
+    }
     for (const [ key, value ] of Object.entries(testCase.checks ?? {})) {
       assert.deepStrictEqual(cmd[key], value, `member ${key} is ${cmd[key]}, but expected ${value}`)
     }
     const buf = cmd.serialize()
-    assert.deepStrictEqual(buf, testCase.example)
+    assert.deepStrictEqual(buf, testCase.bytes)
   })
 }

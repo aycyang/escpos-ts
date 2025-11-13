@@ -3,6 +3,82 @@ import { serial, range } from './decorators'
 export { parse } from './parse'
 import { CmdBase } from './cmd'
 
+
+// --- ENUMS ---
+
+
+export enum BitImageMode {
+  EightDotSingleDensity = 'BitImageMode.EightDotSingleDensity',
+  EightDotDoubleDensity = 'BitImageMode.EightDotDoubleDensity',
+  TwentyFourDotSingleDensity = 'BitImageMode.TwentyFourDotSingleDensity',
+  TwentyFourDotDoubleDensity = 'BitImageMode.TwentyFourDotDoubleDensity',
+}
+
+const BitImageModeToNumber: Record<BitImageMode, number> = {
+  [BitImageMode.EightDotDoubleDensity]: 0,
+  [BitImageMode.EightDotSingleDensity]: 1,
+  [BitImageMode.TwentyFourDotDoubleDensity]: 32,
+  [BitImageMode.TwentyFourDotSingleDensity]: 33,
+}
+
+export enum UnderlineMode {
+  Off = 'UnderlineMode.Off',
+  OneDotThick = 'UnderlineMode.OneDotThick',
+  TwoDotsThick = 'UnderlineMode.TwoDotsThick',
+}
+
+const UnderlineModeToNumber: Record<UnderlineMode, number> = {
+  [UnderlineMode.Off]: 0,
+  [UnderlineMode.OneDotThick]: 1,
+  [UnderlineMode.TwoDotsThick]: 2,
+}
+
+export enum EmphasizedMode {
+  Off = 'EmphasizedMode.Off',
+  On = 'EmphasizedMode.On',
+}
+
+const EmphasizedModeToNumber: Record<EmphasizedMode, number> = {
+  [EmphasizedMode.Off]: 0,
+  [EmphasizedMode.On]: 1,
+}
+
+export enum CharacterSize {
+  X1 = 'CharacterSize.X1',
+  X2 = 'CharacterSize.X2',
+  X3 = 'CharacterSize.X3',
+  X4 = 'CharacterSize.X4',
+  X5 = 'CharacterSize.X5',
+  X6 = 'CharacterSize.X6',
+  X7 = 'CharacterSize.X7',
+  X8 = 'CharacterSize.X8',
+}
+
+const CharacterSizeToNumber: Record<CharacterSize, number> = {
+  [CharacterSize.X1]: 0,
+  [CharacterSize.X2]: 1,
+  [CharacterSize.X3]: 2,
+  [CharacterSize.X4]: 3,
+  [CharacterSize.X5]: 4,
+  [CharacterSize.X6]: 5,
+  [CharacterSize.X7]: 6,
+  [CharacterSize.X8]: 7,
+}
+
+export enum CharacterFont {
+  A = 'CharacterFont.A',
+  B = 'CharacterFont.B',
+}
+
+const CharacterFontToNumber: Record<CharacterFont, number> = {
+  [CharacterFont.A]: 0,
+  [CharacterFont.B]: 1,
+}
+
+
+// --- COMMANDS ---
+
+
 @register(['HT'])
 export class HorizontalTab extends CmdBase {
   static override desc: string = 'Horizontal tab'
@@ -18,6 +94,10 @@ export class SetCharacterSpacing extends CmdBase {
   @serial('u8')
   @range(0, 255)
   n: number
+
+  constructor(n: number) {
+    super({ n })
+  }
 }
 export class SelectPrintMode extends CmdBase {}
 export class SetAbsolutePrintPosition extends CmdBase {}
@@ -25,20 +105,6 @@ export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {}
 export class DefineUserDefinedCharacters extends CmdBase {}
 export class ControlBeeperTones extends CmdBase {}
 export class ModelSpecificBuzzerControl extends CmdBase {}
-
-enum BitImageMode {
-  EightDotSingleDensity = 'EightDotSingleDensity',
-  EightDotDoubleDensity = 'EightDotDoubleDensity',
-  TwentyFourDotSingleDensity = 'TwentyFourDotSingleDensity',
-  TwentyFourDotDoubleDensity = 'TwentyFourDotDoubleDensity',
-}
-
-const BitImageMode2m: Record<BitImageMode, number> = {
-  [BitImageMode.EightDotDoubleDensity]: 0,
-  [BitImageMode.EightDotSingleDensity]: 1,
-  [BitImageMode.TwentyFourDotDoubleDensity]: 32,
-  [BitImageMode.TwentyFourDotSingleDensity]: 33,
-}
 
 @register(['ESC', '*'])
 export class SelectBitImageMode extends CmdBase {
@@ -59,7 +125,7 @@ export class SelectBitImageMode extends CmdBase {
 
   constructor(mode: BitImageMode, d: Buffer) {
     super({
-      m: BitImageMode2m[mode],
+      m: BitImageModeToNumber[mode],
       n: d.length,
       d: d,
     })
@@ -72,11 +138,19 @@ export class SelectBitImageMode extends CmdBase {
 @register(['ESC', '-'])
 export class SetUnderlineMode extends CmdBase {
   static override desc: string = 'Turn underline mode on/off'
+
   @serial('u8')
   @range(0, 2)
   @range(48, 50)
   n: number
+
+  constructor(mode: UnderlineMode) {
+    super({
+      n: UnderlineModeToNumber[mode],
+    })
+  }
 }
+
 export class SelectDefaultLineSpacing extends CmdBase {}
 export class SetLineSpacing extends CmdBase {}
 export class SelectPeripheralDevice extends CmdBase {}
@@ -95,9 +169,16 @@ export class SetHorizontalTabPositions extends CmdBase {}
 @register(['ESC', 'E'])
 export class SetEmphasizedMode extends CmdBase {
   static override desc: string = 'Turn emphasized mode on/off'
+
   @serial('u8')
   @range(0, 255)
   n: number
+
+  constructor(mode: EmphasizedMode) {
+    super({
+      n: EmphasizedModeToNumber[mode],
+    })
+  }
 }
 
 export class SetDoubleStrikeMode extends CmdBase {}
@@ -113,6 +194,12 @@ export class SelectCharacterFont extends CmdBase {
   @range(48, 49)
   @range(97, 98)
   n: number
+
+  constructor(font: CharacterFont) {
+    super({
+      n: CharacterFontToNumber[font],
+    })
+  }
 }
 
 export class SelectInternationalCharacterSet extends CmdBase {}
@@ -359,6 +446,13 @@ export class SelectCharacterSize extends CmdBase {
   @serial('u8')
   @range(0, 119)
   n: number
+
+  constructor(width: CharacterSize, height: CharacterSize) {
+    const lower = CharacterSizeToNumber[height]
+    const upper = CharacterSizeToNumber[width]
+    const n = (upper << 4) | lower
+    super({ n })
+  }
 }
 
 /**
