@@ -205,7 +205,17 @@ const testCases: TestCase[] = [
   { class: SelectPaperSensorsToOutputPaperEndSignals },
   { class: SelectPaperSensorsToStopPrinting },
   { class: EnableOrDisablePanelButtons },
-  { class: PrintAndFeedNLines },
+  {
+    class: PrintAndFeedNLines,
+    constructed: new PrintAndFeedNLines(1),
+    bytes: Buffer.from([
+      0x1b, 0x64,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    },
+  },
   { class: PartialCutOnePointLeftUncut },
   { class: PartialCutThreePointsLeftUncut },
   { class: GeneratePulse },

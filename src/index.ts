@@ -245,7 +245,25 @@ export class SelectJustification extends CmdBase {
 export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {}
 export class SelectPaperSensorsToStopPrinting extends CmdBase {}
 export class EnableOrDisablePanelButtons extends CmdBase {}
-export class PrintAndFeedNLines extends CmdBase {}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ld.html
+ */
+@register(['ESC', 'd'])
+export class PrintAndFeedNLines extends CmdBase {
+  static override desc: string = 'Print and feed n lines'
+
+  @serial('u8')
+  @range(0, 255)
+  n: number
+
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
+}
+
 export class PartialCutOnePointLeftUncut extends CmdBase {}
 export class PartialCutThreePointsLeftUncut extends CmdBase {}
 export class GeneratePulse extends CmdBase {}
