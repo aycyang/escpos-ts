@@ -7,13 +7,7 @@ import assert from 'node:assert'
 export class CmdBase {
   static desc: string
 
-  constructor(members: object) {
-    for (const [key, value] of Object.entries(members)) {
-      this[key] = value
-    }
-    this.validate()
-  }
-
+  // TODO enforce validate is called before cmd can be used
   validate() {
     const metadata = this.constructor[Symbol.metadata]
     assert(metadata)

@@ -111,7 +111,9 @@ export class SetCharacterSpacing extends CmdBase {
   n: number
 
   constructor(n: number) {
-    super({ n })
+    super()
+    this.n = n
+    this.validate()
   }
 }
 export class SelectPrintMode extends CmdBase {}
@@ -139,11 +141,11 @@ export class SelectBitImageMode extends CmdBase {
   d: Buffer
 
   constructor(mode: BitImageMode, d: Buffer) {
-    super({
-      m: BitImageModeToNumber[mode],
-      n: d.length,
-      d: d,
-    })
+    super()
+    this.m = BitImageModeToNumber[mode]
+    this.n = d.length
+    this.d = d
+    this.validate()
   }
 }
 
@@ -160,9 +162,9 @@ export class SetUnderlineMode extends CmdBase {
   n: number
 
   constructor(mode: UnderlineMode) {
-    super({
-      n: UnderlineModeToNumber[mode],
-    })
+    super()
+    this.n = UnderlineModeToNumber[mode]
+    this.validate()
   }
 }
 
@@ -174,10 +176,6 @@ export class CancelUserDefinedCharacters extends CmdBase {}
 @register(['ESC', '@'])
 export class InitializePrinter extends CmdBase {
   static override desc: string = 'Initialize printer'
-
-  constructor() {
-    super({})
-  }
 }
 
 export class SetHorizontalTabPositions extends CmdBase {}
@@ -194,9 +192,9 @@ export class SetEmphasizedMode extends CmdBase {
   n: number
 
   constructor(mode: EmphasizedMode) {
-    super({
-      n: EmphasizedModeToNumber[mode],
-    })
+    super()
+    this.n = EmphasizedModeToNumber[mode]
+    this.validate()
   }
 }
 
@@ -215,9 +213,9 @@ export class SelectCharacterFont extends CmdBase {
   n: number
 
   constructor(font: CharacterFont) {
-    super({
-      n: CharacterFontToNumber[font],
-    })
+    super()
+    this.n = CharacterFontToNumber[font]
+    this.validate()
   }
 }
 
@@ -238,9 +236,9 @@ export class SelectJustification extends CmdBase {
   n: number
 
   constructor(justification: Justification) {
-    super({
-      n: JustificationToNumber[justification],
-    })
+    super()
+    this.n = JustificationToNumber[justification]
+    this.validate()
   }
 }
 
@@ -484,7 +482,9 @@ export class SelectCharacterSize extends CmdBase {
     const upper = (config.width - 1) & 0b0111
     const lower = (config.height - 1) & 0b0111
     const n = (upper << 4) | lower
-    super({ n })
+    super()
+    this.n = n
+    this.validate()
   }
 }
 
@@ -500,9 +500,9 @@ export class SetWhiteAndBlackReversePrintMode extends CmdBase {
   n: number
 
   constructor(mode: WhiteAndBlackReversePrintMode) {
-    super({
-      n: WhiteAndBlackReversePrintModeToNumber[mode],
-    })
+    super()
+    this.n = WhiteAndBlackReversePrintModeToNumber[mode]
+    this.validate()
   }
 }
 
@@ -526,6 +526,8 @@ export class SelectCutModeAndCutPaper extends CmdBase {
     if (shape === CutShape.PartialCut) {
       m++
     }
-    super({ m })
+    super()
+    this.m = m
+    this.validate()
   }
 }
