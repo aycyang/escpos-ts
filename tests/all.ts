@@ -128,7 +128,17 @@ const testCases: TestCase[] = [
       n: 0b10111001,
     }
   },
-  { class: SetAbsolutePrintPosition },
+  {
+    class: SetAbsolutePrintPosition,
+    constructed: new SetAbsolutePrintPosition(0x0201),
+    bytes: Buffer.from([
+      0x1b, 0x24,
+      0x01, 0x02,
+    ]),
+    checks: {
+      n: 0x0201,
+    },
+  },
   { class: SelectOrCancelUserDefinedCharacterSet },
   { class: DefineUserDefinedCharacters },
   { class: ControlBeeperTones },

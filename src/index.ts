@@ -170,7 +170,24 @@ export class SelectPrintMode extends CmdBase {
   }
 }
 
-export class SetAbsolutePrintPosition extends CmdBase {}
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_dollarssign.html
+ */
+@register(['ESC', '$'])
+export class SetAbsolutePrintPosition extends CmdBase {
+  static override desc: string = 'Set absolute print position'
+
+  @serial('u16')
+  @range(0, 65535)
+  n: number
+
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
+}
+
 export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {}
 export class DefineUserDefinedCharacters extends CmdBase {}
 export class ControlBeeperTones extends CmdBase {}
