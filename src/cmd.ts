@@ -2,7 +2,7 @@ import '@tsmetadata/polyfill'
 import { asciiToByte } from './ascii'
 import { kRangeMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
 import { ParseError } from './parse'
-import assert from 'node:assert'
+import { assert } from './assert'
 
 export class CmdBase {
   static desc: string

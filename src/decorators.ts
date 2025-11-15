@@ -1,5 +1,5 @@
 import { kSerialMetadataKey, kRegisterMetadataKey, kRangeMetadataKey } from './symbols'
-import assert from 'node:assert'
+import { assert } from './assert'
 
 class Range {
   min: number
@@ -19,7 +19,7 @@ class Range {
 
 export function serial(arg: SerialFormat) {
   return (value, context) => {
-    assert.strictEqual(context.kind, 'field')
+    assert(context.kind === 'field')
     // Assumption: at least one range was defined, so field metadata should already exist
     assert(context.metadata.fields, 'Please define at least one range')
     assert(context.metadata.fields[context.name], 'Please define at least one range')
@@ -34,7 +34,7 @@ export function range(min: number, max?: number) {
     max = min
   }
   return (value, context) => {
-    assert.strictEqual(context.kind, 'field')
+    assert(context.kind === 'field')
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] ??= {}
     context.metadata.fields[context.name].ranges ??= []

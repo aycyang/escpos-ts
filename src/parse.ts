@@ -1,7 +1,7 @@
 import { Ascii, asciiToByte } from './ascii'
 import { kRegisterMetadataKey, kPrefixMetadataKey } from './symbols'
 import { CmdBase } from './cmd'
-import assert from 'node:assert'
+import { assert } from './assert'
 
 const kPrefixTree = []
 
@@ -41,7 +41,7 @@ type FnLookahead = {
 
 export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: number }): Decorator {
   return (value, context) => {
-    assert.strictEqual(context.kind, 'class')
+    assert(context.kind === 'class')
     assert(value)
     let obj = getFromTree(prefix)
     if (!obj) {
@@ -50,7 +50,7 @@ export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: num
         skip: config.skip
       }
     }
-    assert.strictEqual(obj.skip, config.skip,
+    assert(obj.skip === config.skip,
       `skip value should be fixed for a given multi-function command.
       Tried to define skip value of: ${config.skip}
       Previously defined skip value: ${obj.skip}`)
@@ -67,7 +67,7 @@ export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: num
  */
 export function register(prefix: Ascii[]): Decorator {
   return (value, context) => {
-    assert.strictEqual(context.kind, 'class')
+    assert(context.kind === 'class')
     assert(value)
     addToTree(prefix, value)
     context.metadata.prefix = prefix
