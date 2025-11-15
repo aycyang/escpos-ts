@@ -1,10 +1,14 @@
 {
   "name": "escpos-ts",
   "version": "0.0.1",
-  "description": "",
-  "main": "src/index.ts",
+  "description": "ESC/POS commands with Typescript type definitions",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "check": "tsc --noEmit",
+    "build": "tsc",
     "test": "tsx tests/all.ts"
   },
   "author": "",
