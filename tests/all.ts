@@ -3,12 +3,15 @@ import assert from 'node:assert'
 import {
   BitImageMode,
   UnderlineMode,
+  SimpleUnderlineMode,
   EmphasizedMode,
   CharacterFont,
   WhiteAndBlackReversePrintMode,
   Justification,
   CutMode,
   CutShape,
+  DoubleWidthMode,
+  DoubleHeightMode,
 
   HorizontalTab,
   SetCharacterSpacing,
@@ -114,7 +117,17 @@ const testCases: TestCase[] = [
       n: 16,
     }
   },
-  { class: SelectPrintMode },
+  {
+    class: SelectPrintMode,
+    constructed: new SelectPrintMode(CharacterFont.B, EmphasizedMode.On, SimpleUnderlineMode.On, DoubleWidthMode.On, DoubleHeightMode.On),
+    bytes: Buffer.from([
+      0x1b, 0x21,
+      0b10111001,
+    ]),
+    checks: {
+      n: 0b10111001,
+    }
+  },
   { class: SetAbsolutePrintPosition },
   { class: SelectOrCancelUserDefinedCharacterSet },
   { class: DefineUserDefinedCharacters },

@@ -33,6 +33,16 @@ const UnderlineModeToNumber: Record<UnderlineMode, number> = {
   [UnderlineMode.TwoDotsThick]: 2,
 }
 
+export enum SimpleUnderlineMode {
+  Off = 'SimpleUnderlineMode.Off',
+  On = 'SimpleUnderlineMode.On',
+}
+
+const SimpleUnderlineModeToNumber: Record<SimpleUnderlineMode, number> = {
+  [SimpleUnderlineMode.Off]: 0,
+  [SimpleUnderlineMode.On]: 1,
+}
+
 export enum EmphasizedMode {
   Off = 'EmphasizedMode.Off',
   On = 'EmphasizedMode.On',
@@ -90,6 +100,26 @@ export enum CutShape {
   PartialCut = 'CutShape.PartialCut',
 }
 
+export enum DoubleWidthMode {
+  Off = 'DoubleWidthMode.Off',
+  On = 'DoubleWidthMode.On',
+}
+
+const DoubleWidthModeToNumber: Record<DoubleWidthMode, number> = {
+  [DoubleWidthMode.Off]: 0,
+  [DoubleWidthMode.On]: 1,
+}
+
+export enum DoubleHeightMode {
+  Off = 'DoubleHeightMode.Off',
+  On = 'DoubleHeightMode.On',
+}
+
+const DoubleHeightModeToNumber: Record<DoubleHeightMode, number> = {
+  [DoubleHeightMode.Off]: 0,
+  [DoubleHeightMode.On]: 1,
+}
+
 
 // --- COMMANDS ---
 
@@ -116,7 +146,30 @@ export class SetCharacterSpacing extends CmdBase {
     this.validate()
   }
 }
-export class SelectPrintMode extends CmdBase {}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_exclamation.html
+ */
+@register(['ESC', '!'])
+export class SelectPrintMode extends CmdBase {
+  static override desc: string = 'Select print mode(s)'
+
+  @serial('u8')
+  @range(0, 255)
+  n: number
+
+  constructor(font: CharacterFont, em: EmphasizedMode, un: SimpleUnderlineMode, w2: DoubleWidthMode, h2: DoubleHeightMode) {
+    super()
+    this.n = 0
+    this.n |= CharacterFontToNumber[font] & 1
+    this.n |= (EmphasizedModeToNumber[em] & 1) << 3
+    this.n |= (DoubleHeightModeToNumber[h2] & 1) << 4
+    this.n |= (DoubleWidthModeToNumber[w2] & 1) << 5
+    this.n |= (SimpleUnderlineModeToNumber[un] & 1) << 7
+    this.validate()
+  }
+}
+
 export class SetAbsolutePrintPosition extends CmdBase {}
 export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {}
 export class DefineUserDefinedCharacters extends CmdBase {}
