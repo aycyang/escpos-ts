@@ -19,65 +19,89 @@ documentation and look at how other similar commands are implemented.
 
 ```
 ▶ ParseError
-  ✔ unrecognized prefix (0.485ms)
-  ✔ incomplete command (0.051375ms)
-  ✔ incomplete command after complete command (0.087333ms)
-✔ ParseError (0.870042ms)
-✔ HorizontalTab (0.254709ms)
-✔ SetCharacterSpacing (0.141166ms)
-✔ SelectPrintMode (0.041625ms)
-✔ SetAbsolutePrintPosition (0.037375ms)
-✔ SelectOrCancelUserDefinedCharacterSet (0.19325ms)
-﹣ DefineUserDefinedCharacters (0.106459ms) # SKIP
-﹣ ControlBeeperTones (0.024333ms) # SKIP
-﹣ ModelSpecificBuzzerControl (0.0185ms) # SKIP
-✔ SelectBitImageMode (0.111083ms)
-✔ SetUnderlineMode (0.061792ms)
-﹣ SelectDefaultLineSpacing (0.014958ms) # SKIP
-﹣ SetLineSpacing (0.01425ms) # SKIP
-﹣ SelectPeripheralDevice (0.014625ms) # SKIP
-﹣ CancelUserDefinedCharacters (0.013292ms) # SKIP
-✔ InitializePrinter (0.026167ms)
-﹣ SetHorizontalTabPositions (0.01325ms) # SKIP
-✔ SetEmphasizedMode (0.078167ms)
-﹣ SetDoubleStrikeMode (0.014291ms) # SKIP
-﹣ PrintAndFeedPaper (0.014334ms) # SKIP
-﹣ SelectPageMode (0.012917ms) # SKIP
-✔ SelectCharacterFont (0.02725ms)
-﹣ SelectInternationalCharacterSet (0.012917ms) # SKIP
-﹣ SelectStandardMode (0.012708ms) # SKIP
-﹣ SelectPrintDirectionInPageMode (0.01275ms) # SKIP
-﹣ SetRotationMode (0.012625ms) # SKIP
-﹣ SetPrintAreaInPageMode (0.0125ms) # SKIP
-﹣ SetRelativePrintPosition (0.012458ms) # SKIP
-✔ SelectJustification (0.024125ms)
-﹣ SelectPaperSensorsToOutputPaperEndSignals (0.013209ms) # SKIP
-﹣ SelectPaperSensorsToStopPrinting (0.012583ms) # SKIP
-﹣ EnableOrDisablePanelButtons (0.0125ms) # SKIP
-✔ PrintAndFeedNLines (0.080583ms)
-﹣ PartialCutOnePointLeftUncut (0.013083ms) # SKIP
-﹣ PartialCutThreePointsLeftUncut (0.01275ms) # SKIP
-﹣ GeneratePulse (0.012833ms) # SKIP
-﹣ SelectCharacterCodeTable (0.013333ms) # SKIP
-﹣ TransmitPeripheralDeviceStatus (0.0125ms) # SKIP
-﹣ TransmitPaperSensorStatus (0.014ms) # SKIP
-﹣ SetUpsideDownPrintMode (0.01775ms) # SKIP
-✔ SelectKanjiCharacterFont (0.030625ms)
-✔ CancelSetValuesForTopOrBottomLogoPrinting (0.030125ms)
-✔ TransmitSetValuesForTopOrBottomLogoPrinting (0.024875ms)
-✔ SetTopLogoPrinting (0.036125ms)
-✔ SetBottomLogoPrinting (0.025625ms)
-✔ MakeExtendedSettingsForTopOrBottomLogoPrinting (0.02725ms)
-✔ EnableOrDisableTopOrBottomLogoPrinting (0.047875ms)
-✔ SelectCharacterSize (0.021583ms)
-✔ SetWhiteAndBlackReversePrintMode (0.020916ms)
-✔ SelectCutModeAndCutPaper (0.026667ms)
+  ✔ unrecognized prefix (0.491334ms)
+  ✔ incomplete command (0.051916ms)
+  ✔ incomplete command after complete command (0.089041ms)
+✔ ParseError (0.880042ms)
+✔ HorizontalTab (0.257666ms)
+✔ SetCharacterSpacing (0.142958ms)
+✔ SelectPrintMode (0.042042ms)
+✔ SetAbsolutePrintPosition (0.038916ms)
+✔ SelectOrCancelUserDefinedCharacterSet (0.192084ms)
+﹣ DefineUserDefinedCharacters (0.1085ms) # SKIP
+﹣ ControlBeeperTones (0.025875ms) # SKIP
+﹣ ModelSpecificBuzzerControl (0.031708ms) # SKIP
+✔ SelectBitImageMode (0.133125ms)
+✔ SetUnderlineMode (0.068208ms)
+✔ SelectDefaultLineSpacing (0.028542ms)
+✔ SetLineSpacing (0.076709ms)
+✔ SelectPeripheralDevice (0.028542ms)
+✔ CancelUserDefinedCharacters (0.02425ms)
+✔ InitializePrinter (0.077542ms)
+✖ SetHorizontalTabPositions (0.043208ms)
+✔ SetEmphasizedMode (0.029791ms)
+﹣ SetDoubleStrikeMode (0.014917ms) # SKIP
+﹣ PrintAndFeedPaper (0.013041ms) # SKIP
+﹣ SelectPageMode (0.012583ms) # SKIP
+✔ SelectCharacterFont (0.022417ms)
+﹣ SelectInternationalCharacterSet (0.0145ms) # SKIP
+﹣ SelectStandardMode (0.012584ms) # SKIP
+﹣ SelectPrintDirectionInPageMode (0.012875ms) # SKIP
+﹣ SetRotationMode (0.013667ms) # SKIP
+﹣ SetPrintAreaInPageMode (0.012208ms) # SKIP
+﹣ SetRelativePrintPosition (0.012792ms) # SKIP
+✔ SelectJustification (0.020625ms)
+﹣ SelectPaperSensorsToOutputPaperEndSignals (0.012792ms) # SKIP
+﹣ SelectPaperSensorsToStopPrinting (0.0125ms) # SKIP
+﹣ EnableOrDisablePanelButtons (0.012125ms) # SKIP
+✔ PrintAndFeedNLines (0.01975ms)
+﹣ PartialCutOnePointLeftUncut (0.012292ms) # SKIP
+﹣ PartialCutThreePointsLeftUncut (0.01225ms) # SKIP
+﹣ GeneratePulse (0.012208ms) # SKIP
+﹣ SelectCharacterCodeTable (0.012167ms) # SKIP
+﹣ TransmitPeripheralDeviceStatus (0.01275ms) # SKIP
+﹣ TransmitPaperSensorStatus (0.012541ms) # SKIP
+﹣ SetUpsideDownPrintMode (0.012166ms) # SKIP
+✔ SelectKanjiCharacterFont (0.034833ms)
+✔ CancelSetValuesForTopOrBottomLogoPrinting (0.029583ms)
+✔ TransmitSetValuesForTopOrBottomLogoPrinting (0.023ms)
+✔ SetTopLogoPrinting (0.032042ms)
+✔ SetBottomLogoPrinting (0.024584ms)
+✔ MakeExtendedSettingsForTopOrBottomLogoPrinting (0.027042ms)
+✔ EnableOrDisableTopOrBottomLogoPrinting (0.054875ms)
+✔ SelectCharacterSize (0.01925ms)
+✔ SetWhiteAndBlackReversePrintMode (0.022625ms)
+✔ SelectCutModeAndCutPaper (0.01775ms)
 ℹ tests 53
 ℹ suites 0
-ℹ pass 26
-ℹ fail 0
+ℹ pass 30
+ℹ fail 1
 ℹ cancelled 0
-ℹ skipped 27
+ℹ skipped 22
 ℹ todo 0
-ℹ duration_ms 6.408916
+ℹ duration_ms 6.656583
+
+✖ failing tests:
+
+test at tests/all.ts:2:6674
+✖ SetHorizontalTabPositions (0.043208ms)
+  ParseError: unexpected token: 8
+      at parse (/Users/a/workspace/escpos-ts/src/parse.ts:88:13)
+      at TestContext.<anonymous> (/Users/a/workspace/escpos-ts/tests/all.ts:477:18)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+
 ```
+
+### Notes
+
+- Different types of parameters:
+  - little-endian 8-bit, 16-bit or 32-bit number
+  - variable-size null-terminated buffer with max size e.g. <https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cd.html>
+  - interleaved key-value pairs with total length specified in header e.g. <https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn64.html>
+  - buffer of bytes with total length specified in header e.g. <https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn112.html>
+- Given the above, I think I want to rework the decorator metadata to store references to specialized parsing functions depending on the type of parameter. the function should perhaps return the in-memory representation along with the number of bytes parsed.

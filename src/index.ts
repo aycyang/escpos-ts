@@ -8,6 +8,16 @@ import { CmdBase } from './cmd'
 
 // --- ENUMS ---
 
+export enum PeripheralDeviceSelection {
+  EnablePrinter = 'PeripheralDeviceSelection.EnablePrinter',
+  DisablePrinter = 'PeripheralDeviceSelection.DisablePrinter',
+}
+
+const PeripheralDeviceSelectionToNumber: Record<PeripheralDeviceSelection, number> = {
+  [PeripheralDeviceSelection.EnablePrinter]: 1,
+  [PeripheralDeviceSelection.DisablePrinter]: 2,
+}
+
 export enum UserDefinedCharacterSetSelection {
   Canceled = 'UserDefinedCharacterSetSelection.Canceled',
   Selected = 'UserDefinedCharacterSetSelection.Selected',
@@ -280,29 +290,87 @@ export class SetUnderlineMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_2.html
  */
-export class SelectDefaultLineSpacing extends CmdBase {}
+@register(['ESC', '2'])
+export class SelectDefaultLineSpacing extends CmdBase {
+  static override desc: string = 'Select default line spacing'
+}
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_3.html
  */
-export class SetLineSpacing extends CmdBase {}
+@register(['ESC', '3'])
+export class SetLineSpacing extends CmdBase {
+  static override desc: string = 'Set line spacing'
+
+  @serial('u8')
+  @range(0, 255)
+  n: number
+
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
+}
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_equal.html
  */
-export class SelectPeripheralDevice extends CmdBase {}
+@register(['ESC', '='])
+export class SelectPeripheralDevice extends CmdBase {
+  static override desc: string = 'Select peripheral device'
+
+  @serial('u8')
+  @range(0, 255)
+  n: number
+
+  constructor(sel: PeripheralDeviceSelection) {
+    super()
+    this.n = PeripheralDeviceSelectionToNumber[sel]
+    this.validate()
+  }
+}
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_questionmark.html
  */
-export class CancelUserDefinedCharacters extends CmdBase {}
+@register(['ESC', '?'])
+export class CancelUserDefinedCharacters extends CmdBase {
+  static override desc: string = 'Cancel user-defined characters'
 
+  @serial('u8')
+  @range(32, 126)
+  n: number
+
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_atsign.html
+ */
 @register(['ESC', '@'])
 export class InitializePrinter extends CmdBase {
   static override desc: string = 'Initialize printer'
 }
 
-export class SetHorizontalTabPositions extends CmdBase {}
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cd.html
+ */
+@register(['ESC', 'D'])
+export class SetHorizontalTabPositions extends CmdBase {
+  static override desc: string = 'Set horizontal tab positions'
+
+  // TODO read null-terminated buffer
+
+  constructor(...args: number[]) {
+    super()
+    // TODO
+  }
+}
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ce.html

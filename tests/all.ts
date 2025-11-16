@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
+  PeripheralDeviceSelection,
   UserDefinedCharacterSetSelection,
   BitImageMode,
   UnderlineMode,
@@ -182,10 +183,46 @@ const testCases: TestCase[] = [
       n: 1,
     }
   },
-  { class: SelectDefaultLineSpacing },
-  { class: SetLineSpacing },
-  { class: SelectPeripheralDevice },
-  { class: CancelUserDefinedCharacters },
+  {
+    class: SelectDefaultLineSpacing,
+    constructed: new SelectDefaultLineSpacing(),
+    bytes: Buffer.from([
+      0x1b, 0x32,
+    ]),
+  },
+  {
+    class: SetLineSpacing,
+    constructed: new SetLineSpacing(1),
+    bytes: Buffer.from([
+      0x1b, 0x33,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    },
+  },
+  {
+    class: SelectPeripheralDevice,
+    constructed: new SelectPeripheralDevice(PeripheralDeviceSelection.EnablePrinter),
+    bytes: Buffer.from([
+      0x1b, 0x3d,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    },
+  },
+  {
+    class: CancelUserDefinedCharacters,
+    constructed: new CancelUserDefinedCharacters(32),
+    bytes: Buffer.from([
+      0x1b, 0x3f,
+      0x20,
+    ]),
+    checks: {
+      n: 32,
+    },
+  },
   {
     class: InitializePrinter,
     constructed: new InitializePrinter(),
@@ -193,7 +230,19 @@ const testCases: TestCase[] = [
       0x1b, 0x40,
     ]),
   },
-  { class: SetHorizontalTabPositions },
+  {
+    class: SetHorizontalTabPositions,
+    constructed: new SetHorizontalTabPositions(8, 16, 32),
+    bytes: Buffer.from([
+      0x1b, 0x44,
+      8, 16, 32, 0,
+    ]),
+    checks: {
+      buf: Buffer.from([
+        8, 16, 32,
+      ]),
+    },
+  },
   {
     class: SetEmphasizedMode,
     constructed: new SetEmphasizedMode(EmphasizedMode.On),
