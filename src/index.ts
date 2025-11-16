@@ -8,6 +8,15 @@ import { CmdBase } from './cmd'
 
 // --- ENUMS ---
 
+export enum UserDefinedCharacterSetSelection {
+  Canceled = 'UserDefinedCharacterSetSelection.Canceled',
+  Selected = 'UserDefinedCharacterSetSelection.Selected',
+}
+
+const UserDefinedCharacterSetSelectionToNumber: Record<UserDefinedCharacterSetSelection, number> = {
+  [UserDefinedCharacterSetSelection.Canceled]: 0,
+  [UserDefinedCharacterSetSelection.Selected]: 1,
+}
 
 export enum BitImageMode {
   EightDotSingleDensity = 'BitImageMode.EightDotSingleDensity',
@@ -190,7 +199,24 @@ export class SetAbsolutePrintPosition extends CmdBase {
   }
 }
 
-export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {}
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_percent.html
+ */
+@register(['ESC', '%'])
+export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {
+  static override desc: string = 'Select/cancel user-defined character set'
+
+  @serial('u8')
+  @range(0, 255)
+  n: number
+
+  constructor(sel: UserDefinedCharacterSetSelection) {
+    super()
+    this.n = UserDefinedCharacterSetSelectionToNumber[sel]
+    this.validate()
+  }
+}
+
 export class DefineUserDefinedCharacters extends CmdBase {}
 export class ControlBeeperTones extends CmdBase {}
 export class ModelSpecificBuzzerControl extends CmdBase {}

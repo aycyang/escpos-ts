@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
+  UserDefinedCharacterSetSelection,
   BitImageMode,
   UnderlineMode,
   SimpleUnderlineMode,
@@ -139,7 +140,17 @@ const testCases: TestCase[] = [
       n: 0x0201,
     },
   },
-  { class: SelectOrCancelUserDefinedCharacterSet },
+  {
+    class: SelectOrCancelUserDefinedCharacterSet,
+    constructed: new SelectOrCancelUserDefinedCharacterSet(UserDefinedCharacterSetSelection.Selected),
+    bytes: Buffer.from([
+      0x1b, 0x25,
+      0x01,
+    ]),
+    checks: {
+      n: 1,
+    },
+  },
   { class: DefineUserDefinedCharacters },
   { class: ControlBeeperTones },
   { class: ModelSpecificBuzzerControl },
