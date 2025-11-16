@@ -2,6 +2,8 @@
 
 *Not production-ready*
 
+![Plot of ESC/POS commands implemented over time](progress.png)
+
 Here's the current test output. If there's a check mark, that means a test
 exists and the command is implemented. If the test is skipped, that means the
 test is only a stub and the command probably hasn't been implemented yet.
@@ -17,65 +19,65 @@ documentation and look at how other similar commands are implemented.
 
 ```
 ▶ ParseError
-  ✔ unrecognized prefix (0.486084ms)
-  ✔ incomplete command (0.052417ms)
-  ✔ incomplete command after complete command (0.091125ms)
-✔ ParseError (0.875709ms)
-✔ HorizontalTab (0.236959ms)
-✔ SetCharacterSpacing (0.136459ms)
-﹣ SelectPrintMode (0.030042ms) # SKIP
-﹣ SetAbsolutePrintPosition (0.020041ms) # SKIP
-﹣ SelectOrCancelUserDefinedCharacterSet (0.177208ms) # SKIP
-﹣ DefineUserDefinedCharacters (0.103041ms) # SKIP
-﹣ ControlBeeperTones (0.024084ms) # SKIP
-﹣ ModelSpecificBuzzerControl (0.018042ms) # SKIP
-✔ SelectBitImageMode (0.0825ms)
-✔ SetUnderlineMode (0.061125ms)
-﹣ SelectDefaultLineSpacing (0.015875ms) # SKIP
-﹣ SetLineSpacing (0.014625ms) # SKIP
-﹣ SelectPeripheralDevice (0.016417ms) # SKIP
-﹣ CancelUserDefinedCharacters (0.014792ms) # SKIP
-✔ InitializePrinter (0.024625ms)
-﹣ SetHorizontalTabPositions (0.01425ms) # SKIP
-✔ SetEmphasizedMode (0.10325ms)
-﹣ SetDoubleStrikeMode (0.017917ms) # SKIP
-﹣ PrintAndFeedPaper (0.016166ms) # SKIP
-﹣ SelectPageMode (0.014625ms) # SKIP
-✔ SelectCharacterFont (0.03925ms)
-﹣ SelectInternationalCharacterSet (0.018459ms) # SKIP
-﹣ SelectStandardMode (0.013125ms) # SKIP
-﹣ SelectPrintDirectionInPageMode (0.029708ms) # SKIP
-﹣ SetRotationMode (0.01875ms) # SKIP
-﹣ SetPrintAreaInPageMode (0.015208ms) # SKIP
-﹣ SetRelativePrintPosition (0.013917ms) # SKIP
-✔ SelectJustification (0.042084ms)
-﹣ SelectPaperSensorsToOutputPaperEndSignals (0.014125ms) # SKIP
-﹣ SelectPaperSensorsToStopPrinting (0.013ms) # SKIP
-﹣ EnableOrDisablePanelButtons (0.012917ms) # SKIP
-✔ PrintAndFeedNLines (0.063541ms)
-﹣ PartialCutOnePointLeftUncut (0.01375ms) # SKIP
-﹣ PartialCutThreePointsLeftUncut (0.013333ms) # SKIP
-﹣ GeneratePulse (0.012958ms) # SKIP
-﹣ SelectCharacterCodeTable (0.012916ms) # SKIP
-﹣ TransmitPeripheralDeviceStatus (0.012792ms) # SKIP
-﹣ TransmitPaperSensorStatus (0.012334ms) # SKIP
-﹣ SetUpsideDownPrintMode (0.012833ms) # SKIP
-✔ SelectKanjiCharacterFont (0.06125ms)
-✔ CancelSetValuesForTopOrBottomLogoPrinting (0.036709ms)
-✔ TransmitSetValuesForTopOrBottomLogoPrinting (0.027208ms)
-✔ SetTopLogoPrinting (0.100542ms)
-✔ SetBottomLogoPrinting (0.029958ms)
-✔ MakeExtendedSettingsForTopOrBottomLogoPrinting (0.030334ms)
-✔ EnableOrDisableTopOrBottomLogoPrinting (0.025ms)
-✔ SelectCharacterSize (0.022125ms)
-✔ SetWhiteAndBlackReversePrintMode (0.020958ms)
-✔ SelectCutModeAndCutPaper (0.024917ms)
+  ✔ unrecognized prefix (0.485ms)
+  ✔ incomplete command (0.051375ms)
+  ✔ incomplete command after complete command (0.087333ms)
+✔ ParseError (0.870042ms)
+✔ HorizontalTab (0.254709ms)
+✔ SetCharacterSpacing (0.141166ms)
+✔ SelectPrintMode (0.041625ms)
+✔ SetAbsolutePrintPosition (0.037375ms)
+✔ SelectOrCancelUserDefinedCharacterSet (0.19325ms)
+﹣ DefineUserDefinedCharacters (0.106459ms) # SKIP
+﹣ ControlBeeperTones (0.024333ms) # SKIP
+﹣ ModelSpecificBuzzerControl (0.0185ms) # SKIP
+✔ SelectBitImageMode (0.111083ms)
+✔ SetUnderlineMode (0.061792ms)
+﹣ SelectDefaultLineSpacing (0.014958ms) # SKIP
+﹣ SetLineSpacing (0.01425ms) # SKIP
+﹣ SelectPeripheralDevice (0.014625ms) # SKIP
+﹣ CancelUserDefinedCharacters (0.013292ms) # SKIP
+✔ InitializePrinter (0.026167ms)
+﹣ SetHorizontalTabPositions (0.01325ms) # SKIP
+✔ SetEmphasizedMode (0.078167ms)
+﹣ SetDoubleStrikeMode (0.014291ms) # SKIP
+﹣ PrintAndFeedPaper (0.014334ms) # SKIP
+﹣ SelectPageMode (0.012917ms) # SKIP
+✔ SelectCharacterFont (0.02725ms)
+﹣ SelectInternationalCharacterSet (0.012917ms) # SKIP
+﹣ SelectStandardMode (0.012708ms) # SKIP
+﹣ SelectPrintDirectionInPageMode (0.01275ms) # SKIP
+﹣ SetRotationMode (0.012625ms) # SKIP
+﹣ SetPrintAreaInPageMode (0.0125ms) # SKIP
+﹣ SetRelativePrintPosition (0.012458ms) # SKIP
+✔ SelectJustification (0.024125ms)
+﹣ SelectPaperSensorsToOutputPaperEndSignals (0.013209ms) # SKIP
+﹣ SelectPaperSensorsToStopPrinting (0.012583ms) # SKIP
+﹣ EnableOrDisablePanelButtons (0.0125ms) # SKIP
+✔ PrintAndFeedNLines (0.080583ms)
+﹣ PartialCutOnePointLeftUncut (0.013083ms) # SKIP
+﹣ PartialCutThreePointsLeftUncut (0.01275ms) # SKIP
+﹣ GeneratePulse (0.012833ms) # SKIP
+﹣ SelectCharacterCodeTable (0.013333ms) # SKIP
+﹣ TransmitPeripheralDeviceStatus (0.0125ms) # SKIP
+﹣ TransmitPaperSensorStatus (0.014ms) # SKIP
+﹣ SetUpsideDownPrintMode (0.01775ms) # SKIP
+✔ SelectKanjiCharacterFont (0.030625ms)
+✔ CancelSetValuesForTopOrBottomLogoPrinting (0.030125ms)
+✔ TransmitSetValuesForTopOrBottomLogoPrinting (0.024875ms)
+✔ SetTopLogoPrinting (0.036125ms)
+✔ SetBottomLogoPrinting (0.025625ms)
+✔ MakeExtendedSettingsForTopOrBottomLogoPrinting (0.02725ms)
+✔ EnableOrDisableTopOrBottomLogoPrinting (0.047875ms)
+✔ SelectCharacterSize (0.021583ms)
+✔ SetWhiteAndBlackReversePrintMode (0.020916ms)
+✔ SelectCutModeAndCutPaper (0.026667ms)
 ℹ tests 53
 ℹ suites 0
-ℹ pass 23
+ℹ pass 26
 ℹ fail 0
 ℹ cancelled 0
-ℹ skipped 30
+ℹ skipped 27
 ℹ todo 0
-ℹ duration_ms 6.3195
+ℹ duration_ms 6.408916
 ```
