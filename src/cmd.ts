@@ -2,6 +2,7 @@ import { Buffer } from 'buffer'
 
 import '@tsmetadata/polyfill'
 import { asciiToByte } from './ascii'
+import { bufToAbbrevString } from './util'
 import { kRangeMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
 import { ParseError } from './parse'
 import { assert } from './assert'
@@ -14,7 +15,12 @@ export class CmdBase {
     const fields = Object.keys(this)
     const fieldsAndValues = []
     for (const name of fields) {
-      fieldsAndValues.push(`${name}=${this[name]}`)
+      const value = this[name]
+      let valueString = value.toString()
+      if (value.length) {
+        valueString = bufToAbbrevString(value)
+      }
+      fieldsAndValues.push(`${name}=${valueString}`)
     }
     // TODO explain what each field value means, perhaps with decorators?
     return `${ctor.desc} ( ${fieldsAndValues.join(', ')} )`
