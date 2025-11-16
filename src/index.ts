@@ -217,8 +217,19 @@ export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ampersand.html
+ */
 export class DefineUserDefinedCharacters extends CmdBase {}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lparen_ca.html
+ */
 export class ControlBeeperTones extends CmdBase {}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lparen_ca_fn97.html
+ */
 export class ModelSpecificBuzzerControl extends CmdBase {}
 
 @register(['ESC', '*'])
@@ -266,9 +277,24 @@ export class SetUnderlineMode extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_2.html
+ */
 export class SelectDefaultLineSpacing extends CmdBase {}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_3.html
+ */
 export class SetLineSpacing extends CmdBase {}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_equal.html
+ */
 export class SelectPeripheralDevice extends CmdBase {}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_questionmark.html
+ */
 export class CancelUserDefinedCharacters extends CmdBase {}
 
 @register(['ESC', '@'])
