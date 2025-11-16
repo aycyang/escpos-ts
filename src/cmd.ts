@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer'
+
 import '@tsmetadata/polyfill'
 import { asciiToByte } from './ascii'
 import { kRangeMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
@@ -6,6 +8,17 @@ import { assert } from './assert'
 
 export class CmdBase {
   static desc: string
+
+  toString(): string {
+    const ctor = this.constructor as any
+    const fields = Object.keys(this)
+    const fieldsAndValues = []
+    for (const name of fields) {
+      fieldsAndValues.push(`${name}=${this[name]}`)
+    }
+    // TODO explain what each field value means, perhaps with decorators?
+    return `${ctor.desc} ( ${fieldsAndValues.join(', ')} )`
+  }
 
   // TODO enforce validate is called before cmd can be used
   validate() {

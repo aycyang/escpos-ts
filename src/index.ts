@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer'
+
 import { register, registerMultiFn, parse } from './parse'
 import { serial, range } from './decorators'
 export { parse } from './parse'
