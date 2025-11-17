@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer'
 
 import { register, registerMultiFn, parse } from './parse'
-import { u8, u16, u32, sizedBuffer } from './decorators'
+import { u8, u16, u32, sizedBuffer, nullTerminatedBuffer } from './fieldDecorators'
 export { parse } from './parse'
 import { CmdBase } from './cmd'
 
@@ -351,11 +351,14 @@ export class InitializePrinter extends CmdBase {
 export class SetHorizontalTabPositions extends CmdBase {
   static override desc: string = 'Set horizontal tab positions'
 
-  // TODO read null-terminated buffer
+  // TODO verify size limit isn't off by one
+  @nullTerminatedBuffer([[1, 255]], 32)
+  buf: Buffer
 
   constructor(...args: number[]) {
     super()
-    // TODO
+    this.buf = Buffer.from([...args, 0])
+    this.validate()
   }
 }
 

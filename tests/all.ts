@@ -239,7 +239,7 @@ const testCases: TestCase[] = [
     ]),
     checks: {
       buf: Buffer.from([
-        8, 16, 32,
+        8, 16, 32, 0,
       ]),
     },
   },

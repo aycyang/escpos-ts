@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer'
+import { ParseError } from './parse'
 import { assert } from './assert'
 
 type Range = number | [ number, number ]
@@ -27,6 +28,22 @@ function throwIfNumberNotInRanges(ranges: Range[]) {
 function throwIfBufElementsNotInRanges(ranges: Range[]) {
   return (name, value: Buffer) => {
     const offendingIndex = value.findIndex(byte => !ranges.some(range => rangeContains(range, byte)))
+    if (offendingIndex !== -1) {
+      throw new Error(
+        `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
+        at index ${offendingIndex} that is not within a valid range.
+        Valid ranges: ${ranges ?
+          ranges.map(range => range.toString()).join(', ') :
+          '<no ranges specified>'
+        }`)
+    }
+  }
+}
+
+
+function throwIfNullTerminatedBufferElementsNotInRanges(ranges: Range[]) {
+  return (name, value: Buffer) => {
+    const offendingIndex = value.subarray(0, -1).findIndex(byte => !ranges.some(range => rangeContains(range, byte)))
     if (offendingIndex !== -1) {
       throw new Error(
         `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
@@ -75,15 +92,37 @@ function serializeU32(n: number): Buffer {
 
 function sizedBufferParseFactory(name: string, offset: number): Function {
   // Caller should bind itself as this.
-  function parseSizedBuffer (buf: Buffer): [Buffer, Buffer] {
+  function parseSizedBuffer(buf: Buffer): [Buffer, Buffer] {
     const size = this[name] + offset
     return [buf.subarray(0, size), buf.subarray(size)]
   }
   return parseSizedBuffer
 }
 
-function serializeBuf(buf: Buffer): Buffer {
+function serializeBuffer(buf: Buffer): Buffer {
   return buf
+}
+
+// TODO Instead of throwing a parse error when the size limit is exceeded,
+// should just finalize the current command and parse anything beyond the size
+// limit normally.
+// "A maximum of 32 horizontal tab positions can be set. Data exceeding 32
+// horizontal tab positions is processed as normal data."
+// source: https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cd.html
+// This needs to be tested on a real machine to determine exact behavior.
+function nullTerminatedBufferParseFactory(sizeLimit: number): Function {
+  function parseNullTerminatedBuffer(buf: Buffer): [Buffer, Buffer] {
+    const i = buf.findIndex(n => n === 0)
+    if (i === -1) {
+      throw new ParseError(`null terminator not found`)
+    }
+    if (i > sizeLimit) {
+      throw new ParseError(`null terminator found at index ${i},
+        which is beyond the size limit of ${sizeLimit}`)
+    }
+    return [buf.subarray(0, i + 1), buf.subarray(i + 1)]
+  }
+  return parseNullTerminatedBuffer
 }
 
 export function u8(ranges: Range[]) {
@@ -128,8 +167,20 @@ export function sizedBuffer(sizeFieldName: string, sizeOffset: number, ranges: R
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
       parseFactory: sizedBufferParseFactory(sizeFieldName, sizeOffset),
-      serialize: serializeBuf,
+      serialize: serializeBuffer,
       validate: throwIfBufElementsNotInRanges(ranges),
+    }
+  }
+}
+
+export function nullTerminatedBuffer(ranges: Range[], sizeLimit: number) {
+  return (value, context) => {
+    assert(context.kind === 'field')
+    context.metadata.fields ??= {}
+    context.metadata.fields[context.name] = {
+      parseFactory: nullTerminatedBufferParseFactory(sizeLimit),
+      serialize: serializeBuffer,
+      validate: throwIfNullTerminatedBufferElementsNotInRanges(ranges),
     }
   }
 }
