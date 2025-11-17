@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer'
 
-import { register, registerMultiFn, parse } from './parse'
-import { u8, u16, u32, sizedBuffer, nullTerminatedBuffer } from './fieldDecorators'
+import { register, registerMultiFn } from './parse'
+import { u8, u16, sizedBuffer, nullTerminatedBuffer } from './fieldDecorators'
 export { parse } from './parse'
 import { CmdBase } from './cmd'
 

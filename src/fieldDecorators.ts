@@ -56,10 +56,6 @@ function throwIfNullTerminatedBufferElementsNotInRanges(ranges: Range[]) {
   }
 }
 
-function isEmptyObject(obj: object): boolean {
-  return obj instanceof Object && Object.keys(obj).length === 0
-}
-
 function parseU8(buf: Buffer): [number, Buffer] {
   return [buf[0], buf.subarray(1)]
 }
@@ -90,7 +86,9 @@ function serializeU32(n: number): Buffer {
   return buf
 }
 
-function sizedBufferParseFactory(name: string, offset: number): Function {
+type ParseFunction = (Buffer) => [number | Buffer, Buffer]
+
+function sizedBufferParseFactory(name: string, offset: number): ParseFunction {
   // Caller should bind itself as this.
   function parseSizedBuffer(buf: Buffer): [Buffer, Buffer] {
     const size = this[name] + offset
@@ -110,7 +108,7 @@ function serializeBuffer(buf: Buffer): Buffer {
 // horizontal tab positions is processed as normal data."
 // source: https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cd.html
 // This needs to be tested on a real machine to determine exact behavior.
-function nullTerminatedBufferParseFactory(sizeLimit: number): Function {
+function nullTerminatedBufferParseFactory(sizeLimit: number): ParseFunction {
   function parseNullTerminatedBuffer(buf: Buffer): [Buffer, Buffer] {
     const i = buf.findIndex(n => n === 0)
     if (i === -1) {

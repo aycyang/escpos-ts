@@ -1,16 +1,21 @@
 import { Buffer } from 'buffer'
 
 import '@tsmetadata/polyfill'
-import { asciiToByte } from './ascii'
+import { Ascii, asciiToByte } from './ascii'
 import { bufToAbbrevString } from './util'
-import { ParseError } from './parse'
 import { assert } from './assert'
+
+export type CmdClass = {
+  desc: string
+  new(...args: unknown[]): CmdBase
+  from(buf: Buffer): [CmdBase, Buffer]
+}
 
 export class CmdBase {
   static desc: string
 
   toString(): string {
-    const ctor = this.constructor as any
+    const cmdClass = this.constructor as CmdClass
     const fields = Object.keys(this)
     const fieldsAndValues = []
     for (const name of fields) {
@@ -22,7 +27,7 @@ export class CmdBase {
       fieldsAndValues.push(`${name}=${valueString}`)
     }
     // TODO explain what each field value means, perhaps with decorators?
-    return `${ctor.desc} ( ${fieldsAndValues.join(', ')} )`
+    return `${cmdClass.desc} ( ${fieldsAndValues.join(', ')} )`
   }
 
   // TODO enforce validate is called before cmd can be used
@@ -39,7 +44,7 @@ export class CmdBase {
   serialize(): Buffer {
     const metadata = this.constructor[Symbol.metadata]
     assert(metadata)
-    const prefix = metadata.prefix as any[]
+    const prefix = metadata.prefix as Ascii[]
     const bytes = prefix.map(asciiToByte)
     if (!metadata.fields) return Buffer.from(bytes)
     for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields)) {
@@ -56,7 +61,7 @@ export class CmdBase {
    *
    * TODO throw parse error if end of buffer is reached prematurely
    */
-  static from(buf: Buffer): [any, Buffer] {
+  static from(buf: Buffer): [CmdBase, Buffer] {
     const metadata = this[Symbol.metadata]
     assert(metadata)
     // The goal here is to create an object with the subclass's prototype, but

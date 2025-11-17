@@ -1,15 +1,15 @@
 import { Ascii, asciiToByte } from './ascii'
-import { CmdBase } from './cmd'
+import { CmdClass, CmdBase } from './cmd'
 import { byteToHex } from './util'
 import { assert } from './assert'
 
-
-const kPrefixTree = []
+type Node = Node[] | CmdClass | FnLookahead
+const kPrefixTree: Node[] = []
 
 export class ParseError extends Error {}
 
-function getFromTree(prefix: Ascii[]): any {
-  let cur = kPrefixTree
+function getFromTree(prefix: Ascii[]): Node {
+  let cur: Node = kPrefixTree
   let i = 0
   while (i < prefix.length) {
     const b = asciiToByte(prefix[i])
@@ -23,7 +23,7 @@ function getFromTree(prefix: Ascii[]): any {
 }
 
 function addToTree(prefix: Ascii[], target) {
-  let cur = kPrefixTree
+  let cur: Node = kPrefixTree
   let i = 0
   while (i < prefix.length - 1) {
     const b = asciiToByte(prefix[i])
@@ -36,13 +36,13 @@ function addToTree(prefix: Ascii[], target) {
 }
 
 class FnLookahead {
-  fns: any[]
+  fns: CmdClass[]
   skip: number
   constructor(skip: number) {
     this.fns = []
     this.skip = skip
   }
-  put(fn: number, ctor: Function) {
+  put(fn: number, ctor) {
     this.fns[fn] = ctor
   }
 }
@@ -51,7 +51,7 @@ export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: num
   return (value, context) => {
     assert(context.kind === 'class')
     assert(value)
-    let lookahead = getFromTree(prefix)
+    let lookahead = getFromTree(prefix) as FnLookahead
     if (!lookahead) {
       lookahead = new FnLookahead(config.skip)
     }
@@ -87,7 +87,7 @@ export function parse(buf: Buffer): CmdBase[] {
   const cmds: CmdBase[] = []
   while (buf.length > 0) {
     // Traverse parse tree until a leaf node is reached.
-    let curNode: any = kPrefixTree
+    let curNode = kPrefixTree as Node
     let i = 0
     while(i < buf.length && buf[i] in curNode) {
       curNode = curNode[buf[i]]
@@ -109,7 +109,7 @@ export function parse(buf: Buffer): CmdBase[] {
     // curNode could now be one of two things: (1) a command constructor, or
     // (2) a multi-function command dispatcher. In case of (2), lookahead to
     // the "fn" byte to resolve to the subcommand.
-    let cmdClass = curNode
+    let cmdClass = curNode as CmdClass
     if (curNode instanceof FnLookahead) {
       const fn = buf[curNode.skip]
       cmdClass = curNode.fns[fn]
