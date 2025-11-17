@@ -96,12 +96,3 @@ test at tests/all.ts:2:6674
       at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
 
 ```
-
-### Notes
-
-- Different types of parameters:
-  - little-endian 8-bit, 16-bit or 32-bit number
-  - variable-size null-terminated buffer with max size e.g. <https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cd.html>
-  - interleaved key-value pairs with total length specified in header e.g. <https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn64.html>
-  - buffer of bytes with total length specified in header e.g. <https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn112.html>
-- Given the above, I think I want to rework the decorator metadata to store references to specialized parsing functions depending on the type of parameter. the function should perhaps return the in-memory representation along with the number of bytes parsed.

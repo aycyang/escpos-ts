@@ -1,4 +1,4 @@
-function byteToHex(b: number): string {
+export function byteToHex(b: number): string {
   const upper = (b >> 4) & 0x0f
   const lower = b & 0x0f
   return upper.toString(16) + lower.toString(16)

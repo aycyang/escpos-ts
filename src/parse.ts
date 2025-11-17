@@ -1,7 +1,9 @@
 import { Ascii, asciiToByte } from './ascii'
 import { kRegisterMetadataKey, kPrefixMetadataKey } from './symbols'
 import { CmdBase } from './cmd'
+import { byteToHex } from './util'
 import { assert } from './assert'
+
 
 const kPrefixTree = []
 
@@ -34,28 +36,32 @@ function addToTree(prefix: Ascii[], target) {
   cur[b] = target
 }
 
-type FnLookahead = {
+class FnLookahead {
   fns: any[]
   skip: number
+  constructor(skip: number) {
+    this.fns = []
+    this.skip = skip
+  }
+  put(fn: number, ctor: Function) {
+    this.fns[fn] = ctor
+  }
 }
 
 export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: number }): Decorator {
   return (value, context) => {
     assert(context.kind === 'class')
     assert(value)
-    let obj = getFromTree(prefix)
-    if (!obj) {
-      obj = {
-        fns: [],
-        skip: config.skip
-      }
+    let lookahead = getFromTree(prefix)
+    if (!lookahead) {
+      lookahead = new FnLookahead(config.skip)
     }
-    assert(obj.skip === config.skip,
+    assert(lookahead.skip === config.skip,
       `skip value should be fixed for a given multi-function command.
       Tried to define skip value of: ${config.skip}
-      Previously defined skip value: ${obj.skip}`)
-    obj.fns[config.fn] = value
-    addToTree(prefix, obj)
+      Previously defined skip value: ${lookahead.skip}`)
+    lookahead.put(config.fn, value)
+    addToTree(prefix, lookahead)
     context.metadata.prefix = prefix
   }
 }
@@ -80,36 +86,40 @@ export function register(prefix: Ascii[]): Decorator {
  */
 export function parse(buf: Buffer): CmdBase[] {
   const cmds: CmdBase[] = []
-  let cur: any = kPrefixTree
-  let i = 0
-  while (i < buf.length) {
-    const b = buf[i]
-    if (!(b in cur)) {
-      throw new ParseError(`unexpected token: ${b}`)
-    }
-    cur = cur[b]
-    if (Array.isArray(cur)) { // descend another level in the tree
+  while (buf.length > 0) {
+    // Traverse parse tree until a leaf node is reached.
+    let curNode: any = kPrefixTree
+    let i = 0
+    while(i < buf.length && buf[i] in curNode) {
+      curNode = curNode[buf[i]]
       i++
-    } else if (cur.desc) { // cur is a cmd ctor
-      const ctor = cur
-      const [instance, bytesRead] = ctor.from(buf.subarray(i + 1))
-      cmds.push(instance)
-      i += bytesRead + 1
-      cur = kPrefixTree
-    } else { // cur is a FnLookahead that looks at the fn byte and dispatches to the appropriate cmd ctor
-      const lookahead = cur as FnLookahead
-      const subBuf = buf.subarray(i + 1)
-      const fn = subBuf[lookahead.skip]
-      const ctor = lookahead.fns[fn]
-      const [instance, bytesRead] = ctor.from(subBuf)
-      cmds.push(instance)
-      i += bytesRead + 1
-      cur = kPrefixTree
     }
-  }
-  if (cur !== kPrefixTree) {
-    // TODO print out the current unfinished command
-    throw new ParseError(`unexpected end of buffer`)
+
+    // If curNode isn't a leaf node by now, something went wrong with the
+    // parse.
+    if (Array.isArray(curNode)) {
+      if (i >= buf.length) {
+        throw new ParseError(`unexpected end of buffer: ${buf}`)
+      }
+      throw new ParseError(`unrecognized token: 0x${byteToHex(buf[i])}`)
+    }
+
+    // Advance the buffer start pointer to just after the prefix.
+    buf = buf.subarray(i)
+
+    // curNode could now be one of two things: (1) a command constructor, or
+    // (2) a multi-function command dispatcher. In case of (2), lookahead to
+    // the "fn" byte to resolve to the subcommand.
+    let cmdClass = curNode
+    if (curNode instanceof FnLookahead) {
+      const fn = buf[curNode.skip]
+      cmdClass = curNode.fns[fn]
+    }
+
+    // cmdClass is now the fully-resolved command constructor.
+    const [cmd, remainder] = cmdClass.from(buf)
+    cmds.push(cmd)
+    buf = remainder
   }
   return cmds
 }

@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer'
 
 import { register, registerMultiFn, parse } from './parse'
-import { serial, range } from './decorators'
+import { u8, u16, u32, sizedBuffer } from './decorators'
 export { parse } from './parse'
 import { CmdBase } from './cmd'
 
@@ -157,8 +157,7 @@ export class HorizontalTab extends CmdBase {
 export class SetCharacterSpacing extends CmdBase {
   static override desc: string = 'Set right-side character spacing'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(n: number) {
@@ -175,8 +174,7 @@ export class SetCharacterSpacing extends CmdBase {
 export class SelectPrintMode extends CmdBase {
   static override desc: string = 'Select print mode(s)'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(font: CharacterFont, em: EmphasizedMode, un: SimpleUnderlineMode, w2: DoubleWidthMode, h2: DoubleHeightMode) {
@@ -198,8 +196,7 @@ export class SelectPrintMode extends CmdBase {
 export class SetAbsolutePrintPosition extends CmdBase {
   static override desc: string = 'Set absolute print position'
 
-  @serial('u16')
-  @range(0, 65535)
+  @u16([[0, 65535]])
   n: number
 
   constructor(n: number) {
@@ -216,8 +213,7 @@ export class SetAbsolutePrintPosition extends CmdBase {
 export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {
   static override desc: string = 'Select/cancel user-defined character set'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(sel: UserDefinedCharacterSetSelection) {
@@ -246,17 +242,13 @@ export class ModelSpecificBuzzerControl extends CmdBase {}
 export class SelectBitImageMode extends CmdBase {
   static override desc: string = 'Select bit-image mode'
 
-  @serial('u8')
-  @range(0, 1)
-  @range(32, 33)
+  @u8([0, 1, 32, 33])
   m: number
 
-  @serial('u16')
-  @range(1, 2047)
+  @u16([[1, 2047]])
   n: number
 
-  @serial({ member: 'n' })
-  @range(0, 255)
+  @sizedBuffer('n', 0, [[0, 255]])
   d: Buffer
 
   constructor(mode: BitImageMode, d: Buffer) {
@@ -275,9 +267,7 @@ export class SelectBitImageMode extends CmdBase {
 export class SetUnderlineMode extends CmdBase {
   static override desc: string = 'Turn underline mode on/off'
 
-  @serial('u8')
-  @range(0, 2)
-  @range(48, 50)
+  @u8([[0, 2], [48, 50]])
   n: number
 
   constructor(mode: UnderlineMode) {
@@ -302,8 +292,7 @@ export class SelectDefaultLineSpacing extends CmdBase {
 export class SetLineSpacing extends CmdBase {
   static override desc: string = 'Set line spacing'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(n: number) {
@@ -320,8 +309,7 @@ export class SetLineSpacing extends CmdBase {
 export class SelectPeripheralDevice extends CmdBase {
   static override desc: string = 'Select peripheral device'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(sel: PeripheralDeviceSelection) {
@@ -338,8 +326,7 @@ export class SelectPeripheralDevice extends CmdBase {
 export class CancelUserDefinedCharacters extends CmdBase {
   static override desc: string = 'Cancel user-defined characters'
 
-  @serial('u8')
-  @range(32, 126)
+  @u8([[32, 126]])
   n: number
 
   constructor(n: number) {
@@ -379,8 +366,7 @@ export class SetHorizontalTabPositions extends CmdBase {
 export class SetEmphasizedMode extends CmdBase {
   static override desc: string = 'Turn emphasized mode on/off'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(mode: EmphasizedMode) {
@@ -398,10 +384,7 @@ export class SelectPageMode extends CmdBase {}
 export class SelectCharacterFont extends CmdBase {
   static override desc: string = 'Select character font'
 
-  @serial('u8')
-  @range(0, 1)
-  @range(48, 49)
-  @range(97, 98)
+  @u8([0, 1, 48, 49, 97, 98])
   n: number
 
   constructor(font: CharacterFont) {
@@ -422,9 +405,7 @@ export class SetRelativePrintPosition extends CmdBase {}
 export class SelectJustification extends CmdBase {
   static override desc: string = 'Select justification'
 
-  @serial('u8')
-  @range(0, 2)
-  @range(48, 50)
+  @u8([[0, 2], [48, 50]])
   n: number
 
   constructor(justification: Justification) {
@@ -445,8 +426,7 @@ export class EnableOrDisablePanelButtons extends CmdBase {}
 export class PrintAndFeedNLines extends CmdBase {
   static override desc: string = 'Print and feed n lines'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(n: number) {
@@ -470,15 +450,14 @@ export class SetUpsideDownPrintMode extends CmdBase {}
 @registerMultiFn(['FS', '(', 'A'], { skip: 2, fn: 48 })
 export class SelectKanjiCharacterFont extends CmdBase {
   static override desc: string = 'Select Kanji character style(s)'
-  @serial('u16')
-  @range(2)
+
+  @u16([2])
   p: number
-  @serial('u8')
-  @range(48)
+
+  @u8([48])
   fn: number
-  @serial('u8')
-  @range(0, 1)
-  @range(48, 49)
+
+  @u8([0, 1, 48, 49])
   m: number
 }
 
@@ -489,32 +468,25 @@ export class SelectKanjiCharacterFont extends CmdBase {
 export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Cancel set values for top/bottom logo printing'
 
-  @serial('u16')
-  @range(6)
+  @u16([6])
   p: number
 
-  @serial('u8')
-  @range(60)
+  @u8([60])
   fn: number
 
-  @serial('u8')
-  @range(2)
+  @u8([2])
   m: number
 
-  @serial('u8')
-  @range(48, 49)
+  @u8([48, 49])
   c: number
 
-  @serial('u8')
-  @range(67)
+  @u8([67])
   d1: number
 
-  @serial('u8')
-  @range(76)
+  @u8([76])
   d2: number
 
-  @serial('u8')
-  @range(82)
+  @u8([82])
   d3: number
 }
 
@@ -525,20 +497,16 @@ export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
 export class TransmitSetValuesForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Transmit set values for top/bottom logo printing'
 
-  @serial('u16')
-  @range(3)
+  @u16([3])
   p: number
 
-  @serial('u8')
-  @range(61)
+  @u8([61])
   fn: number
 
-  @serial('u8')
-  @range(2)
+  @u8([2])
   m: number
 
-  @serial('u8')
-  @range(48, 50)
+  @u8([[48, 50]])
   c: number
 }
 
@@ -549,32 +517,25 @@ export class TransmitSetValuesForTopOrBottomLogoPrinting extends CmdBase {
 export class SetTopLogoPrinting extends CmdBase {
   static override desc: string = 'Set top logo printing'
 
-  @serial('u16')
-  @range(6)
+  @u16([6])
   p: number
 
-  @serial('u8')
-  @range(62)
+  @u8([62])
   fn: number
 
-  @serial('u8')
-  @range(2)
+  @u8([2])
   m: number
 
-  @serial('u8')
-  @range(32, 126)
+  @u8([[32, 126]])
   kc1: number
 
-  @serial('u8')
-  @range(32, 126)
+  @u8([[32, 126]])
   kc2: number
 
-  @serial('u8')
-  @range(48, 50)
+  @u8([[48, 50]])
   a: number
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 }
 
@@ -585,28 +546,22 @@ export class SetTopLogoPrinting extends CmdBase {
 export class SetBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Set bottom logo printing'
 
-  @serial('u16')
-  @range(5)
+  @u16([5])
   p: number
 
-  @serial('u8')
-  @range(63)
+  @u8([63])
   fn: number
 
-  @serial('u8')
-  @range(2)
+  @u8([2])
   m: number
 
-  @serial('u8')
-  @range(32, 126)
+  @u8([[32, 126]])
   kc1: number
 
-  @serial('u8')
-  @range(32, 126)
+  @u8([[32, 126]])
   kc2: number
 
-  @serial('u8')
-  @range(48, 50)
+  @u8([[48, 50]])
   a: number
 }
 
@@ -619,23 +574,19 @@ export class SetBottomLogoPrinting extends CmdBase {
 export class MakeExtendedSettingsForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Make extended settings for top/bottom logo printing'
 
-  @serial('u16')
-  @range(4, 12)
+  @u16([[4, 12]])
   p: number
 
-  @serial('u8')
-  @range(64)
+  @u8([64])
   fn: number
 
-  @serial('u8')
-  @range(2)
+  @u8([2])
   m: number
 
   // TODO this is an oversimplification. should probably be represented as a
   // Map<number, number> (making each option its own separate member would make
   // the population logic too complicated IMO)
-  @serial({ member: 'p', offset: -2 })
-  @range(48, 67)
+  @sizedBuffer('p', -2, [[48, 67]])
   settings: Buffer
 }
 
@@ -646,24 +597,19 @@ export class MakeExtendedSettingsForTopOrBottomLogoPrinting extends CmdBase {
 export class EnableOrDisableTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Enable/disable top/bottom logo printing'
 
-  @serial('u16')
-  @range(4)
+  @u16([4])
   p: number
 
-  @serial('u8')
-  @range(65)
+  @u8([65])
   fn: number
 
-  @serial('u8')
-  @range(2)
+  @u8([2])
   m: number
 
-  @serial('u8')
-  @range(48, 49)
+  @u8([[48, 49]])
   a: number
 
-  @serial('u8')
-  @range(48, 49)
+  @u8([[48, 49]])
   n: number
 }
 
@@ -677,8 +623,7 @@ export class SelectCharacterSize extends CmdBase {
   // NOTE 0-119 is not exactly accurate. there are ranges within 0-119 which
   // should be considered invalid. this would be easier if we could support a
   // 'u4' type.
-  @serial('u8')
-  @range(0, 119)
+  @u8([[0, 119]])
   n: number
 
   /**
@@ -705,8 +650,7 @@ export class SelectCharacterSize extends CmdBase {
 export class SetWhiteAndBlackReversePrintMode extends CmdBase {
   static override desc: string = 'Turn white/black reverse print mode on/off'
 
-  @serial('u8')
-  @range(0, 255)
+  @u8([[0, 255]])
   n: number
 
   constructor(mode: WhiteAndBlackReversePrintMode) {
@@ -723,10 +667,7 @@ export class SetWhiteAndBlackReversePrintMode extends CmdBase {
 export class SelectCutModeAndCutPaper extends CmdBase {
   static override desc: string = 'Select cut mode and cut paper'
 
-  @serial('u8')
-  @range(0, 1)
-  @range(48, 49)
-  @range(65, 66)
+  @u8([0, 1, 48, 49, 65, 66])
   m: number
 
   // TODO parse n if m is 65 or 66
