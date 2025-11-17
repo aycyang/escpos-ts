@@ -2,7 +2,7 @@ import { Buffer } from 'buffer'
 import { ParseError } from './parse'
 import { assert } from './assert'
 
-type Range = number | [ number, number ]
+type Range = number | [number, number]
 
 function rangeContains(range: Range, value: number) {
   if (Array.isArray(range)) {
@@ -13,45 +13,54 @@ function rangeContains(range: Range, value: number) {
 
 function throwIfNumberNotInRanges(ranges: Range[]) {
   return (name, value) => {
-    const cond = ranges.some(range => rangeContains(range, value))
+    const cond = ranges.some((range) => rangeContains(range, value))
     if (!cond) {
       throw new Error(
         `Parsed value ${value} for field '${name}' is not within a valid range.
-        Valid ranges: ${ranges ?
-          ranges.map(range => range.toString()).join(', ') :
-          '<no ranges specified>'
-        }`)
+        Valid ranges: ${
+          ranges
+            ? ranges.map((range) => range.toString()).join(', ')
+            : '<no ranges specified>'
+        }`,
+      )
     }
   }
 }
 
 function throwIfBufElementsNotInRanges(ranges: Range[]) {
   return (name, value: Buffer) => {
-    const offendingIndex = value.findIndex(byte => !ranges.some(range => rangeContains(range, byte)))
+    const offendingIndex = value.findIndex(
+      (byte) => !ranges.some((range) => rangeContains(range, byte)),
+    )
     if (offendingIndex !== -1) {
       throw new Error(
         `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
         at index ${offendingIndex} that is not within a valid range.
-        Valid ranges: ${ranges ?
-          ranges.map(range => range.toString()).join(', ') :
-          '<no ranges specified>'
-        }`)
+        Valid ranges: ${
+          ranges
+            ? ranges.map((range) => range.toString()).join(', ')
+            : '<no ranges specified>'
+        }`,
+      )
     }
   }
 }
 
-
 function throwIfNullTerminatedBufferElementsNotInRanges(ranges: Range[]) {
   return (name, value: Buffer) => {
-    const offendingIndex = value.subarray(0, -1).findIndex(byte => !ranges.some(range => rangeContains(range, byte)))
+    const offendingIndex = value
+      .subarray(0, -1)
+      .findIndex((byte) => !ranges.some((range) => rangeContains(range, byte)))
     if (offendingIndex !== -1) {
       throw new Error(
         `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
         at index ${offendingIndex} that is not within a valid range.
-        Valid ranges: ${ranges ?
-          ranges.map(range => range.toString()).join(', ') :
-          '<no ranges specified>'
-        }`)
+        Valid ranges: ${
+          ranges
+            ? ranges.map((range) => range.toString()).join(', ')
+            : '<no ranges specified>'
+        }`,
+      )
     }
   }
 }
@@ -110,7 +119,7 @@ function serializeBuffer(buf: Buffer): Buffer {
 // This needs to be tested on a real machine to determine exact behavior.
 function nullTerminatedBufferParseFactory(sizeLimit: number): ParseFunction {
   function parseNullTerminatedBuffer(buf: Buffer): [Buffer, Buffer] {
-    const i = buf.findIndex(n => n === 0)
+    const i = buf.findIndex((n) => n === 0)
     if (i === -1) {
       throw new ParseError(`null terminator not found`)
     }
@@ -159,7 +168,11 @@ export function u32(ranges: Range[]) {
   }
 }
 
-export function sizedBuffer(sizeFieldName: string, sizeOffset: number, ranges: Range[]) {
+export function sizedBuffer(
+  sizeFieldName: string,
+  sizeOffset: number,
+  ranges: Range[],
+) {
   return (value, context) => {
     assert(context.kind === 'field')
     context.metadata.fields ??= {}

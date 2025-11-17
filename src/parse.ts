@@ -46,16 +46,21 @@ class FnLookahead {
   }
 }
 
-export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: number }): CmdClassDecorator {
+export function registerMultiFn(
+  prefix: Ascii[],
+  config: { skip: number; fn: number },
+): CmdClassDecorator {
   return (value: CmdClass, context: ClassDecoratorContext) => {
     let lookahead = getFromTree(prefix) as FnLookahead
     if (!lookahead) {
       lookahead = new FnLookahead(config.skip)
     }
-    assert(lookahead.skip === config.skip,
+    assert(
+      lookahead.skip === config.skip,
       `skip value should be fixed for a given multi-function command.
       Tried to define skip value of: ${config.skip}
-      Previously defined skip value: ${lookahead.skip}`)
+      Previously defined skip value: ${lookahead.skip}`,
+    )
     lookahead.put(config.fn, value)
     addToTree(prefix, lookahead)
     context.metadata.prefix = prefix
@@ -84,7 +89,7 @@ export function parse(buf: Buffer): CmdBase[] {
     // Traverse parse tree until a leaf node is reached.
     let curNode = kPrefixTree as Node
     let i = 0
-    while(i < buf.length && Array.isArray(curNode) && buf[i] in curNode) {
+    while (i < buf.length && Array.isArray(curNode) && buf[i] in curNode) {
       curNode = curNode[buf[i]]
       i++
     }
@@ -117,4 +122,3 @@ export function parse(buf: Buffer): CmdBase[] {
   }
   return cmds
 }
-

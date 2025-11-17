@@ -7,12 +7,14 @@ import { assert } from './assert'
 
 export type CmdClass = {
   desc: string
-  new(...args: unknown[]): CmdBase
+  new (...args: unknown[]): CmdBase
   from(buf: Buffer): [CmdBase, Buffer]
 }
 
-export type CmdClassDecorator =
-  (value: CmdClass, context: ClassDecoratorContext) => (void)
+export type CmdClassDecorator = (
+  value: CmdClass,
+  context: ClassDecoratorContext,
+) => void
 
 export class CmdBase {
   static desc: string
@@ -89,4 +91,3 @@ export class CmdBase {
     return [instance, buf]
   }
 }
-

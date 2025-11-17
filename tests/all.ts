@@ -14,7 +14,6 @@ import {
   CutShape,
   DoubleWidthMode,
   DoubleHeightMode,
-
   HorizontalTab,
   SetCharacterSpacing,
   SelectPrintMode,
@@ -68,86 +67,88 @@ import {
 } from '../src/index'
 
 test('ParseError', async (t) => {
-  await t.test('unrecognized prefix', t => {
-    assert.throws(() => {
-      parse(Buffer.from([0x1b, 0x1b]))
-    }, error => {
-      return true
-    })
+  await t.test('unrecognized prefix', (t) => {
+    assert.throws(
+      () => {
+        parse(Buffer.from([0x1b, 0x1b]))
+      },
+      (error) => {
+        return true
+      },
+    )
   })
 
-  await t.test('incomplete command', t => {
-    assert.throws(() => {
-      parse(Buffer.from([0x1b]))
-    }, error => {
-      return true
-    })
+  await t.test('incomplete command', (t) => {
+    assert.throws(
+      () => {
+        parse(Buffer.from([0x1b]))
+      },
+      (error) => {
+        return true
+      },
+    )
   })
 
-  await t.test('incomplete command after complete command', t => {
-    assert.throws(() => {
-      parse(Buffer.from([0x1b, 0x40, 0x1b]))
-    }, error => {
-      return true
-    })
+  await t.test('incomplete command after complete command', (t) => {
+    assert.throws(
+      () => {
+        parse(Buffer.from([0x1b, 0x40, 0x1b]))
+      },
+      (error) => {
+        return true
+      },
+    )
   })
-
 })
 
 type TestCase = {
-  class: Function,
-  constructed?: object,
-  bytes?: Buffer,
-  checks?: object,
+  class: Function
+  constructed?: object
+  bytes?: Buffer
+  checks?: object
 }
 
 const testCases: TestCase[] = [
   {
     class: HorizontalTab,
-    bytes: Buffer.from([
-      0x09,
-    ]),
+    bytes: Buffer.from([0x09]),
   },
   {
     class: SetCharacterSpacing,
     constructed: new SetCharacterSpacing(16),
-    bytes: Buffer.from([
-      0x1b, 0x20,
-      0x10,
-    ]),
+    bytes: Buffer.from([0x1b, 0x20, 0x10]),
     checks: {
       n: 16,
-    }
+    },
   },
   {
     class: SelectPrintMode,
-    constructed: new SelectPrintMode(CharacterFont.B, EmphasizedMode.On, SimpleUnderlineMode.On, DoubleWidthMode.On, DoubleHeightMode.On),
-    bytes: Buffer.from([
-      0x1b, 0x21,
-      0b10111001,
-    ]),
+    constructed: new SelectPrintMode(
+      CharacterFont.B,
+      EmphasizedMode.On,
+      SimpleUnderlineMode.On,
+      DoubleWidthMode.On,
+      DoubleHeightMode.On,
+    ),
+    bytes: Buffer.from([0x1b, 0x21, 0b10111001]),
     checks: {
       n: 0b10111001,
-    }
+    },
   },
   {
     class: SetAbsolutePrintPosition,
     constructed: new SetAbsolutePrintPosition(0x0201),
-    bytes: Buffer.from([
-      0x1b, 0x24,
-      0x01, 0x02,
-    ]),
+    bytes: Buffer.from([0x1b, 0x24, 0x01, 0x02]),
     checks: {
       n: 0x0201,
     },
   },
   {
     class: SelectOrCancelUserDefinedCharacterSet,
-    constructed: new SelectOrCancelUserDefinedCharacterSet(UserDefinedCharacterSetSelection.Selected),
-    bytes: Buffer.from([
-      0x1b, 0x25,
-      0x01,
-    ]),
+    constructed: new SelectOrCancelUserDefinedCharacterSet(
+      UserDefinedCharacterSetSelection.Selected,
+    ),
+    bytes: Buffer.from([0x1b, 0x25, 0x01]),
     checks: {
       n: 1,
     },
@@ -159,13 +160,9 @@ const testCases: TestCase[] = [
     class: SelectBitImageMode,
     constructed: new SelectBitImageMode(
       BitImageMode.EightDotSingleDensity,
-      Buffer.from([0x05, 0x06, 0x07])),
-    bytes: Buffer.from([
-      0x1b, 0x2a,
-      0x01,
-      0x03, 0x00,
-      0x05, 0x06, 0x07,
-    ]),
+      Buffer.from([0x05, 0x06, 0x07]),
+    ),
+    bytes: Buffer.from([0x1b, 0x2a, 0x01, 0x03, 0x00, 0x05, 0x06, 0x07]),
     checks: {
       m: 1,
       n: 3,
@@ -175,39 +172,30 @@ const testCases: TestCase[] = [
   {
     class: SetUnderlineMode,
     constructed: new SetUnderlineMode(UnderlineMode.OneDotThick),
-    bytes: Buffer.from([
-      0x1b, 0x2d,
-      0x01,
-    ]),
+    bytes: Buffer.from([0x1b, 0x2d, 0x01]),
     checks: {
       n: 1,
-    }
+    },
   },
   {
     class: SelectDefaultLineSpacing,
     constructed: new SelectDefaultLineSpacing(),
-    bytes: Buffer.from([
-      0x1b, 0x32,
-    ]),
+    bytes: Buffer.from([0x1b, 0x32]),
   },
   {
     class: SetLineSpacing,
     constructed: new SetLineSpacing(1),
-    bytes: Buffer.from([
-      0x1b, 0x33,
-      0x01,
-    ]),
+    bytes: Buffer.from([0x1b, 0x33, 0x01]),
     checks: {
       n: 1,
     },
   },
   {
     class: SelectPeripheralDevice,
-    constructed: new SelectPeripheralDevice(PeripheralDeviceSelection.EnablePrinter),
-    bytes: Buffer.from([
-      0x1b, 0x3d,
-      0x01,
-    ]),
+    constructed: new SelectPeripheralDevice(
+      PeripheralDeviceSelection.EnablePrinter,
+    ),
+    bytes: Buffer.from([0x1b, 0x3d, 0x01]),
     checks: {
       n: 1,
     },
@@ -215,10 +203,7 @@ const testCases: TestCase[] = [
   {
     class: CancelUserDefinedCharacters,
     constructed: new CancelUserDefinedCharacters(32),
-    bytes: Buffer.from([
-      0x1b, 0x3f,
-      0x20,
-    ]),
+    bytes: Buffer.from([0x1b, 0x3f, 0x20]),
     checks: {
       n: 32,
     },
@@ -226,33 +211,23 @@ const testCases: TestCase[] = [
   {
     class: InitializePrinter,
     constructed: new InitializePrinter(),
-    bytes: Buffer.from([
-      0x1b, 0x40,
-    ]),
+    bytes: Buffer.from([0x1b, 0x40]),
   },
   {
     class: SetHorizontalTabPositions,
     constructed: new SetHorizontalTabPositions(8, 16, 32),
-    bytes: Buffer.from([
-      0x1b, 0x44,
-      8, 16, 32, 0,
-    ]),
+    bytes: Buffer.from([0x1b, 0x44, 8, 16, 32, 0]),
     checks: {
-      buf: Buffer.from([
-        8, 16, 32, 0,
-      ]),
+      buf: Buffer.from([8, 16, 32, 0]),
     },
   },
   {
     class: SetEmphasizedMode,
     constructed: new SetEmphasizedMode(EmphasizedMode.On),
-    bytes: Buffer.from([
-      0x1b, 0x45,
-      0x01,
-    ]),
+    bytes: Buffer.from([0x1b, 0x45, 0x01]),
     checks: {
       n: 1,
-    }
+    },
   },
   { class: SetDoubleStrikeMode },
   { class: PrintAndFeedPaper },
@@ -260,10 +235,7 @@ const testCases: TestCase[] = [
   {
     class: SelectCharacterFont,
     constructed: new SelectCharacterFont(CharacterFont.B),
-    bytes: Buffer.from([
-      0x1b, 0x4d,
-      0x01,
-    ]),
+    bytes: Buffer.from([0x1b, 0x4d, 0x01]),
     checks: {
       n: 0x01,
     },
@@ -277,10 +249,7 @@ const testCases: TestCase[] = [
   {
     class: SelectJustification,
     constructed: new SelectJustification(Justification.Center),
-    bytes: Buffer.from([
-      0x1b, 0x61,
-      0x01,
-    ]),
+    bytes: Buffer.from([0x1b, 0x61, 0x01]),
     checks: {
       n: 1,
     },
@@ -291,10 +260,7 @@ const testCases: TestCase[] = [
   {
     class: PrintAndFeedNLines,
     constructed: new PrintAndFeedNLines(1),
-    bytes: Buffer.from([
-      0x1b, 0x64,
-      0x01,
-    ]),
+    bytes: Buffer.from([0x1b, 0x64, 0x01]),
     checks: {
       n: 1,
     },
@@ -308,12 +274,7 @@ const testCases: TestCase[] = [
   { class: SetUpsideDownPrintMode },
   {
     class: SelectKanjiCharacterFont,
-    bytes: Buffer.from([
-      0x1c, 0x28, 0x41,
-      0x02, 0x00,
-      0x30,
-      0x00,
-    ]),
+    bytes: Buffer.from([0x1c, 0x28, 0x41, 0x02, 0x00, 0x30, 0x00]),
     checks: {
       p: 2,
       fn: 0x30,
@@ -323,12 +284,7 @@ const testCases: TestCase[] = [
   {
     class: CancelSetValuesForTopOrBottomLogoPrinting,
     bytes: Buffer.from([
-      0x1c, 0x28, 0x45,
-      0x06, 0x00,
-      0x3c,
-      0x02,
-      0x30,
-      0x43, 0x4c, 0x52,
+      0x1c, 0x28, 0x45, 0x06, 0x00, 0x3c, 0x02, 0x30, 0x43, 0x4c, 0x52,
     ]),
     checks: {
       p: 6,
@@ -338,35 +294,22 @@ const testCases: TestCase[] = [
       d1: 0x43,
       d2: 0x4c,
       d3: 0x52,
-    }
+    },
   },
   {
     class: TransmitSetValuesForTopOrBottomLogoPrinting,
-    bytes: Buffer.from([
-      0x1c, 0x28, 0x45,
-      0x03, 0x00,
-      0x3d,
-      0x02,
-      0x30,
-    ]),
+    bytes: Buffer.from([0x1c, 0x28, 0x45, 0x03, 0x00, 0x3d, 0x02, 0x30]),
     checks: {
       p: 3,
       fn: 0x3d,
       m: 2,
       c: 0x30,
-    }
+    },
   },
   {
     class: SetTopLogoPrinting,
     bytes: Buffer.from([
-      0x1c, 0x28, 0x45,
-      0x06, 0x00,
-      0x3e,
-      0x02,
-      0x20,
-      0x20,
-      0x30,
-      0x00,
+      0x1c, 0x28, 0x45, 0x06, 0x00, 0x3e, 0x02, 0x20, 0x20, 0x30, 0x00,
     ]),
     checks: {
       p: 6,
@@ -376,18 +319,12 @@ const testCases: TestCase[] = [
       kc2: 0x20,
       a: 0x30,
       n: 0x00,
-    }
+    },
   },
   {
     class: SetBottomLogoPrinting,
     bytes: Buffer.from([
-      0x1c, 0x28, 0x45,
-      0x05, 0x00,
-      0x3f,
-      0x02,
-      0x20,
-      0x20,
-      0x30,
+      0x1c, 0x28, 0x45, 0x05, 0x00, 0x3f, 0x02, 0x20, 0x20, 0x30,
     ]),
     checks: {
       p: 5,
@@ -396,72 +333,56 @@ const testCases: TestCase[] = [
       kc1: 0x20,
       kc2: 0x20,
       a: 0x30,
-    }
+    },
   },
   {
     class: MakeExtendedSettingsForTopOrBottomLogoPrinting,
     bytes: Buffer.from([
-      0x1c, 0x28, 0x45,
-      0x06, 0x00,
-      0x40,
-      0x02,
-      0x30, 0x31,
-      0x40, 0x30,
+      0x1c, 0x28, 0x45, 0x06, 0x00, 0x40, 0x02, 0x30, 0x31, 0x40, 0x30,
     ]),
     checks: {
       p: 6,
       fn: 0x40,
       m: 2,
       settings: Buffer.from([0x30, 0x31, 0x40, 0x30]),
-    }
+    },
   },
   {
     class: EnableOrDisableTopOrBottomLogoPrinting,
-    bytes: Buffer.from([
-      0x1c, 0x28, 0x45,
-      0x04, 0x00,
-      0x41,
-      0x02,
-      0x30,
-      0x30,
-    ]),
+    bytes: Buffer.from([0x1c, 0x28, 0x45, 0x04, 0x00, 0x41, 0x02, 0x30, 0x30]),
     checks: {
       p: 4,
       fn: 0x41,
       m: 2,
       a: 0x30,
       n: 0x30,
-    }
+    },
   },
   {
     class: SelectCharacterSize,
     constructed: new SelectCharacterSize({ width: 2, height: 3 }),
-    bytes: Buffer.from([
-      0x1d, 0x21,
-      0x12,
-    ]),
+    bytes: Buffer.from([0x1d, 0x21, 0x12]),
     checks: {
       n: 18,
     },
   },
   {
     class: SetWhiteAndBlackReversePrintMode,
-    constructed: new SetWhiteAndBlackReversePrintMode(WhiteAndBlackReversePrintMode.On),
-    bytes: Buffer.from([
-      0x1d, 0x42,
-      0x01,
-    ]),
+    constructed: new SetWhiteAndBlackReversePrintMode(
+      WhiteAndBlackReversePrintMode.On,
+    ),
+    bytes: Buffer.from([0x1d, 0x42, 0x01]),
     checks: {
       n: 1,
     },
   },
   {
     class: SelectCutModeAndCutPaper,
-    constructed: new SelectCutModeAndCutPaper(CutMode.CutPaper, CutShape.PartialCut),
-    bytes: Buffer.from([
-      0x1d, 0x56,
-      0x01,
-    ]),
+    constructed: new SelectCutModeAndCutPaper(
+      CutMode.CutPaper,
+      CutShape.PartialCut,
+    ),
+    bytes: Buffer.from([0x1d, 0x56, 0x01]),
     checks: {
       m: 1,
     },
@@ -469,7 +390,7 @@ const testCases: TestCase[] = [
 ]
 
 for (const testCase of testCases) {
-  test(testCase.class.name, t => {
+  test(testCase.class.name, (t) => {
     if (!testCase.bytes) {
       t.skip()
       return
@@ -479,10 +400,18 @@ for (const testCase of testCases) {
     const cmd = cmds[0]
     assert(cmd instanceof testCase.class)
     if (testCase.constructed) {
-      assert.deepStrictEqual(cmd, testCase.constructed, 'parsed (actual) differs from constructed (expected)')
+      assert.deepStrictEqual(
+        cmd,
+        testCase.constructed,
+        'parsed (actual) differs from constructed (expected)',
+      )
     }
-    for (const [ key, value ] of Object.entries(testCase.checks ?? {})) {
-      assert.deepStrictEqual(cmd[key], value, `member ${key} is ${cmd[key]}, but expected ${value}`)
+    for (const [key, value] of Object.entries(testCase.checks ?? {})) {
+      assert.deepStrictEqual(
+        cmd[key],
+        value,
+        `member ${key} is ${cmd[key]}, but expected ${value}`,
+      )
     }
     const buf = cmd.serialize()
     assert.deepStrictEqual(buf, testCase.bytes)

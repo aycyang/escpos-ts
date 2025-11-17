@@ -5,7 +5,6 @@ import { u8, u16, sizedBuffer, nullTerminatedBuffer } from './fieldDecorators'
 export { parse } from './parse'
 import { CmdBase } from './cmd'
 
-
 // --- ENUMS ---
 
 export enum PeripheralDeviceSelection {
@@ -13,7 +12,10 @@ export enum PeripheralDeviceSelection {
   DisablePrinter = 'PeripheralDeviceSelection.DisablePrinter',
 }
 
-const PeripheralDeviceSelectionToNumber: Record<PeripheralDeviceSelection, number> = {
+const PeripheralDeviceSelectionToNumber: Record<
+  PeripheralDeviceSelection,
+  number
+> = {
   [PeripheralDeviceSelection.EnablePrinter]: 1,
   [PeripheralDeviceSelection.DisablePrinter]: 2,
 }
@@ -23,7 +25,10 @@ export enum UserDefinedCharacterSetSelection {
   Selected = 'UserDefinedCharacterSetSelection.Selected',
 }
 
-const UserDefinedCharacterSetSelectionToNumber: Record<UserDefinedCharacterSetSelection, number> = {
+const UserDefinedCharacterSetSelectionToNumber: Record<
+  UserDefinedCharacterSetSelection,
+  number
+> = {
   [UserDefinedCharacterSetSelection.Canceled]: 0,
   [UserDefinedCharacterSetSelection.Selected]: 1,
 }
@@ -89,7 +94,10 @@ export enum WhiteAndBlackReversePrintMode {
   On = 'WhiteAndBlackReversePrintMode.On',
 }
 
-const WhiteAndBlackReversePrintModeToNumber: Record<WhiteAndBlackReversePrintMode, number> = {
+const WhiteAndBlackReversePrintModeToNumber: Record<
+  WhiteAndBlackReversePrintMode,
+  number
+> = {
   [WhiteAndBlackReversePrintMode.Off]: 0,
   [WhiteAndBlackReversePrintMode.On]: 1,
 }
@@ -141,9 +149,7 @@ const DoubleHeightModeToNumber: Record<DoubleHeightMode, number> = {
   [DoubleHeightMode.On]: 1,
 }
 
-
 // --- COMMANDS ---
-
 
 @register(['HT'])
 export class HorizontalTab extends CmdBase {
@@ -177,7 +183,13 @@ export class SelectPrintMode extends CmdBase {
   @u8([[0, 255]])
   n: number
 
-  constructor(font: CharacterFont, em: EmphasizedMode, un: SimpleUnderlineMode, w2: DoubleWidthMode, h2: DoubleHeightMode) {
+  constructor(
+    font: CharacterFont,
+    em: EmphasizedMode,
+    un: SimpleUnderlineMode,
+    w2: DoubleWidthMode,
+    h2: DoubleHeightMode,
+  ) {
     super()
     this.n = 0
     this.n |= CharacterFontToNumber[font] & 1
@@ -267,7 +279,10 @@ export class SelectBitImageMode extends CmdBase {
 export class SetUnderlineMode extends CmdBase {
   static override desc: string = 'Turn underline mode on/off'
 
-  @u8([[0, 2], [48, 50]])
+  @u8([
+    [0, 2],
+    [48, 50],
+  ])
   n: number
 
   constructor(mode: UnderlineMode) {
@@ -408,7 +423,10 @@ export class SetRelativePrintPosition extends CmdBase {}
 export class SelectJustification extends CmdBase {
   static override desc: string = 'Select justification'
 
-  @u8([[0, 2], [48, 50]])
+  @u8([
+    [0, 2],
+    [48, 50],
+  ])
   n: number
 
   constructor(justification: Justification) {
@@ -469,7 +487,8 @@ export class SelectKanjiCharacterFont extends CmdBase {
  */
 @registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 60 })
 export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
-  static override desc: string = 'Cancel set values for top/bottom logo printing'
+  static override desc: string =
+    'Cancel set values for top/bottom logo printing'
 
   @u16([6])
   p: number
@@ -498,7 +517,8 @@ export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
  */
 @registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 61 })
 export class TransmitSetValuesForTopOrBottomLogoPrinting extends CmdBase {
-  static override desc: string = 'Transmit set values for top/bottom logo printing'
+  static override desc: string =
+    'Transmit set values for top/bottom logo printing'
 
   @u16([3])
   p: number
@@ -575,7 +595,8 @@ export class SetBottomLogoPrinting extends CmdBase {
  */
 @registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 64 })
 export class MakeExtendedSettingsForTopOrBottomLogoPrinting extends CmdBase {
-  static override desc: string = 'Make extended settings for top/bottom logo printing'
+  static override desc: string =
+    'Make extended settings for top/bottom logo printing'
 
   @u16([[4, 12]])
   p: number
@@ -634,7 +655,7 @@ export class SelectCharacterSize extends CmdBase {
    * should be numbers in the range 1-8. For example, a value of 2 means each
    * character will be twice as wide.
    */
-  constructor(config: { width: number, height: number }) {
+  constructor(config: { width: number; height: number }) {
     // TODO should validate these inputs. maybe could get this for free if a 'u4'
     // type were supported
     const upper = (config.width - 1) & 0b0111

@@ -1,6 +1,6 @@
 # ESC/POS parser and generator Typescript library
 
-*Not production-ready*
+_Not production-ready_
 
 ![Plot of ESC/POS commands implemented over time](progress.png)
 
