@@ -1,5 +1,4 @@
 import { Ascii, asciiToByte } from './ascii'
-import { kRegisterMetadataKey, kPrefixMetadataKey } from './symbols'
 import { CmdBase } from './cmd'
 import { byteToHex } from './util'
 import { assert } from './assert'

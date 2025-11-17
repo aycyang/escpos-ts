@@ -3,7 +3,6 @@ import { Buffer } from 'buffer'
 import '@tsmetadata/polyfill'
 import { asciiToByte } from './ascii'
 import { bufToAbbrevString } from './util'
-import { kRangeMetadataKey, kSerialMetadataKey, kPrefixMetadataKey, kRegisterMetadataKey } from './symbols'
 import { ParseError } from './parse'
 import { assert } from './assert'
 

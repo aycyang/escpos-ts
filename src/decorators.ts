@@ -1,27 +1,41 @@
-import { kSerialMetadataKey, kRegisterMetadataKey, kRangeMetadataKey } from './symbols'
+import { Buffer } from 'buffer'
 import { assert } from './assert'
 
-type Range2 = number | [ number, number ]
+type Range = number | [ number, number ]
 
-function rangeContains(range: Range2, value: number) {
+function rangeContains(range: Range, value: number) {
   if (Array.isArray(range)) {
     return range[0] <= value && value <= range[1]
   }
   return value === range
 }
 
-class Range {
-  min: number
-  max: number
-  constructor(min: number, max: number) {
-    this.min = min
-    this.max = max
+function throwIfNumberNotInRanges(ranges: Range[]) {
+  return (name, value) => {
+    const cond = ranges.some(range => rangeContains(range, value))
+    if (!cond) {
+      throw new Error(
+        `Parsed value ${value} for field '${name}' is not within a valid range.
+        Valid ranges: ${ranges ?
+          ranges.map(range => range.toString()).join(', ') :
+          '<no ranges specified>'
+        }`)
+    }
   }
-  contains(value: number) {
-    return this.min <= value && value <= this.max
-  }
-  toString(): string {
-    return `${this.min}-${this.max}`
+}
+
+function throwIfBufElementsNotInRanges(ranges: Range[]) {
+  return (name, value: Buffer) => {
+    const offendingIndex = value.findIndex(byte => !ranges.some(range => rangeContains(range, byte)))
+    if (offendingIndex !== -1) {
+      throw new Error(
+        `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
+        at index ${offendingIndex} that is not within a valid range.
+        Valid ranges: ${ranges ?
+          ranges.map(range => range.toString()).join(', ') :
+          '<no ranges specified>'
+        }`)
+    }
   }
 }
 
@@ -72,36 +86,7 @@ function serializeBuf(buf: Buffer): Buffer {
   return buf
 }
 
-function throwIfNumberNotInRanges(ranges: Range2[]) {
-  return (name, value) => {
-    const cond = ranges.some(range => rangeContains(range, value))
-    if (!cond) {
-      throw new Error(
-        `Parsed value ${value} for field '${name}' is not within a valid range.
-        Valid ranges: ${ranges ?
-          ranges.map(range => range.toString()).join(', ') :
-          '<no ranges specified>'
-        }`)
-    }
-  }
-}
-
-function throwIfBufElementsNotInRanges(ranges: Range2[]) {
-  return (name, value: Buffer) => {
-    const offendingIndex = value.findIndex(byte => !ranges.some(range => rangeContains(range, byte)))
-    if (offendingIndex !== -1) {
-      throw new Error(
-        `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
-        at index ${offendingIndex} that is not within a valid range.
-        Valid ranges: ${ranges ?
-          ranges.map(range => range.toString()).join(', ') :
-          '<no ranges specified>'
-        }`)
-    }
-  }
-}
-
-export function u8(ranges: Range2[]) {
+export function u8(ranges: Range[]) {
   return (value, context) => {
     assert(context.kind === 'field')
     context.metadata.fields ??= {}
@@ -113,7 +98,7 @@ export function u8(ranges: Range2[]) {
   }
 }
 
-export function u16(ranges: Range2[]) {
+export function u16(ranges: Range[]) {
   return (value, context) => {
     assert(context.kind === 'field')
     context.metadata.fields ??= {}
@@ -125,7 +110,7 @@ export function u16(ranges: Range2[]) {
   }
 }
 
-export function u32(ranges: Range2[]) {
+export function u32(ranges: Range[]) {
   return (value, context) => {
     assert(context.kind === 'field')
     context.metadata.fields ??= {}
@@ -137,7 +122,7 @@ export function u32(ranges: Range2[]) {
   }
 }
 
-export function sizedBuffer(sizeFieldName: string, sizeOffset: number, ranges: Range2[]) {
+export function sizedBuffer(sizeFieldName: string, sizeOffset: number, ranges: Range[]) {
   return (value, context) => {
     assert(context.kind === 'field')
     context.metadata.fields ??= {}
@@ -146,31 +131,5 @@ export function sizedBuffer(sizeFieldName: string, sizeOffset: number, ranges: R
       serialize: serializeBuf,
       validate: throwIfBufElementsNotInRanges(ranges),
     }
-  }
-}
-
-
-export function serial(arg: SerialFormat) {
-  return (value, context) => {
-    assert(context.kind === 'field')
-    // Assumption: at least one range was defined, so field metadata should already exist
-    assert(context.metadata.fields, 'Please define at least one range')
-    assert(context.metadata.fields[context.name], 'Please define at least one range')
-    assert(context.metadata.fields[context.name].ranges, 'Please define at least one range')
-    assert(context.metadata.fields[context.name].ranges.length > 0, 'Please define at least one range')
-    context.metadata.fields[context.name].serial = arg
-  }
-}
-
-export function range(min: number, max?: number) {
-  if (max === undefined) {
-    max = min
-  }
-  return (value, context) => {
-    assert(context.kind === 'field')
-    context.metadata.fields ??= {}
-    context.metadata.fields[context.name] ??= {}
-    context.metadata.fields[context.name].ranges ??= []
-    context.metadata.fields[context.name].ranges.push(new Range(min, max))
   }
 }
