@@ -11,6 +11,9 @@ export type CmdClass = {
   from(buf: Buffer): [CmdBase, Buffer]
 }
 
+export type CmdClassDecorator =
+  (value: CmdClass, context: ClassDecoratorContext) => (void)
+
 export class CmdBase {
   static desc: string
 

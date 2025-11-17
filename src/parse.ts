@@ -1,5 +1,5 @@
 import { Ascii, asciiToByte } from './ascii'
-import { CmdClass, CmdBase } from './cmd'
+import { CmdClass, CmdClassDecorator, CmdBase } from './cmd'
 import { byteToHex } from './util'
 import { assert } from './assert'
 
@@ -9,30 +9,29 @@ const kPrefixTree: Node[] = []
 export class ParseError extends Error {}
 
 function getFromTree(prefix: Ascii[]): Node {
-  let cur: Node = kPrefixTree
+  let curNode: Node = kPrefixTree
   let i = 0
   while (i < prefix.length) {
+    if (!Array.isArray(curNode)) return undefined
     const b = asciiToByte(prefix[i])
-    if (!(b in cur)) {
-      return undefined
-    }
-    cur = cur[b]
+    curNode = curNode[b]
     i++
   }
-  return cur
+  return curNode
 }
 
-function addToTree(prefix: Ascii[], target) {
-  let cur: Node = kPrefixTree
+function addToTree(prefix: Ascii[], target: Node) {
+  let curNode: Node = kPrefixTree
   let i = 0
   while (i < prefix.length - 1) {
+    if (!Array.isArray(curNode)) return
     const b = asciiToByte(prefix[i])
-    cur[b] ??= []
-    cur = cur[b]
+    curNode[b] ??= []
+    curNode = curNode[b]
     i++
   }
   const b = asciiToByte(prefix[i])
-  cur[b] = target
+  curNode[b] = target
 }
 
 class FnLookahead {
@@ -42,15 +41,13 @@ class FnLookahead {
     this.fns = []
     this.skip = skip
   }
-  put(fn: number, ctor) {
+  put(fn: number, ctor: CmdClass) {
     this.fns[fn] = ctor
   }
 }
 
-export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: number }): Decorator {
-  return (value, context) => {
-    assert(context.kind === 'class')
-    assert(value)
+export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: number }): CmdClassDecorator {
+  return (value: CmdClass, context: ClassDecoratorContext) => {
     let lookahead = getFromTree(prefix) as FnLookahead
     if (!lookahead) {
       lookahead = new FnLookahead(config.skip)
@@ -70,10 +67,8 @@ export function registerMultiFn(prefix: Ascii[], config: { skip: number, fn: num
  * node is set to the constructor of the class decorated by the returned
  * decorator.
  */
-export function register(prefix: Ascii[]): Decorator {
-  return (value, context) => {
-    assert(context.kind === 'class')
-    assert(value)
+export function register(prefix: Ascii[]): CmdClassDecorator {
+  return (value: CmdClass, context: ClassDecoratorContext) => {
     addToTree(prefix, value)
     context.metadata.prefix = prefix
   }
@@ -89,7 +84,7 @@ export function parse(buf: Buffer): CmdBase[] {
     // Traverse parse tree until a leaf node is reached.
     let curNode = kPrefixTree as Node
     let i = 0
-    while(i < buf.length && buf[i] in curNode) {
+    while(i < buf.length && Array.isArray(curNode) && buf[i] in curNode) {
       curNode = curNode[buf[i]]
       i++
     }
@@ -98,7 +93,7 @@ export function parse(buf: Buffer): CmdBase[] {
     // parse.
     if (Array.isArray(curNode)) {
       if (i >= buf.length) {
-        throw new ParseError(`unexpected end of buffer: ${buf}`)
+        throw new ParseError(`unexpected end of buffer: ${buf.toString()}`)
       }
       throw new ParseError(`unrecognized token: 0x${byteToHex(buf[i])}`)
     }
