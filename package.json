@@ -9,7 +9,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "tsx tests/all.ts"
+    "test": "tsx tests/all.ts",
+    "prepare": "husky install"
   },
   "author": "",
   "license": "BSD-3-Clause",
@@ -17,6 +18,8 @@
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.9.1",
     "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4"
@@ -30,5 +33,8 @@
     "semi": false,
     "singleQuote": true,
     "quoteProps": "consistent"
+  },
+  "lint-staged": {
+    "*.{ts,md}": "prettier --write"
   }
 }
