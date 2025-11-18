@@ -4,12 +4,15 @@ export function byteToHex(b: number): string {
   return upper.toString(16) + lower.toString(16)
 }
 
+function toHexList(nums: number[]): string {
+  return nums.map(byteToHex).join(' ')
+}
+
 export function bufToAbbrevString(buf: Buffer) {
   if (buf.length <= 8) {
-    return `[ ${buf.join(',')} ]`
+    return `[ ${toHexList([...buf])} ]`
   }
-  const start = [buf[0], buf[1], buf[2]].map(byteToHex).join(' ')
-  const endBuf = buf.subarray(-3)
-  const end = [endBuf[0], endBuf[1], endBuf[2]].map(byteToHex).join(' ')
+  const start = toHexList([...buf.subarray(0, 3)])
+  const end = toHexList([...buf.subarray(-3)])
   return `[ ${start} ... (${buf.length - 6} more) ... ${end} ]`
 }

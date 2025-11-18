@@ -35,6 +35,7 @@
     "quoteProps": "consistent"
   },
   "lint-staged": {
+    "*.ts": "eslint --cache --fix src tests",
     "*.{ts,md}": "prettier --write"
   }
 }

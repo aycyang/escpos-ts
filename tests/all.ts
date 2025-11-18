@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
+  CmdClass,
   PeripheralDeviceSelection,
   UserDefinedCharacterSetSelection,
   BitImageMode,
@@ -66,43 +67,37 @@ import {
   parse,
 } from '../src/index'
 
-test('ParseError', async (t) => {
-  await t.test('unrecognized prefix', (t) => {
+void test('ParseError', async (t) => {
+  await t.test('unrecognized prefix', () => {
     assert.throws(
       () => {
         parse(Buffer.from([0x1b, 0x1b]))
       },
-      (error) => {
-        return true
-      },
+      () => true,
     )
   })
 
-  await t.test('incomplete command', (t) => {
+  await t.test('incomplete command', () => {
     assert.throws(
       () => {
         parse(Buffer.from([0x1b]))
       },
-      (error) => {
-        return true
-      },
+      () => true,
     )
   })
 
-  await t.test('incomplete command after complete command', (t) => {
+  await t.test('incomplete command after complete command', () => {
     assert.throws(
       () => {
         parse(Buffer.from([0x1b, 0x40, 0x1b]))
       },
-      (error) => {
-        return true
-      },
+      () => true,
     )
   })
 })
 
 type TestCase = {
-  class: Function
+  class: CmdClass
   constructed?: object
   bytes?: Buffer
   checks?: object
@@ -390,7 +385,7 @@ const testCases: TestCase[] = [
 ]
 
 for (const testCase of testCases) {
-  test(testCase.class.name, (t) => {
+  void test(testCase.class.name, (t) => {
     if (!testCase.bytes) {
       t.skip()
       return
@@ -398,6 +393,7 @@ for (const testCase of testCases) {
     const cmds = parse(testCase.bytes)
     assert.strictEqual(cmds.length, 1)
     const cmd = cmds[0]
+    console.log(cmd.toString())
     assert(cmd instanceof testCase.class)
     if (testCase.constructed) {
       assert.deepStrictEqual(

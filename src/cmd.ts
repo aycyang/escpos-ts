@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer'
 
 import '@tsmetadata/polyfill'
+import { CmdField, FieldMetadata, ParseFunction } from './fieldDecorators'
 import { Ascii, asciiToByte } from './ascii'
 import { bufToAbbrevString } from './util'
 import { assert } from './assert'
@@ -21,12 +22,10 @@ export class CmdBase {
 
   toString(): string {
     const cmdClass = this.constructor as CmdClass
-    const fields = Object.keys(this)
     const fieldsAndValues = []
-    for (const name of fields) {
-      const value = this[name]
-      let valueString = value.toString()
-      if (value.length) {
+    for (const [name, value] of Object.entries(this)) {
+      let valueString: string = (value as number | Buffer).toString()
+      if (Buffer.isBuffer(value)) {
         valueString = bufToAbbrevString(value)
       }
       fieldsAndValues.push(`${name}=${valueString}`)
@@ -41,8 +40,8 @@ export class CmdBase {
     assert(metadata)
     if (!metadata.fields) return
     for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields)) {
-      const value = this[fieldName]
-      fieldMetadata.validate(fieldName, value)
+      const value = this[fieldName] as CmdField
+      ;(fieldMetadata as FieldMetadata).validate(fieldName, value)
     }
   }
 
@@ -53,8 +52,12 @@ export class CmdBase {
     const bytes = prefix.map(asciiToByte)
     if (!metadata.fields) return Buffer.from(bytes)
     for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields)) {
-      const value = this[fieldName]
-      bytes.push(...fieldMetadata.serialize(value))
+      const fieldValue = this[fieldName] as CmdField
+      assert(
+        fieldValue !== undefined,
+        `${this.constructor.name}.${fieldName} has metadata but is undefined`,
+      )
+      bytes.push(...(fieldMetadata as FieldMetadata).serialize(fieldValue))
     }
     return Buffer.from(bytes)
   }
@@ -76,12 +79,14 @@ export class CmdBase {
     // because subclasses may define arbitrary constructors which cannot be
     // handled generically. To achieve this goal, `Object.create()` is used
     // here.
-    const instance = Object.create(this.prototype)
+    const instance = Object.create(this.prototype) as CmdBase
     if (!metadata.fields) return [instance, buf]
     for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields)) {
-      let parse = fieldMetadata.parse
-      if (fieldMetadata.parseFactory) {
-        parse = fieldMetadata.parseFactory.bind(instance)
+      let parse = (fieldMetadata as FieldMetadata).parse
+      if ((fieldMetadata as FieldMetadata).parseMethod) {
+        parse = (fieldMetadata as FieldMetadata).parseMethod.bind(
+          instance,
+        ) as ParseFunction
       }
       const [value, subarray] = parse(buf)
       instance[fieldName] = value

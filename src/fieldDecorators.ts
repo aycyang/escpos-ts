@@ -1,20 +1,25 @@
 import { Buffer } from 'buffer'
+import { CmdBase } from './cmd'
 import { ParseError } from './parse'
 import { assert } from './assert'
 
+type ClassFieldDecorator = (
+  value: undefined,
+  context: ClassFieldDecoratorContext,
+) => void
+
 type Range = number | [number, number]
 
-function rangeContains(range: Range, value: number) {
+function rangeContains(range: Range, value: number): boolean {
   if (Array.isArray(range)) {
     return range[0] <= value && value <= range[1]
   }
   return value === range
 }
 
-function throwIfNumberNotInRanges(ranges: Range[]) {
-  return (name, value) => {
-    const cond = ranges.some((range) => rangeContains(range, value))
-    if (!cond) {
+function throwIfNumberNotInRanges(ranges: Range[]): ValidateFunction {
+  return (name: string, value: number) => {
+    if (!ranges.some((range) => rangeContains(range, value))) {
       throw new Error(
         `Parsed value ${value} for field '${name}' is not within a valid range.
         Valid ranges: ${
@@ -27,8 +32,8 @@ function throwIfNumberNotInRanges(ranges: Range[]) {
   }
 }
 
-function throwIfBufElementsNotInRanges(ranges: Range[]) {
-  return (name, value: Buffer) => {
+function throwIfBufElementsNotInRanges(ranges: Range[]): ValidateFunction {
+  return (name: string, value: Buffer) => {
     const offendingIndex = value.findIndex(
       (byte) => !ranges.some((range) => rangeContains(range, byte)),
     )
@@ -46,8 +51,10 @@ function throwIfBufElementsNotInRanges(ranges: Range[]) {
   }
 }
 
-function throwIfNullTerminatedBufferElementsNotInRanges(ranges: Range[]) {
-  return (name, value: Buffer) => {
+function throwIfNullTerminatedBufferElementsNotInRanges(
+  ranges: Range[],
+): ValidateFunction {
+  return (name: string, value: Buffer) => {
     const offendingIndex = value
       .subarray(0, -1)
       .findIndex((byte) => !ranges.some((range) => rangeContains(range, byte)))
@@ -95,12 +102,25 @@ function serializeU32(n: number): Buffer {
   return buf
 }
 
-type ParseFunction = (Buffer) => [number | Buffer, Buffer]
+export type CmdField = number | Buffer
+export type ParseMethod = (this: CmdBase, buf: Buffer) => [CmdField, Buffer]
+export type ParseFunction = (buf: Buffer) => [CmdField, Buffer]
+export type ParseMethodFactory = (...args: unknown[]) => ParseMethod
+export type SerializeFunction = (value: CmdField) => Buffer
+export type ValidateFunction = (name: string, value: CmdField) => void
+export type FieldMetadata = {
+  parse?: ParseFunction
+  parseMethod?: ParseMethod
+  serialize: SerializeFunction
+  validate: ValidateFunction
+}
 
-function sizedBufferParseFactory(name: string, offset: number): ParseFunction {
+function sizedBufferParseFactory(name: string, offset: number): ParseMethod {
   // Caller should bind itself as this.
-  function parseSizedBuffer(buf: Buffer): [Buffer, Buffer] {
-    const size = this[name] + offset
+  function parseSizedBuffer(this: CmdBase, buf: Buffer): [Buffer, Buffer] {
+    const fieldValue: number = this[name] as number
+    assert(typeof fieldValue === 'number')
+    const size: number = fieldValue + offset
     return [buf.subarray(0, size), buf.subarray(size)]
   }
   return parseSizedBuffer
@@ -132,9 +152,8 @@ function nullTerminatedBufferParseFactory(sizeLimit: number): ParseFunction {
   return parseNullTerminatedBuffer
 }
 
-export function u8(ranges: Range[]) {
-  return (value, context) => {
-    assert(context.kind === 'field')
+export function u8(ranges: Range[]): ClassFieldDecorator {
+  return (_, context) => {
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
       parse: parseU8,
@@ -144,9 +163,8 @@ export function u8(ranges: Range[]) {
   }
 }
 
-export function u16(ranges: Range[]) {
-  return (value, context) => {
-    assert(context.kind === 'field')
+export function u16(ranges: Range[]): ClassFieldDecorator {
+  return (_, context) => {
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
       parse: parseU16,
@@ -156,9 +174,8 @@ export function u16(ranges: Range[]) {
   }
 }
 
-export function u32(ranges: Range[]) {
-  return (value, context) => {
-    assert(context.kind === 'field')
+export function u32(ranges: Range[]): ClassFieldDecorator {
+  return (_, context) => {
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
       parse: parseU32,
@@ -172,24 +189,25 @@ export function sizedBuffer(
   sizeFieldName: string,
   sizeOffset: number,
   ranges: Range[],
-) {
-  return (value, context) => {
-    assert(context.kind === 'field')
+): ClassFieldDecorator {
+  return (_, context) => {
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
-      parseFactory: sizedBufferParseFactory(sizeFieldName, sizeOffset),
+      parseMethod: sizedBufferParseFactory(sizeFieldName, sizeOffset),
       serialize: serializeBuffer,
       validate: throwIfBufElementsNotInRanges(ranges),
     }
   }
 }
 
-export function nullTerminatedBuffer(ranges: Range[], sizeLimit: number) {
-  return (value, context) => {
-    assert(context.kind === 'field')
+export function nullTerminatedBuffer(
+  ranges: Range[],
+  sizeLimit: number,
+): ClassFieldDecorator {
+  return (_, context) => {
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
-      parseFactory: nullTerminatedBufferParseFactory(sizeLimit),
+      parseMethod: nullTerminatedBufferParseFactory(sizeLimit),
       serialize: serializeBuffer,
       validate: throwIfNullTerminatedBufferElementsNotInRanges(ranges),
     }

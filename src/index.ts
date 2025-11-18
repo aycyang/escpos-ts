@@ -2,8 +2,10 @@ import { Buffer } from 'buffer'
 
 import { register, registerMultiFn } from './parse'
 import { u8, u16, sizedBuffer, nullTerminatedBuffer } from './fieldDecorators'
-export { parse } from './parse'
 import { CmdBase } from './cmd'
+
+export { parse } from './parse'
+export type { CmdClass } from './cmd'
 
 // --- ENUMS ---
 
