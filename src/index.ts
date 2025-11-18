@@ -9,6 +9,26 @@ export type { CmdClass } from './cmd'
 
 // --- ENUMS ---
 
+export enum BuzzerSoundPattern {
+  A = 'BuzzerSoundPattern.A',
+  B = 'BuzzerSoundPattern.B',
+  C = 'BuzzerSoundPattern.C',
+  D = 'BuzzerSoundPattern.D',
+  E = 'BuzzerSoundPattern.E',
+  Error = 'BuzzerSoundPattern.Error',
+  PaperEnd = 'BuzzerSoundPattern.PaperEnd',
+}
+
+const BuzzerSoundPatternToNumber: Record<BuzzerSoundPattern, number> = {
+  [BuzzerSoundPattern.A]: 1,
+  [BuzzerSoundPattern.B]: 2,
+  [BuzzerSoundPattern.C]: 3,
+  [BuzzerSoundPattern.D]: 4,
+  [BuzzerSoundPattern.E]: 5,
+  [BuzzerSoundPattern.Error]: 6,
+  [BuzzerSoundPattern.PaperEnd]: 7,
+}
+
 export enum PeripheralDeviceSelection {
   EnablePrinter = 'PeripheralDeviceSelection.EnablePrinter',
   DisablePrinter = 'PeripheralDeviceSelection.DisablePrinter',
@@ -239,18 +259,38 @@ export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ampersand.html
+ * TODO this one's hard
  */
 export class DefineUserDefinedCharacters extends CmdBase {}
 
 /**
- * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lparen_ca.html
- */
-export class ControlBeeperTones extends CmdBase {}
-
-/**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lparen_ca_fn97.html
  */
-export class ModelSpecificBuzzerControl extends CmdBase {}
+@registerMultiFn(['ESC', '(', 'A'], { skip: 2, fn: 97 })
+export class ModelSpecificBuzzerControl extends CmdBase {
+  static override desc: string = 'Model specific buzzer control (fn=97)'
+
+  @u16([3])
+  p: number
+
+  @u8([97])
+  fn: number
+
+  @u8([[1, 7]])
+  n: number
+
+  @u8([[0, 255]])
+  c: number
+
+  constructor(pattern: BuzzerSoundPattern, repeat: number) {
+    super()
+    this.p = 3
+    this.fn = 97
+    this.n = BuzzerSoundPatternToNumber[pattern]
+    this.c = repeat
+    this.validate()
+  }
+}
 
 @register(['ESC', '*'])
 export class SelectBitImageMode extends CmdBase {

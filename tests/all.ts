@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
+  BuzzerSoundPattern,
   CmdClass,
   PeripheralDeviceSelection,
   UserDefinedCharacterSetSelection,
@@ -21,7 +22,6 @@ import {
   SetAbsolutePrintPosition,
   SelectOrCancelUserDefinedCharacterSet,
   DefineUserDefinedCharacters,
-  ControlBeeperTones,
   ModelSpecificBuzzerControl,
   SelectBitImageMode,
   SetUnderlineMode,
@@ -149,8 +149,17 @@ const testCases: TestCase[] = [
     },
   },
   { class: DefineUserDefinedCharacters },
-  { class: ControlBeeperTones },
-  { class: ModelSpecificBuzzerControl },
+  {
+    class: ModelSpecificBuzzerControl,
+    constructed: new ModelSpecificBuzzerControl(BuzzerSoundPattern.A, 2),
+    bytes: Buffer.from([0x1b, 0x28, 0x41, 0x03, 0x00, 0x61, 0x01, 0x02]),
+    checks: {
+      p: 3,
+      fn: 97,
+      n: 1,
+      c: 2,
+    },
+  },
   {
     class: SelectBitImageMode,
     constructed: new SelectBitImageMode(
