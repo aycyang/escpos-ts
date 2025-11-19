@@ -8,6 +8,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "lint": "npx eslint --cache --fix src tests",
     "build": "tsc",
     "test": "tsx tests/all.ts",
     "prepare": "husky install"
