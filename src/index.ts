@@ -276,7 +276,9 @@ export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ampersand.html
  * TODO this one's hard
  */
-export class DefineUserDefinedCharacters extends CmdBase {}
+export class DefineUserDefinedCharacters extends CmdBase {
+  static override desc: string = 'Define user-defined characters'
+}
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lparen_ca_fn97.html
@@ -475,8 +477,12 @@ export class SetDoubleStrikeMode extends CmdBase {
   }
 }
 
-export class PrintAndFeedPaper extends CmdBase {}
-export class SelectPageMode extends CmdBase {}
+export class PrintAndFeedPaper extends CmdBase {
+  static desc: string = 'Print and feed paper'
+}
+export class SelectPageMode extends CmdBase {
+  static desc: string = 'Select Page mode'
+}
 
 @register(['ESC', 'M'])
 export class SelectCharacterFont extends CmdBase {
@@ -492,7 +498,9 @@ export class SelectCharacterFont extends CmdBase {
   }
 }
 
-export class SelectInternationalCharacterSet extends CmdBase {}
+export class SelectInternationalCharacterSet extends CmdBase {
+  static desc: string = 'Select an international character set'
+}
 
 @register(['ESC', 'S'])
 export class SelectStandardMode extends CmdBase {
@@ -504,10 +512,18 @@ export class SelectStandardMode extends CmdBase {
   }
 }
 
-export class SelectPrintDirectionInPageMode extends CmdBase {}
-export class SetRotationMode extends CmdBase {}
-export class SetPrintAreaInPageMode extends CmdBase {}
-export class SetRelativePrintPosition extends CmdBase {}
+export class SelectPrintDirectionInPageMode extends CmdBase {
+  static desc: string = 'Select print direction in Page mode'
+}
+export class SetRotationMode extends CmdBase {
+  static desc: string = 'Turn 90° clockwise rotation mode on/off'
+}
+export class SetPrintAreaInPageMode extends CmdBase {
+  static desc: string = 'Set print area in Page mode'
+}
+export class SetRelativePrintPosition extends CmdBase {
+  static desc: string = 'Set relative print position'
+}
 
 @register(['ESC', 'a'])
 export class SelectJustification extends CmdBase {
@@ -526,9 +542,15 @@ export class SelectJustification extends CmdBase {
   }
 }
 
-export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {}
-export class SelectPaperSensorsToStopPrinting extends CmdBase {}
-export class EnableOrDisablePanelButtons extends CmdBase {}
+export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {
+  static desc: string = 'Select paper sensor(s) to output paper-end signals'
+}
+export class SelectPaperSensorsToStopPrinting extends CmdBase {
+  static desc: string = 'Select paper sensor(s) to stop printing'
+}
+export class EnableOrDisablePanelButtons extends CmdBase {
+  static desc: string = 'Enable/disable panel buttons'
+}
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ld.html
@@ -547,13 +569,27 @@ export class PrintAndFeedNLines extends CmdBase {
   }
 }
 
-export class PartialCutOnePointLeftUncut extends CmdBase {}
-export class PartialCutThreePointsLeftUncut extends CmdBase {}
-export class GeneratePulse extends CmdBase {}
-export class SelectCharacterCodeTable extends CmdBase {}
-export class TransmitPeripheralDeviceStatus extends CmdBase {}
-export class TransmitPaperSensorStatus extends CmdBase {}
-export class SetUpsideDownPrintMode extends CmdBase {}
+export class PartialCutOnePointLeftUncut extends CmdBase {
+  static desc: string = 'Partial cut (one point left uncut)'
+}
+export class PartialCutThreePointsLeftUncut extends CmdBase {
+  static desc: string = 'Partial cut (three points left uncut)'
+}
+export class GeneratePulse extends CmdBase {
+  static desc: string = 'Generate pulse'
+}
+export class SelectCharacterCodeTable extends CmdBase {
+  static desc: string = 'Select character code table'
+}
+export class TransmitPeripheralDeviceStatus extends CmdBase {
+  static desc: string = 'Transmit peripheral device status'
+}
+export class TransmitPaperSensorStatus extends CmdBase {
+  static desc: string = 'Transmit paper sensor status'
+}
+export class SetUpsideDownPrintMode extends CmdBase {
+  static desc: string = 'Turn upside-down print mode on/off'
+}
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ca_fn48.html
@@ -608,6 +644,19 @@ export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
 
   @u8([82])
   d3: number
+
+  // TODO args needs enum
+  constructor(c: number) {
+    super()
+    this.p = 6
+    this.fn = 60
+    this.m = 2
+    this.c = c
+    this.d1 = 67
+    this.d2 = 76
+    this.d3 = 82
+    this.validate()
+  }
 }
 
 /**
@@ -629,6 +678,16 @@ export class TransmitSetValuesForTopOrBottomLogoPrinting extends CmdBase {
 
   @u8([[48, 50]])
   c: number
+
+  // TODO args needs enum
+  constructor(c: number) {
+    super()
+    this.p = 3
+    this.fn = 61
+    this.m = 2
+    this.c = c
+    this.validate()
+  }
 }
 
 /**
@@ -658,6 +717,19 @@ export class SetTopLogoPrinting extends CmdBase {
 
   @u8([[0, 255]])
   n: number
+
+  // TODO args needs enum
+  constructor(kc1: number, kc2: number, a: number, n: number) {
+    super()
+    this.p = 6
+    this.fn = 62
+    this.m = 2
+    this.kc1 = kc1
+    this.kc2 = kc2
+    this.a = a
+    this.n = n
+    this.validate()
+  }
 }
 
 /**
@@ -684,6 +756,18 @@ export class SetBottomLogoPrinting extends CmdBase {
 
   @u8([[48, 50]])
   a: number
+
+  // TODO args needs enum
+  constructor(kc1: number, kc2: number, a: number) {
+    super()
+    this.p = 5
+    this.fn = 63
+    this.m = 2
+    this.kc1 = kc1
+    this.kc2 = kc2
+    this.a = a
+    this.validate()
+  }
 }
 
 /**
@@ -710,6 +794,16 @@ export class MakeExtendedSettingsForTopOrBottomLogoPrinting extends CmdBase {
   // the population logic too complicated IMO)
   @sizedBuffer('p', -2, [[48, 67]])
   settings: Buffer
+
+  // TODO args needs enum
+  constructor(p: number, settings: Buffer) {
+    super()
+    this.p = p
+    this.fn = 64
+    this.m = 2
+    this.settings = settings
+    this.validate()
+  }
 }
 
 /**
@@ -733,6 +827,17 @@ export class EnableOrDisableTopOrBottomLogoPrinting extends CmdBase {
 
   @u8([[48, 49]])
   n: number
+
+  // TODO args needs enum
+  constructor(a: number, n: number) {
+    super()
+    this.p = 4
+    this.fn = 65
+    this.m = 2
+    this.a = a
+    this.n = n
+    this.validate()
+  }
 }
 
 /**
