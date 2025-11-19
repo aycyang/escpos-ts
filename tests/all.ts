@@ -253,7 +253,11 @@ const testCases: TestCase[] = [
     },
   },
   { class: SelectInternationalCharacterSet },
-  { class: SelectStandardMode },
+  {
+    class: SelectStandardMode,
+    constructed: new SelectStandardMode(),
+    bytes: Buffer.from([0x1b, 0x53]),
+  },
   { class: SelectPrintDirectionInPageMode },
   { class: SetRotationMode },
   { class: SetPrintAreaInPageMode },

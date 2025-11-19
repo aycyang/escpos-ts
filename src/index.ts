@@ -478,7 +478,17 @@ export class SelectCharacterFont extends CmdBase {
 }
 
 export class SelectInternationalCharacterSet extends CmdBase {}
-export class SelectStandardMode extends CmdBase {}
+
+@register(['ESC', 'S'])
+export class SelectStandardMode extends CmdBase {
+  static override desc: string = 'Select Standard mode'
+
+  constructor() {
+    super()
+    this.validate()
+  }
+}
+
 export class SelectPrintDirectionInPageMode extends CmdBase {}
 export class SetRotationMode extends CmdBase {}
 export class SetPrintAreaInPageMode extends CmdBase {}
