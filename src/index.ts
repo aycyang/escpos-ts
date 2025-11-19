@@ -183,6 +183,9 @@ const DoubleStrikeModeToNumber: Record<DoubleStrikeMode, number> = {
 
 // --- COMMANDS ---
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/ht.html
+ */
 @register(['HT'])
 export class HorizontalTab extends CmdBase {
   static override desc: string = 'Horizontal tab'
@@ -379,6 +382,9 @@ export class ModelSpecificBuzzerControl extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_asterisk.html
+ */
 @register(['ESC', '*'])
 export class SelectBitImageMode extends CmdBase {
   static override desc: string = 'Select bit-image mode'
@@ -533,6 +539,9 @@ export class SetEmphasizedMode extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cg.html
+ */
 @register(['ESC', 'G'])
 export class SetDoubleStrikeMode extends CmdBase {
   static override desc: string = 'Turn double-strike mode on/off'
@@ -547,13 +556,23 @@ export class SetDoubleStrikeMode extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cj.html
+ */
 export class PrintAndFeedPaper extends CmdBase {
   static desc: string = 'Print and feed paper'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cl.html
+ */
 export class SelectPageMode extends CmdBase {
   static desc: string = 'Select Page mode'
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cm.html
+ */
 @register(['ESC', 'M'])
 export class SelectCharacterFont extends CmdBase {
   static override desc: string = 'Select character font'
@@ -568,10 +587,16 @@ export class SelectCharacterFont extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cr.html
+ */
 export class SelectInternationalCharacterSet extends CmdBase {
   static desc: string = 'Select an international character set'
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cs.html
+ */
 @register(['ESC', 'S'])
 export class SelectStandardMode extends CmdBase {
   static override desc: string = 'Select Standard mode'
@@ -582,19 +607,37 @@ export class SelectStandardMode extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ct.html
+ */
 export class SelectPrintDirectionInPageMode extends CmdBase {
   static desc: string = 'Select print direction in Page mode'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cv.html
+ */
 export class SetRotationMode extends CmdBase {
   static desc: string = 'Turn 90° clockwise rotation mode on/off'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cw.html
+ */
 export class SetPrintAreaInPageMode extends CmdBase {
   static desc: string = 'Set print area in Page mode'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_backslash.html
+ */
 export class SetRelativePrintPosition extends CmdBase {
   static desc: string = 'Set relative print position'
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_la.html
+ */
 @register(['ESC', 'a'])
 export class SelectJustification extends CmdBase {
   static override desc: string = 'Select justification'
@@ -612,12 +655,23 @@ export class SelectJustification extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lc_3.html
+ */
 export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {
   static desc: string = 'Select paper sensor(s) to output paper-end signals'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lc_4.html
+ */
 export class SelectPaperSensorsToStopPrinting extends CmdBase {
   static desc: string = 'Select paper sensor(s) to stop printing'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lc_5.html
+ */
 export class EnableOrDisablePanelButtons extends CmdBase {
   static desc: string = 'Enable/disable panel buttons'
 }
@@ -639,24 +693,51 @@ export class PrintAndFeedNLines extends CmdBase {
   }
 }
 
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_li.html
+ */
 export class PartialCutOnePointLeftUncut extends CmdBase {
   static desc: string = 'Partial cut (one point left uncut)'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lm.html
+ */
 export class PartialCutThreePointsLeftUncut extends CmdBase {
   static desc: string = 'Partial cut (three points left uncut)'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lp.html
+ */
 export class GeneratePulse extends CmdBase {
   static desc: string = 'Generate pulse'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lt.html
+ */
 export class SelectCharacterCodeTable extends CmdBase {
   static desc: string = 'Select character code table'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lu.html
+ */
 export class TransmitPeripheralDeviceStatus extends CmdBase {
   static desc: string = 'Transmit peripheral device status'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lv.html
+ */
 export class TransmitPaperSensorStatus extends CmdBase {
   static desc: string = 'Transmit paper sensor status'
 }
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lbrace.html
+ */
 export class SetUpsideDownPrintMode extends CmdBase {
   static desc: string = 'Turn upside-down print mode on/off'
 }
