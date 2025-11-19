@@ -450,7 +450,7 @@ export class SetEmphasizedMode extends CmdBase {
 export class SetDoubleStrikeMode extends CmdBase {
   static override desc: string = 'Turn double-strike mode on/off'
 
-  @u8([0, 1])
+  @u8([[0, 255]])
   n: number
 
   constructor(mode: DoubleStrikeMode) {
