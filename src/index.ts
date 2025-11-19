@@ -5,7 +5,7 @@ import { u8, u16, sizedBuffer, nullTerminatedBuffer } from './fieldDecorators'
 import { CmdBase } from './cmd'
 
 export { parse } from './parse'
-export type { CmdClass } from './cmd'
+export type { CmdBase, CmdClass } from './cmd'
 
 // --- ENUMS ---
 
@@ -186,6 +186,11 @@ const DoubleStrikeModeToNumber: Record<DoubleStrikeMode, number> = {
 @register(['HT'])
 export class HorizontalTab extends CmdBase {
   static override desc: string = 'Horizontal tab'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
@@ -350,6 +355,11 @@ export class SetUnderlineMode extends CmdBase {
 @register(['ESC', '2'])
 export class SelectDefaultLineSpacing extends CmdBase {
   static override desc: string = 'Select default line spacing'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
@@ -409,6 +419,11 @@ export class CancelUserDefinedCharacters extends CmdBase {
 @register(['ESC', '@'])
 export class InitializePrinter extends CmdBase {
   static override desc: string = 'Initialize printer'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
@@ -555,6 +570,14 @@ export class SelectKanjiCharacterFont extends CmdBase {
 
   @u8([0, 1, 48, 49])
   m: number
+
+  constructor(m: number) {
+    super()
+    this.p = 2
+    this.fn = 48
+    this.m = m
+    this.validate()
+  }
 }
 
 /**

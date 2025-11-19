@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert'
 import {
   BuzzerSoundPattern,
+  CmdBase,
   CmdClass,
   PeripheralDeviceSelection,
   UserDefinedCharacterSetSelection,
@@ -99,7 +100,7 @@ void test('ParseError', async (t) => {
 
 type TestCase = {
   class: CmdClass
-  constructed?: object
+  constructed?: CmdBase
   bytes?: Buffer
   checks?: object
 }
@@ -414,9 +415,11 @@ for (const testCase of testCases) {
     const cmds = parse(testCase.bytes)
     assert.strictEqual(cmds.length, 1)
     const cmd = cmds[0]
+    assert(cmd.isValid)
     console.log(cmd.toString())
     assert(cmd instanceof testCase.class)
     if (testCase.constructed) {
+      assert(testCase.constructed.isValid)
       assert.deepStrictEqual(
         cmd,
         testCase.constructed,

@@ -20,10 +20,13 @@ export type CmdClassDecorator = (
 export class CmdBase {
   static desc: string
 
+  isValid: boolean = false
+
   toString(): string {
     const cmdClass = this.constructor as CmdClass
     const fieldsAndValues = []
     for (const [name, value] of Object.entries(this)) {
+      if (name === 'isValid') continue
       let valueString: string = (value as number | Buffer).toString()
       if (Buffer.isBuffer(value)) {
         valueString = bufToAbbrevString(value)
@@ -34,15 +37,18 @@ export class CmdBase {
     return `${cmdClass.desc} ( ${fieldsAndValues.join(', ')} )`
   }
 
-  // TODO enforce validate is called before cmd can be used
   validate() {
     const metadata = this.constructor[Symbol.metadata]
     assert(metadata)
-    if (!metadata.fields) return
+    if (!metadata.fields) {
+      this.isValid = true
+      return
+    }
     for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields)) {
       const value = this[fieldName] as CmdField
       ;(fieldMetadata as FieldMetadata).validate(fieldName, value)
     }
+    this.isValid = true
   }
 
   serialize(): Buffer {
@@ -80,7 +86,10 @@ export class CmdBase {
     // handled generically. To achieve this goal, `Object.create()` is used
     // here.
     const instance = Object.create(this.prototype) as CmdBase
-    if (!metadata.fields) return [instance, buf]
+    if (!metadata.fields) {
+      instance.validate()
+      return [instance, buf]
+    }
     for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields)) {
       let parse = (fieldMetadata as FieldMetadata).parse
       if ((fieldMetadata as FieldMetadata).parseMethod) {
