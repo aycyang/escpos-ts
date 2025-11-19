@@ -65,6 +65,7 @@ import {
   SetWhiteAndBlackReversePrintMode,
   SelectCutModeAndCutPaper,
   parse,
+  DoubleStrikeMode,
 } from '../src/index'
 
 void test('ParseError', async (t) => {
@@ -233,7 +234,14 @@ const testCases: TestCase[] = [
       n: 1,
     },
   },
-  { class: SetDoubleStrikeMode },
+  {
+    class: SetDoubleStrikeMode,
+    constructed: new SetDoubleStrikeMode(DoubleStrikeMode.On),
+    bytes: Buffer.from([0x1b, 0x47, 0x01]),
+    checks: {
+      n: 0x01,
+    },
+  },
   { class: PrintAndFeedPaper },
   { class: SelectPageMode },
   {

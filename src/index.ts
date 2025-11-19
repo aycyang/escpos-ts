@@ -171,6 +171,16 @@ const DoubleHeightModeToNumber: Record<DoubleHeightMode, number> = {
   [DoubleHeightMode.On]: 1,
 }
 
+export enum DoubleStrikeMode {
+  Off = 'DoubleStrikeMode.Off',
+  On = 'DoubleStrikeMode.On',
+}
+
+const DoubleStrikeModeToNumber: Record<DoubleStrikeMode, number> = {
+  [DoubleStrikeMode.Off]: 0,
+  [DoubleStrikeMode.On]: 1,
+}
+
 // --- COMMANDS ---
 
 @register(['HT'])
@@ -436,7 +446,20 @@ export class SetEmphasizedMode extends CmdBase {
   }
 }
 
-export class SetDoubleStrikeMode extends CmdBase {}
+@register(['ESC', 'G'])
+export class SetDoubleStrikeMode extends CmdBase {
+  static override desc: string = 'Turn double-strike mode on/off'
+
+  @u8([[0, 255]])
+  n: number
+
+  constructor(mode: DoubleStrikeMode) {
+    super()
+    this.n = DoubleStrikeModeToNumber[mode]
+    this.validate()
+  }
+}
+
 export class PrintAndFeedPaper extends CmdBase {}
 export class SelectPageMode extends CmdBase {}
 
