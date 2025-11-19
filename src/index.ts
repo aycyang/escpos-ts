@@ -194,6 +194,76 @@ export class HorizontalTab extends CmdBase {
 }
 
 /**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/lf.html
+ */
+export class lf extends CmdBase {
+  static desc: string = 'Print and line feed'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/ff_in_page.html
+ */
+export class ff_in_page extends CmdBase {
+  static desc: string = 'Print and return to Standard mode (in Page mode)'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/cr.html
+ */
+export class cr extends CmdBase {
+  static desc: string = 'Print and carriage return'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/dle_eot.html
+ */
+export class dle_eot extends CmdBase {
+  static desc: string = 'Transmit real-time status'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/dle_enq.html
+ */
+export class dle_enq extends CmdBase {
+  static desc: string = 'Send real-time request to printer'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/dle_dc4_fn1.html
+ */
+export class dle_dc4_fn1 extends CmdBase {
+  static desc: string = 'Generate pulse in real-time'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/dle_dc4_fn2.html
+ */
+export class dle_dc4_fn2 extends CmdBase {
+  static desc: string = 'Execute power-off sequence'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/dle_dc4_fn3.html
+ */
+export class dle_dc4_fn3 extends CmdBase {
+  static desc: string = 'Sound buzzer in real-time'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/dle_dc4_fn8.html
+ */
+export class dle_dc4_fn8 extends CmdBase {
+  static desc: string = 'Clear buffer(s)'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/can.html
+ */
+export class can extends CmdBase {
+  static desc: string = 'Cancel print data in Page mode'
+}
+
+/**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_space.html
  */
 @register(['ESC', 'SP'])
@@ -592,6 +662,20 @@ export class SetUpsideDownPrintMode extends CmdBase {
 }
 
 /**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_exclamation.html
+ */
+export class fs_exclamation extends CmdBase {
+  static desc: string = 'Select print mode(s) for Kanji characters'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_ampersand.html
+ */
+export class fs_ampersand extends CmdBase {
+  static desc: string = 'Select Kanji character mode'
+}
+
+/**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ca_fn48.html
  */
 @registerMultiFn(['FS', '(', 'A'], { skip: 2, fn: 48 })
@@ -841,6 +925,76 @@ export class EnableOrDisableTopOrBottomLogoPrinting extends CmdBase {
 }
 
 /**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_minus.html
+ */
+export class fs_minus extends CmdBase {
+  static desc: string = 'Turn underline mode on/off for Kanji characters'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_period.html
+ */
+export class fs_period extends CmdBase {
+  static desc: string = 'Cancel Kanji character mode'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_2.html
+ */
+export class fs_2 extends CmdBase {
+  static desc: string = 'Define user-defined Kanji characters'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_cc.html
+ */
+export class fs_cc extends CmdBase {
+  static desc: string = 'Select Kanji character code system'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_cs.html
+ */
+export class fs_cs extends CmdBase {
+  static desc: string = 'Set Kanji character spacing'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_cw.html
+ */
+export class fs_cw extends CmdBase {
+  static desc: string = 'Turn quadruple-size mode on/off for Kanji characters'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lg_1.html
+ */
+export class fs_lg_1 extends CmdBase {
+  static desc: string = 'Write to NV user memory'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lg_2.html
+ */
+export class fs_lg_2 extends CmdBase {
+  static desc: string = 'Read from NV user memory'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lp.html
+ */
+export class fs_lp extends CmdBase {
+  static desc: string = 'Print NV bit image'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lq.html
+ */
+export class fs_lq extends CmdBase {
+  static desc: string = 'Define NV bit image'
+}
+
+/**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_exclamation.html
  */
 @register(['GS', '!'])
@@ -871,6 +1025,510 @@ export class SelectCharacterSize extends CmdBase {
 }
 
 /**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_dollarssign.html
+ */
+export class gs_dollarssign extends CmdBase {
+  static desc: string = 'Set absolute vertical print position in Page mode'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ca.html
+ */
+export class gs_lparen_ca extends CmdBase {
+  static desc: string = 'Execute test print'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cd.html
+ */
+export class gs_lparen_cd extends CmdBase {
+  static desc: string = 'Enable/disable real-time command'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce.html
+ */
+export class gs_lparen_ce extends CmdBase {
+  static desc: string = 'Set user setup commands'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn01.html
+ */
+export class gs_lparen_ce_fn01 extends CmdBase {
+  static desc: string = 'Change into the user setting mode'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn02.html
+ */
+export class gs_lparen_ce_fn02 extends CmdBase {
+  static desc: string = 'End the user setting mode session'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn05.html
+ */
+export class gs_lparen_ce_fn05 extends CmdBase {
+  static desc: string = 'Set the customized setting values'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn06.html
+ */
+export class gs_lparen_ce_fn06 extends CmdBase {
+  static desc: string = 'Transmit the customized setting values'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn11.html
+ */
+export class gs_lparen_ce_fn11 extends CmdBase {
+  static desc: string = 'Set the configuration item for the serial interface'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn12.html
+ */
+export class gs_lparen_ce_fn12 extends CmdBase {
+  static desc: string =
+    'Transmit the configuration item for the serial interface'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn13.html
+ */
+export class gs_lparen_ce_fn13 extends CmdBase {
+  static desc: string = 'Set the configuration item for the Bluetooth interface'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn14.html
+ */
+export class gs_lparen_ce_fn14 extends CmdBase {
+  static desc: string =
+    'Transmit the configuration item for the Bluetooth interface'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn15.html
+ */
+export class gs_lparen_ce_fn15 extends CmdBase {
+  static desc: string = 'Set conditions for USB interface communication'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ce_fn16.html
+ */
+export class gs_lparen_ce_fn16 extends CmdBase {
+  static desc: string = 'Transmit conditions for USB interface communication'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ch.html
+ */
+export class gs_lparen_ch extends CmdBase {
+  static desc: string = 'Request transmission of response or status'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ch_fn48.html
+ */
+export class gs_lparen_ch_fn48 extends CmdBase {
+  static desc: string = 'Specifies the process ID response'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ck.html
+ */
+export class gs_lparen_ck extends CmdBase {
+  static desc: string = 'Select print control method(s)'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ck_fn50.html
+ */
+export class gs_lparen_ck_fn50 extends CmdBase {
+  static desc: string = 'Select the print speed'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_ck_fn97.html
+ */
+export class gs_lparen_ck_fn97 extends CmdBase {
+  static desc: string =
+    'Select the number of parts for the thermal head energizing'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl.html
+ */
+export class gs_lparen_cl extends CmdBase {
+  static desc: string = 'Set graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn48.html
+ */
+export class gs_lparen_cl_fn48 extends CmdBase {
+  static desc: string = 'Transmit the NV graphics memory capacity'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn50.html
+ */
+export class gs_lparen_cl_fn50 extends CmdBase {
+  static desc: string = 'Print the graphics data in the print buffer'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn51.html
+ */
+export class gs_lparen_cl_fn51 extends CmdBase {
+  static desc: string =
+    'Transmit the remaining capacity of the NV graphics memory'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn52.html
+ */
+export class gs_lparen_cl_fn52 extends CmdBase {
+  static desc: string =
+    'Transmit the remaining capacity of the download graphics memory'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn64.html
+ */
+export class gs_lparen_cl_fn64 extends CmdBase {
+  static desc: string = 'Transmit the key code list for defined NV graphics'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn65.html
+ */
+export class gs_lparen_cl_fn65 extends CmdBase {
+  static desc: string = 'Delete all NV graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn66.html
+ */
+export class gs_lparen_cl_fn66 extends CmdBase {
+  static desc: string = 'Delete the specified NV graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn67.html
+ */
+export class gs_lparen_cl_fn67 extends CmdBase {
+  static desc: string = 'Define the NV graphics data (raster format)'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn69.html
+ */
+export class gs_lparen_cl_fn69 extends CmdBase {
+  static desc: string = 'Print the specified NV graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn80.html
+ */
+export class gs_lparen_cl_fn80 extends CmdBase {
+  static desc: string =
+    'Transmit the key code list for defined download graphics'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn81.html
+ */
+export class gs_lparen_cl_fn81 extends CmdBase {
+  static desc: string = 'Delete all download graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn82.html
+ */
+export class gs_lparen_cl_fn82 extends CmdBase {
+  static desc: string = 'Delete the specified download graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn83.html
+ */
+export class gs_lparen_cl_fn83 extends CmdBase {
+  static desc: string = 'Define the download graphics data (raster format)'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn85.html
+ */
+export class gs_lparen_cl_fn85 extends CmdBase {
+  static desc: string = 'Print the specified download graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_cl_fn112.html
+ */
+export class gs_lparen_cl_fn112 extends CmdBase {
+  static desc: string =
+    'Store the graphics data in the print buffer (raster format)'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk.html
+ */
+export class gs_lparen_lk extends CmdBase {
+  static desc: string = 'Set up and print the symbol'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn065.html
+ */
+export class gs_lparen_lk_fn065 extends CmdBase {
+  static desc: string = 'PDF417: Set the number of columns in the data region'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn066.html
+ */
+export class gs_lparen_lk_fn066 extends CmdBase {
+  static desc: string = 'PDF417: Set the number of rows'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn067.html
+ */
+export class gs_lparen_lk_fn067 extends CmdBase {
+  static desc: string = 'PDF417: Set the width of the module'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn068.html
+ */
+export class gs_lparen_lk_fn068 extends CmdBase {
+  static desc: string = 'PDF417: Set the row height'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn069.html
+ */
+export class gs_lparen_lk_fn069 extends CmdBase {
+  static desc: string = 'PDF417: Set the error correction level'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn070.html
+ */
+export class gs_lparen_lk_fn070 extends CmdBase {
+  static desc: string = 'PDF417: Select the options'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn080.html
+ */
+export class gs_lparen_lk_fn080 extends CmdBase {
+  static desc: string = 'PDF417: Store the data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn081.html
+ */
+export class gs_lparen_lk_fn081 extends CmdBase {
+  static desc: string =
+    'PDF417: Print the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn082.html
+ */
+export class gs_lparen_lk_fn082 extends CmdBase {
+  static desc: string =
+    'PDF417: Transmit the size information of the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn165.html
+ */
+export class gs_lparen_lk_fn165 extends CmdBase {
+  static desc: string = 'QR Code: Select the model'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn167.html
+ */
+export class gs_lparen_lk_fn167 extends CmdBase {
+  static desc: string = 'QR Code: Set the size of module'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn169.html
+ */
+export class gs_lparen_lk_fn169 extends CmdBase {
+  static desc: string = 'QR Code: Select the error correction level'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn180.html
+ */
+export class gs_lparen_lk_fn180 extends CmdBase {
+  static desc: string = 'QR Code: Store the data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn181.html
+ */
+export class gs_lparen_lk_fn181 extends CmdBase {
+  static desc: string =
+    'QR Code: Print the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn182.html
+ */
+export class gs_lparen_lk_fn182 extends CmdBase {
+  static desc: string =
+    'QR Code: Transmit the size information of the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn265.html
+ */
+export class gs_lparen_lk_fn265 extends CmdBase {
+  static desc: string = 'MaxiCode: Select the mode'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn280.html
+ */
+export class gs_lparen_lk_fn280 extends CmdBase {
+  static desc: string = 'MaxiCode: Store the data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn281.html
+ */
+export class gs_lparen_lk_fn281 extends CmdBase {
+  static desc: string =
+    'MaxiCode: Print the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn282.html
+ */
+export class gs_lparen_lk_fn282 extends CmdBase {
+  static desc: string =
+    'MaxiCode: Transmit the size information of the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn367.html
+ */
+export class gs_lparen_lk_fn367 extends CmdBase {
+  static desc: string = '2-dimensional GS1 DataBar: Set the width of the module'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn371.html
+ */
+export class gs_lparen_lk_fn371 extends CmdBase {
+  static desc: string =
+    '2-dimensional GS1 DataBar: GS1 DataBar Expanded Stacked maximum width setting'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn380.html
+ */
+export class gs_lparen_lk_fn380 extends CmdBase {
+  static desc: string =
+    '2-dimensional GS1 DataBar: Store data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn381.html
+ */
+export class gs_lparen_lk_fn381 extends CmdBase {
+  static desc: string =
+    '2-dimensional GS1 DataBar: Print the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn382.html
+ */
+export class gs_lparen_lk_fn382 extends CmdBase {
+  static desc: string =
+    '2-dimensional GS1 DataBar: Transmit the size information of the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn467.html
+ */
+export class gs_lparen_lk_fn467 extends CmdBase {
+  static desc: string = 'Composite Symbology: Set the width of the module'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn471.html
+ */
+export class gs_lparen_lk_fn471 extends CmdBase {
+  static desc: string =
+    'Composite Symbology: GS1 DataBar Expanded Stacked maximum width setting'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn472.html
+ */
+export class gs_lparen_lk_fn472 extends CmdBase {
+  static desc: string = 'Composite Symbology: Select HRI character font'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn480.html
+ */
+export class gs_lparen_lk_fn480 extends CmdBase {
+  static desc: string =
+    'Composite Symbology: Store the data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn481.html
+ */
+export class gs_lparen_lk_fn481 extends CmdBase {
+  static desc: string =
+    'Composite Symbology: Print the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lparen_lk_fn482.html
+ */
+export class gs_lparen_lk_fn482 extends CmdBase {
+  static desc: string =
+    'Composite Symbology: Transmit the size information of the symbol data in the symbol storage area'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_asterisk.html
+ */
+export class gs_asterisk extends CmdBase {
+  static desc: string = 'Define downloaded bit image'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_slash.html
+ */
+export class gs_slash extends CmdBase {
+  static desc: string = 'Print downloaded bit image'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_colon.html
+ */
+export class gs_colon extends CmdBase {
+  static desc: string = 'Start/end macro definition'
+}
+
+/**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cb.html
  */
 @register(['GS', 'B'])
@@ -885,6 +1543,55 @@ export class SetWhiteAndBlackReversePrintMode extends CmdBase {
     this.n = WhiteAndBlackReversePrintModeToNumber[mode]
     this.validate()
   }
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cd.html
+ */
+export class gs_cd extends CmdBase {
+  static desc: string = 'Specify Windows BMP graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cd_fn67.html
+ */
+export class gs_cd_fn67 extends CmdBase {
+  static desc: string = 'Define Windows BMP NV graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cd_fn83.html
+ */
+export class gs_cd_fn83 extends CmdBase {
+  static desc: string = 'Define Windows BMP download graphics data'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_ch.html
+ */
+export class gs_ch extends CmdBase {
+  static desc: string = 'Select print position of HRI characters'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_ci.html
+ */
+export class gs_ci extends CmdBase {
+  static desc: string = 'Transmit printer ID'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cl.html
+ */
+export class gs_cl extends CmdBase {
+  static desc: string = 'Set left margin'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cp.html
+ */
+export class gs_cp extends CmdBase {
+  static desc: string = 'Set horizontal and vertical motion units'
 }
 
 /**
@@ -908,4 +1615,95 @@ export class SelectCutModeAndCutPaper extends CmdBase {
     this.m = m
     this.validate()
   }
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cw.html
+ */
+export class gs_cw extends CmdBase {
+  static desc: string = 'Set print area width'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_backslash.html
+ */
+export class gs_backslash extends CmdBase {
+  static desc: string = 'Set relative vertical print position in Page mode'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_caret.html
+ */
+export class gs_caret extends CmdBase {
+  static desc: string = 'Execute macro'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_la.html
+ */
+export class gs_la extends CmdBase {
+  static desc: string = 'Enable/disable Automatic Status Back (ASB)'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lb.html
+ */
+export class gs_lb extends CmdBase {
+  static desc: string = 'Turn smoothing mode on/off'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lf.html
+ */
+export class gs_lf extends CmdBase {
+  static desc: string = 'Select font for HRI characters'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lg_0.html
+ */
+export class gs_lg_0 extends CmdBase {
+  static desc: string = 'Initialize maintenance counter'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lg_2.html
+ */
+export class gs_lg_2 extends CmdBase {
+  static desc: string = 'Transmit maintenance counter'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lh.html
+ */
+export class gs_lh extends CmdBase {
+  static desc: string = 'Set barcode height'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lk.html
+ */
+export class gs_lk extends CmdBase {
+  static desc: string = 'Print barcode'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lr.html
+ */
+export class gs_lr extends CmdBase {
+  static desc: string = 'Transmit status'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lv_0.html
+ */
+export class gs_lv_0 extends CmdBase {
+  static desc: string = 'Print raster bit image'
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_lw.html
+ */
+export class gs_lw extends CmdBase {
+  static desc: string = 'Set barcode width'
 }
