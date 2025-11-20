@@ -66,7 +66,7 @@ export default async function* customReporter(
       yield ''
     } else if (event.type == 'test:pass') {
       if (event.data.details.type == 'test' && testsData[event.data.name]) {
-        testsData[event.data.name].status = event.data.skip ? '⚠️ ' : '✅'
+        testsData[event.data.name].status = event.data.skip ? '❌' : '✅'
       }
       yield ''
     } else if (event.type == 'test:diagnostic') {
