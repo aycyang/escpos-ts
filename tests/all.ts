@@ -335,7 +335,13 @@ const testCases: TestCase[] = [
       n: 0x01,
     },
   },
-  { cmd: new PrintAndFeedPaper() },
+  {
+    cmd: new PrintAndFeedPaper(250),
+    bytes: Buffer.from([0x1b, 0x4a, 0xfa]),
+    checks: {
+      n: 250,
+    },
+  },
   { cmd: new SelectPageMode() },
   {
     cmd: new SelectCharacterFont(CharacterFont.B),
