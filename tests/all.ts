@@ -66,7 +66,7 @@ import {
   SelectCutModeAndCutPaper,
   parse,
   DoubleStrikeMode,
-  lf,
+  PrintAndLineFeed,
   ff_in_page,
   cr,
   dle_eot,
@@ -493,8 +493,10 @@ const testCases: TestCase[] = [
       m: 1,
     },
   },
-
-  { cmd: new lf() },
+  {
+    cmd: new PrintAndLineFeed(),
+    bytes: Buffer.from([0x0a]),
+  },
   { cmd: new ff_in_page() },
   { cmd: new cr() },
   { cmd: new dle_eot() },
