@@ -11,7 +11,7 @@
     "lint": "npx eslint --cache --fix src tests",
     "build": "tsc",
     "test": "tsx --test-reporter=spec tests/all.ts",
-    "test-table": "node --import tsx --test --test-reporter ./tests/reporter.ts ./tests/**/*.ts",
+    "table": "tsx --test --test-reporter=./tests/reporter.ts ./tests/**/*.ts",
     "prepare": "husky install"
   },
   "author": "",

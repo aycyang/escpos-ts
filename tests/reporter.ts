@@ -9,6 +9,18 @@ function padStartEmoji(str: string, intendedLength) {
 }
 
 function table(testsData: Record<string, { status: string }>) {
+  for (const k of Object.keys(testsData)) {
+    const value = testsData[k]
+    const commandName = k.split(' :: ')[0]
+
+    if (commandName) {
+      testsData[commandName] = value
+    }
+
+    // Removes non-commands
+    delete testsData[k]
+  }
+
   const width = Math.max(...Object.keys(testsData).map((k) => k.length))
   const columns = ['Command'.padStart(width), 'Status']
 
@@ -37,7 +49,7 @@ export default async function* customReporter(
   source: AsyncGenerator<TestEvent, void>,
 ) {
   const testsData: Record<string, { status: string }> = {}
-  let notYetPrinted = true
+  let shouldPrint = true
 
   for await (const event of source) {
     if (event.type == 'test:enqueue') {
@@ -58,10 +70,11 @@ export default async function* customReporter(
       }
       yield ''
     } else if (event.type == 'test:diagnostic') {
-      // For reference: https://github.com/integreat-io/node-test-reporter/blob/10a301ed0e8152423b08ed5b3baee423ad004754/lib/index.js#L131
-      if (event.data.message.split(' ').includes('tests') && notYetPrinted) {
+      if (event.data.message.split(' ').includes('tests') && shouldPrint) {
         yield table(testsData)
-        notYetPrinted = false
+        // Print once; multiple diagnostic events are emitted at the end
+        // For reference: https://github.com/integreat-io/node-test-reporter/blob/10a301ed0e8152423b08ed5b3baee423ad004754/lib/index.js#L131
+        shouldPrint = false
       } else {
         yield ''
       }
