@@ -86,6 +86,7 @@ function htmlBlocks(testsData: Record<string, { status: status }>) {
           margin: 2px;
           /* grow to fit row! */
           flex: auto;
+          text-align: center;
         }
         .case[data-status="passed"] {
           background-color: #9dff98;
