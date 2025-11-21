@@ -23,6 +23,14 @@ export class CmdBase {
   isValid: boolean = false
 
   toString(): string {
+    // If the class definition is still a stub, the prefix won't have been
+    // defined yet and there won't be any metadata available.
+    const metadata = this.constructor[Symbol.metadata]
+    let prefix: string = '[ unknown ]'
+    if (metadata && Array.isArray(metadata.prefix)) {
+      prefix = `[ ${metadata.prefix.join(' ')} ]`
+    }
+
     const cmdClass = this.constructor as CmdClass
     const fieldsAndValues = []
     for (const [name, value] of Object.entries(this)) {
@@ -34,7 +42,7 @@ export class CmdBase {
       fieldsAndValues.push(`${name}=${valueString}`)
     }
     // TODO explain what each field value means, perhaps with decorators?
-    return `${cmdClass.desc} ( ${fieldsAndValues.join(', ')} )`
+    return `${prefix} ${cmdClass.desc} ( ${fieldsAndValues.join(', ')} )`
   }
 
   validate() {
