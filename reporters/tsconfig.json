@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    // Use correct ESM import behavior
+    "esModuleInterop": true
+  }
+}

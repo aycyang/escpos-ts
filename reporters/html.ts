@@ -1,23 +1,7 @@
+import assert from 'node:assert'
 import { type TestEvent } from 'node:test/reporters'
 
-type status = 'unknown' | 'failed' | 'passed' | 'skipped'
-
-function removeNonCommands(
-  testsData: Record<string, { status: status }>,
-): Record<string, { status: status }> {
-  const commandData = {}
-
-  for (const k of Object.keys(testsData)) {
-    const value = testsData[k]
-    const [commandName, desc] = k.split(' :: ')
-
-    if (commandName && desc) {
-      commandData[desc] = value
-    }
-  }
-
-  return commandData
-}
+type Status = 'unknown' | 'failed' | 'passed' | 'skipped'
 
 function nameToDescriptionOnly(name: string): string {
   const matches = Array.from(name.matchAll(/(.+)(\s\(\s.*\s\))/g))
@@ -28,8 +12,8 @@ function nameToDescriptionOnly(name: string): string {
   }
 }
 
-function htmlBlocks(testsData: Record<string, { status: status }>) {
-  const blocks = Object.entries(removeNonCommands(testsData)).map(
+function htmlBlocks(testsData: Record<string, { status: Status }>) {
+  const blocks = Object.entries(testsData).map(
     (pair) =>
       `<span class="case" data-status="${pair[1].status}">${nameToDescriptionOnly(pair[0])}</span>\n`,
   )
@@ -83,8 +67,9 @@ function htmlBlocks(testsData: Record<string, { status: status }>) {
     .join('\n')
 }
 
-type EnqueueEvent = TestEvent & { type: 'test:enqueue' }
-function isFile(event: EnqueueEvent) {
+type TestCompleteEvent = TestEvent & { type: 'test:complete' }
+type TestDequeueEvent = TestEvent & { type: 'test:dequeue' }
+function isFile(event: TestCompleteEvent | TestDequeueEvent) {
   const hasFileExt =
     event.data.name.endsWith('.ts') || event.data.name.endsWith('.js')
   return hasFileExt && event.data.column == 1 && event.data.line == 1
@@ -93,47 +78,47 @@ function isFile(event: EnqueueEvent) {
 export default async function* customReporter(
   source: AsyncGenerator<TestEvent, void>,
 ) {
-  const testsData: Record<string, { status: status }> = {}
-  let shouldPrint = true
+  const testsData: Record<string, { status: Status }> = {}
 
   for await (const event of source) {
-    if (event.type == 'test:enqueue') {
-      if (!isFile(event)) {
-        testsData[event.data.name] = {
-          // add extra space cause terminal prints it double width
-          // status: '⚠️ ',
-          status: 'unknown',
-          ...event.data,
+    switch (event.type) {
+      case 'test:dequeue':
+        if (!isFile(event)) {
+          testsData[event.data.name] = {
+            status: 'unknown',
+            ...event.data,
+          }
         }
-      }
-      yield ''
-    } else if (event.type == 'test:fail') {
-      // if (event.data.name in testsData) testsData[event.data.name].status = '❌'
-      if (event.data.name in testsData)
-        testsData[event.data.name].status = 'failed'
-      yield ''
-    } else if (event.type == 'test:pass') {
-      if (event.data.details.type == 'test' && testsData[event.data.name]) {
-        // testsData[event.data.name].status = event.data.skip ? '❌' : '✅'
-        testsData[event.data.name].status = event.data.skip
-          ? 'skipped'
-          : 'passed'
-      }
-      yield ''
-    } else if (event.type == 'test:diagnostic') {
-      if (event.data.message.split(' ').includes('tests') && shouldPrint) {
-        yield htmlBlocks(testsData)
-
-        // Print once; multiple diagnostic events are emitted at the end
-        // For reference: https://github.com/integreat-io/node-test-reporter/blob/10a301ed0e8152423b08ed5b3baee423ad004754/lib/index.js#L131
-        shouldPrint = false
-      } else {
         yield ''
-      }
-    } else if (event.type == 'test:complete') {
-      yield ''
-    } else if (event.type == 'test:stderr' || event.type == 'test:stdout') {
-      yield `${event.data.message}\n`
+        break
+      case 'test:fail':
+        assert(event.data.name in testsData)
+        testsData[event.data.name].status = 'failed'
+        yield ''
+        break
+      case 'test:pass':
+        assert(event.data.name in testsData)
+        if (event.data.details.type == 'test' && testsData[event.data.name]) {
+          testsData[event.data.name].status = event.data.skip
+            ? 'skipped'
+            : 'passed'
+        }
+        yield ''
+        break
+      case 'test:complete':
+        if (isFile(event)) {
+          yield htmlBlocks(testsData)
+        } else {
+          yield ''
+        }
+        break
+      case 'test:stderr':
+      case 'test:stdout':
+        yield `${event.data.message}\n`
+        break
+      default:
+        yield ''
+        break
     }
   }
 }

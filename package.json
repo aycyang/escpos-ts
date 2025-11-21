@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "npx eslint --cache --fix src",
+    "lint": "npx eslint --cache --fix src reporters",
     "build": "tsc",
     "test": "tsx --test",
     "table": "tsx --test --test-reporter=./reporters/html.ts src/index.test.ts",
@@ -39,7 +39,7 @@
     "quoteProps": "consistent"
   },
   "lint-staged": {
-    "*.ts": "eslint --cache --fix src",
+    "*.ts": "eslint --cache --fix src reporters",
     "*.{ts,md}": "prettier --write"
   }
 }
