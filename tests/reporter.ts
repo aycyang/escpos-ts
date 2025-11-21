@@ -77,12 +77,15 @@ function htmlBlocks(testsData: Record<string, { status: status }>) {
         body {
           font-family: system-ui;
           background: black;
-          line-height: calc(23px + 4px);
+          display: flex;
+          align-content: flex-start;
+          flex-wrap: wrap;
         }
         .case { 
-          margin-right: 4px;
-          padding: 2px;
-          word-break: break-all;
+          padding: 8px;
+          margin: 2px;
+          /* grow to fit row! */
+          flex: auto;
         }
         .case[data-status="passed"] {
           background-color: #9dff98;
