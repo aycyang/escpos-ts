@@ -9,7 +9,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "lint": "npx eslint --cache --fix src reporters",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "test": "tsx --test",
     "table": "tsx --test --test-reporter=./reporters/html.ts src/index.test.ts",
     "support": "npm run table 2>/dev/null | awk '/<html>/,EOF' > docs/support.html",

@@ -1,19 +1,14 @@
-// Copied from https://tsx.is/typescript#recommendation and modified
 {
+  "include": [
+    "./src/**/*.ts",
+    "./reporters/**/*.ts"
+  ],
+  "exclude": [],
   "compilerOptions": {
     "target": "es2022",
 
     // Include type definitions for decorators feature
     "lib": ["es2022", "esnext.decorators"],
-
-    // Emit .js files to dist directory
-    "outDir": "dist",
-
-    // Emit .d.ts files for optional use by Typescript
-    "declaration": true,
-
-    // Emit .d.ts.map files so IDEs can jump to Typescript source code
-    "declarationMap": true,
 
     // Treat files as modules even if it doesn't use import/export
     "moduleDetection": "force",
@@ -32,8 +27,5 @@
 
     // Disallow features that require cross-file awareness
     "isolatedModules": true
-  },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts"]
-
+  }
 }
