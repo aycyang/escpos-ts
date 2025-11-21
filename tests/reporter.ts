@@ -69,7 +69,7 @@ function nameToDescriptionOnly(name: string): string {
 function htmlBlocks(testsData: Record<string, { status: status }>) {
   const blocks = Object.entries(removeNonCommands(testsData)).map(
     (pair) =>
-      `<span class="case" data-status="${pair[1].status}">${nameToDescriptionOnly(pair[0])}</span>`,
+      `<span class="case" data-status="${pair[1].status}">${nameToDescriptionOnly(pair[0])}</span>\n`,
   )
   const head = `
     <head>
@@ -112,7 +112,7 @@ function htmlBlocks(testsData: Record<string, { status: status }>) {
       ${head}
     <body>
       <h1>Command support</h1>
-      <div class="content">${blocks.join('')}</div>
+      <div class="content">\n${blocks.join('')}</div>
     </body>
     </html>
   `
