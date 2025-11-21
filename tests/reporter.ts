@@ -77,6 +77,10 @@ function htmlBlocks(testsData: Record<string, { status: status }>) {
         body {
           font-family: system-ui;
           background: black;
+          color: white;
+          text-align: center;
+        }
+        .content {
           display: flex;
           align-content: flex-start;
           flex-wrap: wrap;
@@ -107,7 +111,8 @@ function htmlBlocks(testsData: Record<string, { status: status }>) {
     <html>
       ${head}
     <body>
-      ${blocks.join('')}
+      <h1>Command support</h1>
+      <div class="content">${blocks.join('')}</div>
     </body>
     </html>
   `
