@@ -13,4 +13,4 @@ All 163 commands supported by the Epson TM-T88V have class definition stubs.
 
 For the most up-to-date information on which commands are supported, run `npm test`.
 
-For a recent-ish snapshot of which commands are currently supported, have a look at [support.md](support.md).
+For a recent-ish snapshot of which commands are currently supported, have a look at [support.md](docs/support.html).
