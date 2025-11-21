@@ -199,8 +199,14 @@ export class HorizontalTab extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/lf.html
  */
-export class lf extends CmdBase {
+@register(['LF'])
+export class PrintAndLineFeed extends CmdBase {
   static desc: string = 'Print and line feed'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
@@ -559,8 +565,18 @@ export class SetDoubleStrikeMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cj.html
  */
+@register(['ESC', 'J'])
 export class PrintAndFeedPaper extends CmdBase {
   static desc: string = 'Print and feed paper'
+
+  @u8([[0, 255]])
+  n: number
+
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
 }
 
 /**
