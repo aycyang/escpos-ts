@@ -30,17 +30,19 @@ function indented(strings: TemplateStringsArray, ...values: string[]) {
 
   const joined = strings
     .map((str, i) => {
-      const value = values[i]
+      const inner = values[i]
       const lines = str.split('\n')
-      const valueIndent = lines[lines.length - 1]
-      return `${str}${
-        value
-          ? value
-              .split('\n')
-              .map((v, j) => (j > 0 ? valueIndent + v : v))
-              .join('\n')
-          : ''
-      }`
+      const innerIndent = lines[lines.length - 1]
+      if (inner) {
+        // don't reindent the first line of inner, since that's where the indent level comes from
+        const reindentedInner = inner
+          .split('\n')
+          .map((v, j) => (j > 0 ? innerIndent + v : v))
+          .join('\n')
+        return `${str}${reindentedInner}`
+      } else {
+        return str
+      }
     })
     .join('')
     .trimStart()
