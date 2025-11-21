@@ -1,25 +1,6 @@
 import { type TestEvent } from 'node:test/reporters'
 
 type status = 'unknown' | 'failed' | 'passed' | 'skipped'
-const mode = 'html'
-
-function padStartEmoji(str: string, intendedLength) {
-  // hack to fix double-width emojis
-  const length = Array.from(
-    str.replace('⚠️ ', '! ').replace(/✅|❌/, '##'),
-  ).length
-  return `${''.padStart(Math.max(intendedLength - length, 0))}${str}`
-}
-
-function statusToEmoji(status) {
-  if (status === 'unknown' || status === 'failed') {
-    return '❌'
-  } else if (status === 'passed') {
-    return '✅'
-  } else {
-    return '⚠️ '
-  }
-}
 
 function removeNonCommands(
   testsData: Record<string, { status: status }>,
@@ -36,25 +17,6 @@ function removeNonCommands(
   }
 
   return commandData
-}
-
-function markdownTable(testsData: Record<string, { status: status }>) {
-  const width = Math.max(...Object.keys(testsData).map((k) => k.length))
-  const columns = ['Command'.padStart(width), 'Status']
-
-  testsData = removeNonCommands(testsData)
-
-  const firstRow = `| ${columns.join(' | ')} |`
-  const secondRow = `|-${''.padStart(columns[0].length, '-')}-|-${''.padStart(columns[1].length, '-')}-|`
-  const rows = [firstRow, secondRow]
-  for (const [key, value] of Object.entries(testsData)) {
-    rows.push(
-      `| ${key.padStart(columns[0].length)} | ${padStartEmoji(statusToEmoji(value.status), columns[1].length)} |`,
-    )
-  }
-  rows.push('\n')
-
-  return rows.join('\n')
 }
 
 function nameToDescriptionOnly(name: string): string {
@@ -128,7 +90,6 @@ function isFile(event: EnqueueEvent) {
   return hasFileExt && event.data.column == 1 && event.data.line == 1
 }
 
-// Reports to Markdown table
 export default async function* customReporter(
   source: AsyncGenerator<TestEvent, void>,
 ) {
@@ -161,11 +122,7 @@ export default async function* customReporter(
       yield ''
     } else if (event.type == 'test:diagnostic') {
       if (event.data.message.split(' ').includes('tests') && shouldPrint) {
-        if (mode == 'html') {
-          yield htmlBlocks(testsData)
-        } else {
-          yield markdownTable(testsData)
-        }
+        yield htmlBlocks(testsData)
 
         // Print once; multiple diagnostic events are emitted at the end
         // For reference: https://github.com/integreat-io/node-test-reporter/blob/10a301ed0e8152423b08ed5b3baee423ad004754/lib/index.js#L131
