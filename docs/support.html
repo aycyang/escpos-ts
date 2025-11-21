@@ -1,36 +1,34 @@
 <html>
-
-<head>
-<style>
-body {
-font-family: system-ui;
-background: black;
-color: white;
-text-align: center;
-}
-.content {
-display: flex;
-align-content: flex-start;
-flex-wrap: wrap;
-}
-.case { 
-padding: 8px;
-margin: 2px;
-/* grow to fit row! */
-flex: auto;
-text-align: center;
-}
-.case[data-status="passed"] {
-background-color: #9dff98;
-color: #0d8304;
-} 
-.case[data-status="failed"], .case[data-status="skipped"] {
-background-color: #ff8585;
-color: #860e0b;
-}
-</style>
-</head>
-
+  <head>
+    <style>
+      body {
+        font-family: system-ui;
+        background: black;
+        color: white;
+        text-align: center;
+      }
+      .content {
+        display: flex;
+        align-content: flex-start;
+        flex-wrap: wrap;
+      }
+      .case { 
+        padding: 8px;
+        margin: 2px;
+        /* grow to fit row! */
+        flex: auto;
+        text-align: center;
+      }
+      .case[data-status="passed"] {
+        background-color: #9dff98;
+        color: #0d8304;
+      } 
+      .case[data-status="failed"], .case[data-status="skipped"] {
+        background-color: #ff8585;
+        color: #860e0b;
+      }
+    </style>
+  </head>
 <body>
 <h1>Command support</h1>
 <div class="content">
