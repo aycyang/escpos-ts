@@ -650,8 +650,14 @@ export class PrintAndFeedPaper extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cl.html
  */
+@register(['ESC', 'L'])
 export class SelectPageMode extends CmdBase {
   static desc: string = 'Select Page mode'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**

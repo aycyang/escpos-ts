@@ -333,7 +333,10 @@ const testCases: TestCase[] = [
       n: 250,
     },
   },
-  { cmd: new SelectPageMode() },
+  {
+    cmd: new SelectPageMode(),
+    bytes: Buffer.from([0x1b, 0x4c]),
+  },
   {
     cmd: new SelectCharacterFont(CharacterFont.B),
     bytes: Buffer.from([0x1b, 0x4d, 0x01]),
