@@ -10,7 +10,7 @@ type ClassFieldDecorator = (
 
 type Range = number | [number, number]
 
-function rangeContains(range: Range, value: number): boolean {
+export function rangeContains(range: Range, value: number): boolean {
   if (Array.isArray(range)) {
     return range[0] <= value && value <= range[1]
   }
@@ -32,7 +32,9 @@ function throwIfNumberNotInRanges(ranges: Range[]): ValidateFunction {
   }
 }
 
-function throwIfBufElementsNotInRanges(ranges: Range[]): ValidateFunction {
+export function throwIfBufElementsNotInRanges(
+  ranges: Range[],
+): ValidateFunction {
   return (name: string, value: Buffer) => {
     const offendingIndex = value.findIndex(
       (byte) => !ranges.some((range) => rangeContains(range, byte)),
@@ -102,7 +104,7 @@ function serializeU32(n: number): Buffer {
   return buf
 }
 
-export type CmdField = number | Buffer
+export type CmdField = number | Buffer | Buffer[]
 export type ParseFunction = (buf: Buffer) => [CmdField, Buffer]
 export type ParseMethod = (this: CmdBase, buf: Buffer) => [CmdField, Buffer]
 export type ParseMethodFactory = (...args: unknown[]) => ParseMethod
@@ -149,6 +151,13 @@ function nullTerminatedBufferParseFactory(sizeLimit: number): ParseMethod {
     return [buf.subarray(0, i + 1), buf.subarray(i + 1)]
   }
   return parseNullTerminatedBuffer
+}
+
+export function custom(fieldMetadata: FieldMetadata): ClassFieldDecorator {
+  return (_, context) => {
+    context.metadata.fields ??= {}
+    context.metadata.fields[context.name] = fieldMetadata
+  }
 }
 
 export function u8(ranges: Range[]): ClassFieldDecorator {

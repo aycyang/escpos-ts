@@ -1,8 +1,18 @@
 import { Buffer } from 'buffer'
 
 import { register, registerMultiFn } from './parse'
-import { u8, u16, sizedBuffer, nullTerminatedBuffer } from './fieldDecorators'
+import {
+  throwIfBufElementsNotInRanges,
+  rangeContains,
+  custom,
+  u8,
+  u16,
+  sizedBuffer,
+  nullTerminatedBuffer,
+} from './fieldDecorators'
 import { CmdBase } from './cmd'
+import { ParseError } from './parse'
+import { ValidationError } from './error'
 
 export { parse } from './parse'
 export type { CmdBase, CmdClass } from './cmd'
@@ -353,10 +363,74 @@ export class SelectOrCancelUserDefinedCharacterSet extends CmdBase {
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ampersand.html
- * TODO this one's hard
  */
+@register(['ESC', '&'])
 export class DefineUserDefinedCharacters extends CmdBase {
   static override desc: string = 'Define user-defined characters'
+
+  @u8([3])
+  y: number
+
+  @u8([[32, 126]])
+  c1: number
+
+  @u8([[32, 126]])
+  c2: number
+
+  @custom({
+    parse(this: DefineUserDefinedCharacters, buf: Buffer) {
+      if (this.c2 < this.c1) {
+        throw new ParseError(
+          `c1 should be less than or equal to c2, but c1=${this.c1} and c2=${this.c2}.`,
+        )
+      }
+      const numBufs = this.c2 - this.c1 + 1
+      const bufs = []
+      for (let i = 0; i < numBufs; i++) {
+        const x = buf[0]
+        const size = 1 + this.y * x
+        bufs.push(buf.subarray(0, size))
+        buf = buf.subarray(size)
+      }
+      return [bufs, buf]
+    },
+    serialize(value: Buffer[]) {
+      return Buffer.concat(value)
+    },
+    validate(name: string, value: Buffer[]) {
+      // NOTE The validity of x depends on which font is selected (for Font A,
+      // it's 0-12; for Font B, it's 0-9). This parser is unaware of printer
+      // state, so it uses the more permissive range in all cases, even though
+      // this is technically inaccurate.
+      for (const buf of value) {
+        const x = buf[0]
+        if (!rangeContains([0, 12], x)) {
+          throw new ValidationError(
+            `in ${name}, found x=${x}, but should be in range 0-12.`,
+          )
+        }
+        throwIfBufElementsNotInRanges([[0, 255]])(name, buf)
+      }
+    },
+  })
+  bufs: Buffer[]
+
+  constructor(c1: number, bufs: Buffer[]) {
+    super()
+    this.y = 3
+    this.c1 = c1
+    this.c2 = c1 + bufs.length - 1
+    this.bufs = bufs.map((buf) => {
+      const paddedX = Math.floor((buf.length + this.y - 1) / this.y)
+      const paddedLength = paddedX * this.y
+      const padded = [paddedX, ...buf]
+      while (padded.length < paddedLength + 1) {
+        padded.push(0)
+      }
+      return Buffer.from(padded)
+    })
+    this.validate()
+  }
 }
 
 /**

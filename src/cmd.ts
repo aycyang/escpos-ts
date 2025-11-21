@@ -17,6 +17,16 @@ export type CmdClassDecorator = (
   context: ClassDecoratorContext,
 ) => void
 
+function cmdFieldToString(value: CmdField): string {
+  if (Buffer.isBuffer(value)) {
+    return bufToAbbrevString(value)
+  } else if (Array.isArray(value)) {
+    return value.map((buf) => bufToAbbrevString(buf)).join(', ')
+  } else {
+    return value.toString()
+  }
+}
+
 export class CmdBase {
   static desc: string
 
@@ -35,10 +45,7 @@ export class CmdBase {
     const fieldsAndValues = []
     for (const [name, value] of Object.entries(this)) {
       if (name === 'isValid') continue
-      let valueString: string = (value as CmdField).toString()
-      if (Buffer.isBuffer(value)) {
-        valueString = bufToAbbrevString(value)
-      }
+      const valueString: string = cmdFieldToString(value as CmdField)
       fieldsAndValues.push(`${name}=${valueString}`)
     }
     // TODO explain what each field value means, perhaps with decorators?
