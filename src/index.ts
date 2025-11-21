@@ -11,8 +11,7 @@ import {
   nullTerminatedBuffer,
 } from './fieldDecorators'
 import { CmdBase } from './cmd'
-import { ParseError } from './parse'
-import { ValidationError } from './error'
+import { ParseError, ValidationError } from './error'
 
 export { parse } from './parse'
 export type { CmdBase, CmdClass } from './cmd'

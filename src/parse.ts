@@ -1,12 +1,11 @@
 import { Ascii, asciiToByte } from './ascii'
 import { CmdClass, CmdClassDecorator, CmdBase } from './cmd'
 import { byteToHex } from './util'
+import { ParseError } from './error'
 import { assert } from './assert'
 
 type Node = Node[] | CmdClass | FnLookahead
 const kPrefixTree: Node[] = []
-
-export class ParseError extends Error {}
 
 function getFromTree(prefix: Ascii[]): Node {
   let curNode: Node = kPrefixTree

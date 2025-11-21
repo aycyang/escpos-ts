@@ -1,7 +1,19 @@
 import { Buffer } from 'buffer'
 import { CmdBase } from './cmd'
-import { ParseError } from './parse'
+import { ParseError, ValidationError } from './error'
 import { assert } from './assert'
+
+export type CmdField = number | Buffer | Buffer[]
+export type ParseFunction = (buf: Buffer) => [CmdField, Buffer]
+export type ParseMethod = (this: CmdBase, buf: Buffer) => [CmdField, Buffer]
+export type ParseMethodFactory = (...args: unknown[]) => ParseMethod
+export type SerializeFunction = (value: CmdField) => Buffer
+export type ValidateFunction = (name: string, value: CmdField) => void
+export type FieldMetadata = {
+  parse: ParseMethod
+  serialize: SerializeFunction
+  validate: ValidateFunction
+}
 
 type ClassFieldDecorator = (
   value: undefined,
@@ -20,7 +32,7 @@ export function rangeContains(range: Range, value: number): boolean {
 function throwIfNumberNotInRanges(ranges: Range[]): ValidateFunction {
   return (name: string, value: number) => {
     if (!ranges.some((range) => rangeContains(range, value))) {
-      throw new Error(
+      throw new ValidationError(
         `Parsed value ${value} for field '${name}' is not within a valid range.
         Valid ranges: ${
           ranges
@@ -40,7 +52,7 @@ export function throwIfBufElementsNotInRanges(
       (byte) => !ranges.some((range) => rangeContains(range, byte)),
     )
     if (offendingIndex !== -1) {
-      throw new Error(
+      throw new ValidationError(
         `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
         at index ${offendingIndex} that is not within a valid range.
         Valid ranges: ${
@@ -61,7 +73,7 @@ function throwIfNullTerminatedBufferElementsNotInRanges(
       .subarray(0, -1)
       .findIndex((byte) => !ranges.some((range) => rangeContains(range, byte)))
     if (offendingIndex !== -1) {
-      throw new Error(
+      throw new ValidationError(
         `Parsed buffer for field '${name}' has a byte ${value[offendingIndex]}
         at index ${offendingIndex} that is not within a valid range.
         Valid ranges: ${
@@ -102,18 +114,6 @@ function serializeU32(n: number): Buffer {
   const buf = Buffer.alloc(4)
   buf.writeUInt32LE(n)
   return buf
-}
-
-export type CmdField = number | Buffer | Buffer[]
-export type ParseFunction = (buf: Buffer) => [CmdField, Buffer]
-export type ParseMethod = (this: CmdBase, buf: Buffer) => [CmdField, Buffer]
-export type ParseMethodFactory = (...args: unknown[]) => ParseMethod
-export type SerializeFunction = (value: CmdField) => Buffer
-export type ValidateFunction = (name: string, value: CmdField) => void
-export type FieldMetadata = {
-  parse: ParseMethod
-  serialize: SerializeFunction
-  validate: ValidateFunction
 }
 
 function sizedBufferParseFactory(name: string, offset: number): ParseMethod {
