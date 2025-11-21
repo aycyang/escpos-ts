@@ -12,7 +12,7 @@
     "build": "tsc",
     "test": "tsx --test-reporter=spec tests/all.ts",
     "table": "tsx --test --test-reporter=./tests/reporter.ts ./tests/**/*.ts",
-    "support": "npm run table 2>/dev/null | awk '/Command \\| Status/,EOF' > support.md",
+    "support": "npm run table 2>/dev/null | awk '/<html>/,EOF' > support.html",
     "prepare": "husky install"
   },
   "author": "",

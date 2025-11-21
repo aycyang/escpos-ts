@@ -28,10 +28,10 @@ function removeNonCommands(
 
   for (const k of Object.keys(testsData)) {
     const value = testsData[k]
-    const commandName = k.split(' :: ')[0]
+    const [commandName, desc] = k.split(' :: ')
 
-    if (commandName) {
-      commandData[k] = value
+    if (commandName && desc) {
+      commandData[desc] = value
     }
   }
 
@@ -74,27 +74,42 @@ function htmlBlocks(testsData: Record<string, { status: status }>) {
   const head = `
     <head>
       <style>
-        .case { margin: 1px; }
-        .case[data-status="passing"] { color: green; } 
-        .case[data-status="failed"] { color: red; }
+        body {
+          font-family: system-ui;
+          background: black;
+          line-height: calc(23px + 4px);
+        }
+        .case { 
+          margin-right: 4px;
+          padding: 2px;
+          word-break: break-all;
+        }
+        .case[data-status="passed"] {
+          background-color: #9dff98;
+          color: #0d8304;
+        } 
+        .case[data-status="failed"], .case[data-status="skipped"] {
+          background-color: #ff8585;
+          color: #860e0b;
+        }
       </style>
     </head>
   `
     .split('\n')
     .map((s) => s.trimStart())
-    .join('')
+    .join('\n')
 
   return `
     <html>
       ${head}
     <body>
-      ${blocks.join()}
+      ${blocks.join('')}
     </body>
     </html>
   `
     .split('\n')
     .map((s) => s.trimStart())
-    .join('')
+    .join('\n')
 }
 
 type EnqueueEvent = TestEvent & { type: 'test:enqueue' }
