@@ -35,7 +35,7 @@ export class CmdBase {
     const fieldsAndValues = []
     for (const [name, value] of Object.entries(this)) {
       if (name === 'isValid') continue
-      let valueString: string = (value as number | Buffer).toString()
+      let valueString: string = (value as CmdField).toString()
       if (Buffer.isBuffer(value)) {
         valueString = bufToAbbrevString(value)
       }
@@ -99,12 +99,9 @@ export class CmdBase {
       return [instance, buf]
     }
     for (const [fieldName, fieldMetadata] of Object.entries(metadata.fields)) {
-      let parse = (fieldMetadata as FieldMetadata).parse
-      if ((fieldMetadata as FieldMetadata).parseMethod) {
-        parse = (fieldMetadata as FieldMetadata).parseMethod.bind(
-          instance,
-        ) as ParseFunction
-      }
+      const parse = (fieldMetadata as FieldMetadata).parse.bind(
+        instance,
+      ) as ParseFunction
       const [value, subarray] = parse(buf)
       instance[fieldName] = value
       buf = subarray

@@ -103,14 +103,13 @@ function serializeU32(n: number): Buffer {
 }
 
 export type CmdField = number | Buffer
-export type ParseMethod = (this: CmdBase, buf: Buffer) => [CmdField, Buffer]
 export type ParseFunction = (buf: Buffer) => [CmdField, Buffer]
+export type ParseMethod = (this: CmdBase, buf: Buffer) => [CmdField, Buffer]
 export type ParseMethodFactory = (...args: unknown[]) => ParseMethod
 export type SerializeFunction = (value: CmdField) => Buffer
 export type ValidateFunction = (name: string, value: CmdField) => void
 export type FieldMetadata = {
-  parse?: ParseFunction
-  parseMethod?: ParseMethod
+  parse: ParseMethod
   serialize: SerializeFunction
   validate: ValidateFunction
 }
@@ -137,7 +136,7 @@ function serializeBuffer(buf: Buffer): Buffer {
 // horizontal tab positions is processed as normal data."
 // source: https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cd.html
 // This needs to be tested on a real machine to determine exact behavior.
-function nullTerminatedBufferParseFactory(sizeLimit: number): ParseFunction {
+function nullTerminatedBufferParseFactory(sizeLimit: number): ParseMethod {
   function parseNullTerminatedBuffer(buf: Buffer): [Buffer, Buffer] {
     const i = buf.findIndex((n) => n === 0)
     if (i === -1) {
@@ -193,7 +192,7 @@ export function sizedBuffer(
   return (_, context) => {
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
-      parseMethod: sizedBufferParseFactory(sizeFieldName, sizeOffset),
+      parse: sizedBufferParseFactory(sizeFieldName, sizeOffset),
       serialize: serializeBuffer,
       validate: throwIfBufElementsNotInRanges(ranges),
     }
@@ -207,7 +206,7 @@ export function nullTerminatedBuffer(
   return (_, context) => {
     context.metadata.fields ??= {}
     context.metadata.fields[context.name] = {
-      parseMethod: nullTerminatedBufferParseFactory(sizeLimit),
+      parse: nullTerminatedBufferParseFactory(sizeLimit),
       serialize: serializeBuffer,
       validate: throwIfNullTerminatedBufferElementsNotInRanges(ranges),
     }
