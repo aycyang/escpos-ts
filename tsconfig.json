@@ -33,5 +33,7 @@
     // Disallow features that require cross-file awareness
     "isolatedModules": true
   },
-  "include": ["src", "reporters"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+
 }

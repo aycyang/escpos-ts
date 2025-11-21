@@ -8,10 +8,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "npx eslint --cache --fix src test",
+    "lint": "npx eslint --cache --fix src",
     "build": "tsc",
-    "test": "tsx --test --test-reporter=spec",
-    "table": "tsx --test --test-reporter=./reporters/html.ts test/cmds.ts",
+    "test": "tsx --test",
+    "table": "tsx --test --test-reporter=./reporters/html.ts src/index.test.ts",
     "support": "npm run table 2>/dev/null | awk '/<html>/,EOF' > docs/support.html",
     "prepare": "husky install"
   },
@@ -39,7 +39,7 @@
     "quoteProps": "consistent"
   },
   "lint-staged": {
-    "*.ts": "eslint --cache --fix src test",
+    "*.ts": "eslint --cache --fix src",
     "*.{ts,md}": "prettier --write"
   }
 }
