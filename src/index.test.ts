@@ -177,6 +177,7 @@ import {
   gs_lr,
   gs_lv_0,
   gs_lw,
+  PageModePrintDirection,
 } from './index'
 
 type TestCase = {
@@ -349,7 +350,13 @@ const testCases: TestCase[] = [
     cmd: new SelectStandardMode(),
     bytes: Buffer.from([0x1b, 0x53]),
   },
-  { cmd: new SelectPrintDirectionInPageMode() },
+  {
+    cmd: new SelectPrintDirectionInPageMode(PageModePrintDirection.RightToLeft),
+    bytes: Buffer.from([0x1b, 0x54, 0x2]),
+    checks: {
+      n: 2,
+    },
+  },
   { cmd: new SetRotationMode() },
   { cmd: new SetPrintAreaInPageMode() },
   { cmd: new SetRelativePrintPosition() },
