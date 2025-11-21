@@ -34,7 +34,7 @@ export class CmdBase {
       fieldsAndValues.push(`${name}=${valueString}`)
     }
     // TODO explain what each field value means, perhaps with decorators?
-    return `${cmdClass.desc} ( ${fieldsAndValues.join(', ')} )`
+    return `${this.constructor.name} :: ${cmdClass.desc} ( ${fieldsAndValues.join(', ')} )`
   }
 
   validate() {

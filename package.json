@@ -11,10 +11,13 @@
     "lint": "npx eslint --cache --fix src tests",
     "build": "tsc",
     "test": "tsx --test-reporter=spec tests/all.ts",
+    "table": "tsx --test --test-reporter=./tests/reporter.ts ./tests/**/*.ts",
+    "support": "npm run table 2>/dev/null | awk '/<html>/,EOF' > docs/support.html",
     "prepare": "husky install"
   },
   "author": "",
   "license": "BSD-3-Clause",
+  "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.9.1",
