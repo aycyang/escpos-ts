@@ -47,7 +47,7 @@ class FnLookahead {
 
 export function registerMultiFn(
   prefix: Ascii[],
-  config: { skip: number; fn: number },
+  config: { skip: number; fns: number[] },
 ): CmdClassDecorator {
   return (value: CmdClass, context: ClassDecoratorContext) => {
     let lookahead = getFromTree(prefix) as FnLookahead
@@ -60,7 +60,9 @@ export function registerMultiFn(
       Tried to define skip value of: ${config.skip}
       Previously defined skip value: ${lookahead.skip}`,
     )
-    lookahead.put(config.fn, value)
+    for (const fn of config.fns) {
+      lookahead.put(fn, value)
+    }
     addToTree(prefix, lookahead)
     context.metadata.prefix = prefix
   }

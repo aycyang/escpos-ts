@@ -435,7 +435,7 @@ export class DefineUserDefinedCharacters extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lparen_ca_fn97.html
  */
-@registerMultiFn(['ESC', '(', 'A'], { skip: 2, fn: 97 })
+@registerMultiFn(['ESC', '(', 'A'], { skip: 2, fns: [97] })
 export class ModelSpecificBuzzerControl extends CmdBase {
   static override desc: string = 'Model specific buzzer control (fn=97)'
 
@@ -848,7 +848,7 @@ export class fs_ampersand extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ca_fn48.html
  */
-@registerMultiFn(['FS', '(', 'A'], { skip: 2, fn: 48 })
+@registerMultiFn(['FS', '(', 'A'], { skip: 2, fns: [48] })
 export class SelectKanjiCharacterFont extends CmdBase {
   static override desc: string = 'Select Kanji character style(s)'
 
@@ -873,7 +873,7 @@ export class SelectKanjiCharacterFont extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn60.html
  */
-@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 60 })
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fns: [60] })
 export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string =
     'Cancel set values for top/bottom logo printing'
@@ -916,7 +916,7 @@ export class CancelSetValuesForTopOrBottomLogoPrinting extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn61.html
  */
-@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 61 })
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fns: [61] })
 export class TransmitSetValuesForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string =
     'Transmit set values for top/bottom logo printing'
@@ -947,7 +947,7 @@ export class TransmitSetValuesForTopOrBottomLogoPrinting extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn62.html
  */
-@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 62 })
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fns: [62] })
 export class SetTopLogoPrinting extends CmdBase {
   static override desc: string = 'Set top logo printing'
 
@@ -989,7 +989,7 @@ export class SetTopLogoPrinting extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn63.html
  */
-@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 63 })
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fns: [63] })
 export class SetBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Set bottom logo printing'
 
@@ -1029,7 +1029,7 @@ export class SetBottomLogoPrinting extends CmdBase {
  * NOTE this command can vary in size
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn64.html
  */
-@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 64 })
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fns: [64] })
 export class MakeExtendedSettingsForTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string =
     'Make extended settings for top/bottom logo printing'
@@ -1063,7 +1063,7 @@ export class MakeExtendedSettingsForTopOrBottomLogoPrinting extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/fs_lparen_ce_fn65.html
  */
-@registerMultiFn(['FS', '(', 'E'], { skip: 2, fn: 65 })
+@registerMultiFn(['FS', '(', 'E'], { skip: 2, fns: [65] })
 export class EnableOrDisableTopOrBottomLogoPrinting extends CmdBase {
   static override desc: string = 'Enable/disable top/bottom logo printing'
 
