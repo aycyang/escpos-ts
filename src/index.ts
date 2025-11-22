@@ -185,6 +185,20 @@ const DoubleStrikeModeToNumber: Record<DoubleStrikeMode, number> = {
   [DoubleStrikeMode.On]: 1,
 }
 
+export enum PrintDirection {
+  LeftToRight = 'PrintDirection.LeftToRight',
+  BottomToTop = 'PrintDirection.BottomToTop',
+  RightToLeft = 'PrintDirection.RightToLeft',
+  TopToBottom = 'PrintDirection.TopToBottom',
+}
+
+const PrintDirectionToNumber: Record<PrintDirection, number> = {
+  [PrintDirection.LeftToRight]: 0,
+  [PrintDirection.BottomToTop]: 1,
+  [PrintDirection.RightToLeft]: 2,
+  [PrintDirection.TopToBottom]: 3,
+}
+
 // --- COMMANDS ---
 
 /**
@@ -650,8 +664,14 @@ export class PrintAndFeedPaper extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cl.html
  */
+@register(['ESC', 'L'])
 export class SelectPageMode extends CmdBase {
   static desc: string = 'Select Page mode'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
@@ -694,8 +714,18 @@ export class SelectStandardMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ct.html
  */
+@register(['ESC', 'T'])
 export class SelectPrintDirectionInPageMode extends CmdBase {
   static desc: string = 'Select print direction in Page mode'
+
+  @u8([[0, 255]])
+  n: number
+
+  constructor(direction: PrintDirection) {
+    super()
+    this.n = PrintDirectionToNumber[direction]
+    this.validate()
+  }
 }
 
 /**
@@ -708,8 +738,30 @@ export class SetRotationMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cw.html
  */
+@register(['ESC', 'W'])
 export class SetPrintAreaInPageMode extends CmdBase {
   static desc: string = 'Set print area in Page mode'
+
+  @u16([[0, 65535]])
+  x: number
+
+  @u16([[0, 65535]])
+  y: number
+
+  @u16([[1, 65535]])
+  dx: number
+
+  @u16([[1, 65535]])
+  dy: number
+
+  constructor(x: number, y: number, dx: number, dy: number) {
+    super()
+    this.x = x
+    this.y = y
+    this.dx = dx
+    this.dy = dy
+    this.validate()
+  }
 }
 
 /**

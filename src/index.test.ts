@@ -177,6 +177,7 @@ import {
   gs_lr,
   gs_lv_0,
   gs_lw,
+  PrintDirection,
 } from './index'
 
 type TestCase = {
@@ -333,7 +334,10 @@ const testCases: TestCase[] = [
       n: 250,
     },
   },
-  { cmd: new SelectPageMode() },
+  {
+    cmd: new SelectPageMode(),
+    bytes: Buffer.from([0x1b, 0x4c]),
+  },
   {
     cmd: new SelectCharacterFont(CharacterFont.B),
     bytes: Buffer.from([0x1b, 0x4d, 0x01]),
@@ -346,9 +350,26 @@ const testCases: TestCase[] = [
     cmd: new SelectStandardMode(),
     bytes: Buffer.from([0x1b, 0x53]),
   },
-  { cmd: new SelectPrintDirectionInPageMode() },
+  {
+    cmd: new SelectPrintDirectionInPageMode(PrintDirection.RightToLeft),
+    bytes: Buffer.from([0x1b, 0x54, 0x2]),
+    checks: {
+      n: 2,
+    },
+  },
   { cmd: new SetRotationMode() },
-  { cmd: new SetPrintAreaInPageMode() },
+  {
+    cmd: new SetPrintAreaInPageMode(0xabcd, 0xef12, 0x3456, 0x6789),
+    bytes: Buffer.from([
+      0x1b, 0x57, 0xcd, 0xab, 0x12, 0xef, 0x56, 0x34, 0x89, 0x67,
+    ]),
+    checks: {
+      x: 0xabcd,
+      y: 0xef12,
+      dx: 0x3456,
+      dy: 0x6789,
+    },
+  },
   { cmd: new SetRelativePrintPosition() },
   {
     cmd: new SelectJustification(Justification.Center),
