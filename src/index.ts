@@ -748,10 +748,10 @@ export class SetPrintAreaInPageMode extends CmdBase {
   @u16([[0, 65535]])
   y: number
 
-  @u16([[0, 65535]])
+  @u16([[1, 65535]])
   dx: number
 
-  @u16([[0, 65535]])
+  @u16([[1, 65535]])
   dy: number
 
   constructor(x: number, y: number, dx: number, dy: number) {
