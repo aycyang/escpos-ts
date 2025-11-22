@@ -177,7 +177,7 @@ import {
   gs_lr,
   gs_lv_0,
   gs_lw,
-} from '../src/index'
+} from './index'
 
 type TestCase = {
   cmd: CmdBase

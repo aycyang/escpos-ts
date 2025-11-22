@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert'
-import { parse } from '../src/index'
+import { parse } from './parse'
 
 void test('ParseError', async (t) => {
   await t.test('unrecognized prefix', () => {
