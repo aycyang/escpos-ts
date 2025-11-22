@@ -145,19 +145,14 @@ const JustificationToNumber: Record<Justification, number> = {
   [Justification.Right]: 2,
 }
 
-export enum CutMode {
-  CutPaper = 'CutMode.CutPaper',
-  FeedAndCutPaper = 'CutMode.FeedAndCutPaper',
-}
-
-const CutModeToNumber: Record<CutMode, number> = {
-  [CutMode.CutPaper]: 0,
-  [CutMode.FeedAndCutPaper]: 65,
-}
-
 export enum CutShape {
   FullCut = 'CutShape.FullCut',
   PartialCut = 'CutShape.PartialCut',
+}
+
+const CutShapeToNumber: Record<CutShape, number> = {
+  [CutShape.FullCut]: 0,
+  [CutShape.PartialCut]: 1,
 }
 
 export enum DoubleWidthMode {
@@ -1767,22 +1762,39 @@ export class gs_cp extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cv.html
  */
-@register(['GS', 'V'])
-export class SelectCutModeAndCutPaper extends CmdBase {
-  static override desc: string = 'Select cut mode and cut paper'
+@registerMultiFn(['GS', 'V'], { skip: 0, fns: [0, 1, 48, 49] })
+export class CutPaper extends CmdBase {
+  static override desc: string =
+    'Select cut mode and cut paper (Function A: Cuts the paper)'
 
-  @u8([0, 1, 48, 49, 65, 66])
+  @u8([0, 1, 48, 49])
   m: number
 
-  // TODO parse n if m is 65 or 66
-
-  constructor(mode: CutMode, shape: CutShape) {
-    let m = CutModeToNumber[mode]
-    if (shape === CutShape.PartialCut) {
-      m++
-    }
+  constructor(shape: CutShape) {
     super()
-    this.m = m
+    this.m = CutShapeToNumber[shape]
+    this.validate()
+  }
+}
+
+/**
+ * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_cv.html
+ */
+@registerMultiFn(['GS', 'V'], { skip: 0, fns: [65, 66] })
+export class FeedAndCutPaper extends CmdBase {
+  static override desc: string =
+    'Select cut mode and cut paper (Function B: Feeds paper and cuts the paper)'
+
+  @u8([65, 66])
+  m: number
+
+  @u8([[0, 255]])
+  n: number
+
+  constructor(vmu: number, shape: CutShape) {
+    super()
+    this.m = 65 + CutShapeToNumber[shape]
+    this.n = vmu
     this.validate()
   }
 }

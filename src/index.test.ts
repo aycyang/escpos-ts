@@ -12,7 +12,6 @@ import {
   CharacterFont,
   WhiteAndBlackReversePrintMode,
   Justification,
-  CutMode,
   CutShape,
   DoubleWidthMode,
   DoubleHeightMode,
@@ -63,7 +62,8 @@ import {
   EnableOrDisableTopOrBottomLogoPrinting,
   SelectCharacterSize,
   SetWhiteAndBlackReversePrintMode,
-  SelectCutModeAndCutPaper,
+  CutPaper,
+  FeedAndCutPaper,
   parse,
   DoubleStrikeMode,
   PrintAndLineFeed,
@@ -478,10 +478,18 @@ const testCases: TestCase[] = [
     },
   },
   {
-    cmd: new SelectCutModeAndCutPaper(CutMode.CutPaper, CutShape.PartialCut),
+    cmd: new CutPaper(CutShape.PartialCut),
     bytes: Buffer.from([0x1d, 0x56, 0x01]),
     checks: {
       m: 1,
+    },
+  },
+  {
+    cmd: new FeedAndCutPaper(255, CutShape.PartialCut),
+    bytes: Buffer.from([0x1d, 0x56, 0x42, 0xff]),
+    checks: {
+      m: 66,
+      n: 255,
     },
   },
   {
