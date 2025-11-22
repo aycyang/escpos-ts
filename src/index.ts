@@ -185,18 +185,18 @@ const DoubleStrikeModeToNumber: Record<DoubleStrikeMode, number> = {
   [DoubleStrikeMode.On]: 1,
 }
 
-export enum PageModePrintDirection {
-  LeftToRight = 'PageModePrintDirection.LeftToRight',
-  BottomToTop = 'PageModePrintDirection.BottomToTop',
-  RightToLeft = 'PageModePrintDirection.RightToLeft',
-  TopToBottom = 'PageModePrintDirection.TopToBottom',
+export enum PrintDirection {
+  LeftToRight = 'PrintDirection.LeftToRight',
+  BottomToTop = 'PrintDirection.BottomToTop',
+  RightToLeft = 'PrintDirection.RightToLeft',
+  TopToBottom = 'PrintDirection.TopToBottom',
 }
 
-const PageModePrintDirectionToNumber: Record<PageModePrintDirection, number> = {
-  [PageModePrintDirection.LeftToRight]: 0,
-  [PageModePrintDirection.BottomToTop]: 1,
-  [PageModePrintDirection.RightToLeft]: 2,
-  [PageModePrintDirection.TopToBottom]: 3,
+const PrintDirectionToNumber: Record<PrintDirection, number> = {
+  [PrintDirection.LeftToRight]: 0,
+  [PrintDirection.BottomToTop]: 1,
+  [PrintDirection.RightToLeft]: 2,
+  [PrintDirection.TopToBottom]: 3,
 }
 
 // --- COMMANDS ---
@@ -721,9 +721,9 @@ export class SelectPrintDirectionInPageMode extends CmdBase {
   @u8([[0, 255]])
   n: number
 
-  constructor(direction: PageModePrintDirection) {
+  constructor(direction: PrintDirection) {
     super()
-    this.n = PageModePrintDirectionToNumber[direction]
+    this.n = PrintDirectionToNumber[direction]
     this.validate()
   }
 }
