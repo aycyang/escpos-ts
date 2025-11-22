@@ -193,10 +193,10 @@ export enum PageModePrintDirection {
 }
 
 const PageModePrintDirectionToNumber: Record<PageModePrintDirection, number> = {
-  [PageModePrintDirection.LeftToRight]: 1,
-  [PageModePrintDirection.BottomToTop]: 2,
-  [PageModePrintDirection.RightToLeft]: 3,
-  [PageModePrintDirection.TopToBottom]: 4,
+  [PageModePrintDirection.LeftToRight]: 0,
+  [PageModePrintDirection.BottomToTop]: 1,
+  [PageModePrintDirection.RightToLeft]: 2,
+  [PageModePrintDirection.TopToBottom]: 3,
 }
 
 // --- COMMANDS ---
@@ -714,6 +714,7 @@ export class SelectStandardMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_ct.html
  */
+@register(['ESC', 'T'])
 export class SelectPrintDirectionInPageMode extends CmdBase {
   static desc: string = 'Select print direction in Page mode'
 
