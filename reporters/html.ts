@@ -12,12 +12,54 @@ function nameToDescriptionOnly(name: string): string {
   }
 }
 
+function getIndentation(lines: string[] | TemplateStringsArray): string {
+  let firstIndent: string
+
+  if (lines[0] === '') {
+    firstIndent = lines[1]
+  } else {
+    firstIndent = lines[0]
+  }
+
+  const matched = firstIndent.match(/^(\s+).*$/)
+  return matched ? matched[1] : ''
+}
+
+function indented(strings: TemplateStringsArray, ...values: string[]) {
+  const indentLevel = getIndentation(strings[0].split('\n'))
+
+  const joined = strings
+    .map((str, i) => {
+      const inner = values[i]
+      const lines = str.split('\n')
+      const innerIndent = lines[lines.length - 1]
+      if (inner) {
+        // don't reindent the first line of inner, since that's where the indent level comes from
+        const reindentedInner = inner
+          .split('\n')
+          .map((v, j) => (j > 0 ? innerIndent + v : v))
+          .join('\n')
+        return `${str}${reindentedInner}`
+      } else {
+        return str
+      }
+    })
+    .join('')
+    .trimStart()
+    .trimEnd() // remove extra empty strings at start and end
+
+  return joined
+    .split('\n')
+    .map((line) => line.replace(new RegExp(`^${indentLevel}`), ''))
+    .join('\n')
+}
+
 function htmlBlocks(testsData: Record<string, { status: Status }>) {
   const blocks = Object.entries(testsData).map(
     (pair) =>
-      `<span class="case" data-status="${pair[1].status}">${nameToDescriptionOnly(pair[0])}</span>\n`,
+      `<span class="case" data-status="${pair[1].status}">${nameToDescriptionOnly(pair[0])}</span>`,
   )
-  const head = `
+  const head = indented`
     <head>
       <style>
         body {
@@ -49,22 +91,18 @@ function htmlBlocks(testsData: Record<string, { status: Status }>) {
       </style>
     </head>
   `
-    .split('\n')
-    .map((s) => s.trimStart())
-    .join('\n')
 
-  return `
+  return indented`
     <html>
       ${head}
     <body>
       <h1>Command support</h1>
-      <div class="content">\n${blocks.join('')}</div>
+      <div class="content">
+        ${blocks.join('\n')}
+      </div>
     </body>
     </html>
   `
-    .split('\n')
-    .map((s) => s.trimStart())
-    .join('\n')
 }
 
 type TestCompleteEvent = TestEvent & { type: 'test:complete' }
