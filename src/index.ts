@@ -738,8 +738,30 @@ export class SetRotationMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cw.html
  */
+@register(['ESC', 'W'])
 export class SetPrintAreaInPageMode extends CmdBase {
   static desc: string = 'Set print area in Page mode'
+
+  @u16([[0, 65535]])
+  x: number
+
+  @u16([[0, 65535]])
+  y: number
+
+  @u16([[0, 65535]])
+  dx: number
+
+  @u16([[0, 65535]])
+  dy: number
+
+  constructor(x: number, y: number, dx: number, dy: number) {
+    super()
+    this.x = x
+    this.y = y
+    this.dx = dx
+    this.dy = dy
+    this.validate()
+  }
 }
 
 /**

@@ -358,7 +358,18 @@ const testCases: TestCase[] = [
     },
   },
   { cmd: new SetRotationMode() },
-  { cmd: new SetPrintAreaInPageMode() },
+  {
+    cmd: new SetPrintAreaInPageMode(0xabcd, 0xef12, 0x3456, 0x6789),
+    bytes: Buffer.from([
+      0x1b, 0x57, 0xcd, 0xab, 0x12, 0xef, 0x56, 0x34, 0x89, 0x67,
+    ]),
+    checks: {
+      x: 0xabcd,
+      y: 0xef12,
+      dx: 0x3456,
+      dy: 0x6789,
+    },
+  },
   { cmd: new SetRelativePrintPosition() },
   {
     cmd: new SelectJustification(Justification.Center),
