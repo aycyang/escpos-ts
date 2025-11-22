@@ -1,8 +1,30 @@
 import { Ascii, asciiToByte } from './ascii'
-import { CmdClass, CmdClassDecorator, CmdBase } from './cmd'
-import { byteToHex } from './util'
-import { ParseError } from './error'
+import { CmdClass, CmdClassDecorator } from './cmd'
 import { assert } from './assert'
+
+export interface Serializable {
+  serialize(): Buffer
+}
+
+export class Bytes {
+  values: number[]
+
+  constructor(values: number[] = []) {
+    this.values = values
+  }
+
+  serialize(): Buffer {
+    return Buffer.from(this.values)
+  }
+
+  push(...args: number[]) {
+    this.values.push(...args)
+  }
+
+  static from(values: number[]) {
+    return new Bytes(values)
+  }
+}
 
 type Node = Node[] | CmdClass | FnLookahead
 const kPrefixTree: Node[] = []
@@ -84,9 +106,21 @@ export function register(prefix: Ascii[]): CmdClassDecorator {
 /**
  * Parses a buffer into a list of ESC/POS commands.
  */
-export function parse(buf: Buffer): CmdBase[] {
-  const cmds: CmdBase[] = []
+export function parse(buf: Buffer): Serializable[] {
+  const cmds: Serializable[] = []
   while (buf.length > 0) {
+    if (!(buf[0] in kPrefixTree)) {
+      let last: Bytes
+      if (cmds[cmds.length - 1] instanceof Bytes) {
+        last = cmds[cmds.length - 1] as Bytes
+      } else {
+        last = new Bytes()
+        cmds.push(last)
+      }
+      last.push(buf[0])
+      buf = buf.subarray(1)
+      continue
+    }
     // Traverse parse tree until a leaf node is reached.
     let curNode = kPrefixTree as Node
     let i = 0
@@ -95,13 +129,16 @@ export function parse(buf: Buffer): CmdBase[] {
       i++
     }
 
-    // If curNode isn't a leaf node by now, something went wrong with the
-    // parse.
+    // If curNode isn't a leaf node by now, no prefix was recognized.
+    // Parse the bytes read so far as free bytes.
     if (Array.isArray(curNode)) {
-      if (i >= buf.length) {
-        throw new ParseError(`unexpected end of buffer: ${buf.toString()}`)
+      if (!(cmds[cmds.length - 1] instanceof Bytes)) {
+        cmds.push(new Bytes())
       }
-      throw new ParseError(`unrecognized token: 0x${byteToHex(buf[i])}`)
+      const last = cmds[cmds.length - 1] as Bytes
+      last.push(...buf.subarray(0, i))
+      buf = buf.subarray(i)
+      continue
     }
 
     // Advance the buffer start pointer to just after the prefix.
