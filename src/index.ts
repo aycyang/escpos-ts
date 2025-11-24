@@ -18,6 +18,73 @@ export type { CmdBase, CmdClass } from './cmd'
 
 // --- ENUMS ---
 
+export enum InternationalCharacterSet {
+  USA = 'InternationalCharacterSet.USA',
+  France = 'InternationalCharacterSet.France',
+  Germany = 'InternationalCharacterSet.Germany',
+  UK = 'InternationalCharacterSet.UK',
+  Denmark1 = 'InternationalCharacterSet.Denmark1',
+  Sweden = 'InternationalCharacterSet.Sweden',
+  Italy = 'InternationalCharacterSet.Italy',
+  Spain1 = 'InternationalCharacterSet.Spain1',
+  Japan = 'InternationalCharacterSet.Japan',
+  Norway = 'InternationalCharacterSet.Norway',
+  Denmark2 = 'InternationalCharacterSet.Denmark2',
+  Spain2 = 'InternationalCharacterSet.Spain2',
+  LatinAmerica = 'InternationalCharacterSet.LatinAmerica',
+  Korea = 'InternationalCharacterSet.Korea',
+  SloveniaCroatia = 'InternationalCharacterSet.SloveniaCroatia',
+  China = 'InternationalCharacterSet.China',
+  Vietnam = 'InternationalCharacterSet.Vietnam',
+  Arabia = 'InternationalCharacterSet.Arabia',
+  IndiaDevanagari = 'InternationalCharacterSet.IndiaDevanagari',
+  IndiaBengali = 'InternationalCharacterSet.IndiaBengali',
+  IndiaTamil = 'InternationalCharacterSet.IndiaTamil',
+  IndiaTelugu = 'InternationalCharacterSet.IndiaTelugu',
+  IndiaAssamese = 'InternationalCharacterSet.IndiaAssamese',
+  IndiaOriya = 'InternationalCharacterSet.IndiaOriya',
+  IndiaKannada = 'InternationalCharacterSet.IndiaKannada',
+  IndiaMalayalam = 'InternationalCharacterSet.IndiaMalayalam',
+  IndiaGujarati = 'InternationalCharacterSet.IndiaGujarati',
+  IndiaPunjabi = 'InternationalCharacterSet.IndiaPunjabi',
+  IndiaMarathi = 'InternationalCharacterSet.IndiaMarathi',
+}
+
+const InternationalCharacterSetToNumber: Record<
+  InternationalCharacterSet,
+  number
+> = {
+  [InternationalCharacterSet.USA]: 0,
+  [InternationalCharacterSet.France]: 1,
+  [InternationalCharacterSet.Germany]: 2,
+  [InternationalCharacterSet.UK]: 3,
+  [InternationalCharacterSet.Denmark1]: 4,
+  [InternationalCharacterSet.Sweden]: 5,
+  [InternationalCharacterSet.Italy]: 6,
+  [InternationalCharacterSet.Spain1]: 7,
+  [InternationalCharacterSet.Japan]: 8,
+  [InternationalCharacterSet.Norway]: 9,
+  [InternationalCharacterSet.Denmark2]: 10,
+  [InternationalCharacterSet.Spain2]: 11,
+  [InternationalCharacterSet.LatinAmerica]: 12,
+  [InternationalCharacterSet.Korea]: 13,
+  [InternationalCharacterSet.SloveniaCroatia]: 14,
+  [InternationalCharacterSet.China]: 15,
+  [InternationalCharacterSet.Vietnam]: 16,
+  [InternationalCharacterSet.Arabia]: 17,
+  [InternationalCharacterSet.IndiaDevanagari]: 66,
+  [InternationalCharacterSet.IndiaBengali]: 67,
+  [InternationalCharacterSet.IndiaTamil]: 68,
+  [InternationalCharacterSet.IndiaTelugu]: 69,
+  [InternationalCharacterSet.IndiaAssamese]: 70,
+  [InternationalCharacterSet.IndiaOriya]: 71,
+  [InternationalCharacterSet.IndiaKannada]: 72,
+  [InternationalCharacterSet.IndiaMalayalam]: 73,
+  [InternationalCharacterSet.IndiaGujarati]: 74,
+  [InternationalCharacterSet.IndiaPunjabi]: 75,
+  [InternationalCharacterSet.IndiaMarathi]: 82,
+}
+
 export enum PaperSensor {
   Off = 'PaperSensor.Off',
   NearEnd = 'PaperSensor.NearEnd',
@@ -718,8 +785,18 @@ export class SelectCharacterFont extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cr.html
  */
+@register(['ESC', 'R'])
 export class SelectInternationalCharacterSet extends CmdBase {
   static desc: string = 'Select an international character set'
+
+  @u8([[0, 17]])
+  n: number
+
+  constructor(ics: InternationalCharacterSet) {
+    super()
+    this.n = InternationalCharacterSetToNumber[ics]
+    this.validate()
+  }
 }
 
 /**

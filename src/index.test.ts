@@ -3,6 +3,7 @@ import assert from 'node:assert'
 import { Bytes } from './parse'
 import { CmdBase } from './cmd'
 import {
+  InternationalCharacterSet,
   PaperSensor,
   BuzzerSoundPattern,
   PeripheralDeviceSelection,
@@ -347,7 +348,13 @@ const testCases: TestCase[] = [
       n: 0x01,
     },
   },
-  { cmd: new SelectInternationalCharacterSet() },
+  {
+    cmd: new SelectInternationalCharacterSet(InternationalCharacterSet.Japan),
+    bytes: Buffer.from([0x1b, 0x52, 0x08]),
+    checks: {
+      n: 8,
+    },
+  },
   {
     cmd: new SelectStandardMode(),
     bytes: Buffer.from([0x1b, 0x53]),
