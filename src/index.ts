@@ -242,15 +242,27 @@ export class PrintAndLineFeed extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/ff_in_page.html
  */
-export class ff_in_page extends CmdBase {
+@register(['FF'])
+export class PrintAndReturnToStandardMode extends CmdBase {
   static desc: string = 'Print and return to Standard mode (in Page mode)'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/cr.html
  */
-export class cr extends CmdBase {
+@register(['CR'])
+export class PrintAndCarriageReturn extends CmdBase {
   static desc: string = 'Print and carriage return'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
