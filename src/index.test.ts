@@ -1,9 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert'
+import { Bytes } from './parse'
+import { CmdBase } from './cmd'
 import {
   PaperSensor,
   BuzzerSoundPattern,
-  CmdBase,
   PeripheralDeviceSelection,
   UserDefinedCharacterSetSelection,
   BitImageMode,
@@ -661,9 +662,11 @@ for (const testCase of testCases) {
       return
     }
 
-    const cmds = parse(testCase.bytes)
-    assert.strictEqual(cmds.length, 1)
+    let cmds = parse(testCase.bytes)
+    cmds = cmds.filter((cmd) => !(cmd instanceof Bytes))
+    assert.strictEqual(cmds.length, 1, 'failed to parse a command')
     const parsedCmd = cmds[0]
+    assert(parsedCmd instanceof CmdBase)
     assert(parsedCmd.isValid)
 
     assert(
@@ -673,7 +676,7 @@ for (const testCase of testCases) {
     assert.deepStrictEqual(
       parsedCmd,
       testCase.cmd,
-      'parsed (actual) differs from cmd (expected)',
+      'parsed (actual) differs from constructed (expected)',
     )
 
     for (const [key, value] of Object.entries(testCase.checks ?? {})) {
