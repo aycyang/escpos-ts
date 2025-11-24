@@ -880,15 +880,27 @@ export class PrintAndFeedNLines extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_li.html
  */
+@register(['ESC', 'i'])
 export class PartialCutOnePointLeftUncut extends CmdBase {
   static desc: string = 'Partial cut (one point left uncut)'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lm.html
  */
+@register(['ESC', 'm'])
 export class PartialCutThreePointsLeftUncut extends CmdBase {
   static desc: string = 'Partial cut (three points left uncut)'
+
+  constructor() {
+    super()
+    this.validate()
+  }
 }
 
 /**

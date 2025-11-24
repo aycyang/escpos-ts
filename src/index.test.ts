@@ -407,8 +407,11 @@ const testCases: TestCase[] = [
       n: 1,
     },
   },
-  { cmd: new PartialCutOnePointLeftUncut() },
-  { cmd: new PartialCutThreePointsLeftUncut() },
+  { cmd: new PartialCutOnePointLeftUncut(), bytes: Buffer.from([0x1b, 0x69]) },
+  {
+    cmd: new PartialCutThreePointsLeftUncut(),
+    bytes: Buffer.from([0x1b, 0x6d]),
+  },
   { cmd: new GeneratePulse() },
   { cmd: new SelectCharacterCodeTable() },
   { cmd: new TransmitPeripheralDeviceStatus() },
