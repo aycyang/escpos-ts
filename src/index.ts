@@ -18,6 +18,18 @@ export type { CmdBase, CmdClass } from './cmd'
 
 // --- ENUMS ---
 
+export enum PaperSensor {
+  Off = 'PaperSensor.Off',
+  NearEnd = 'PaperSensor.NearEnd',
+  End = 'PaperSensor.End',
+}
+
+const PaperSensorToNumber: Record<PaperSensor, number> = {
+  [PaperSensor.Off]: 0,
+  [PaperSensor.NearEnd]: 0b0001,
+  [PaperSensor.End]: 0b0100,
+}
+
 export enum BuzzerSoundPattern {
   A = 'BuzzerSoundPattern.A',
   B = 'BuzzerSoundPattern.B',
@@ -794,15 +806,39 @@ export class SelectJustification extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lc_3.html
  */
+@register(['ESC', 'c', '3'])
 export class SelectPaperSensorsToOutputPaperEndSignals extends CmdBase {
   static desc: string = 'Select paper sensor(s) to output paper-end signals'
+
+  @u8([[0, 255]])
+  n: number
+
+  constructor(sensors: PaperSensor[]) {
+    super()
+    this.n = sensors
+      .map((sensor) => PaperSensorToNumber[sensor])
+      .reduce((a, b) => a | b)
+    this.validate()
+  }
 }
 
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lc_4.html
  */
+@register(['ESC', 'c', '4'])
 export class SelectPaperSensorsToStopPrinting extends CmdBase {
   static desc: string = 'Select paper sensor(s) to stop printing'
+
+  @u8([[0, 255]])
+  n: number
+
+  constructor(sensors: PaperSensor[]) {
+    super()
+    this.n = sensors
+      .map((sensor) => PaperSensorToNumber[sensor])
+      .reduce((a, b) => a | b)
+    this.validate()
+  }
 }
 
 /**

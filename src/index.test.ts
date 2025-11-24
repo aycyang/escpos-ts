@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert'
 import {
+  PaperSensor,
   BuzzerSoundPattern,
   CmdBase,
   PeripheralDeviceSelection,
@@ -378,8 +379,26 @@ const testCases: TestCase[] = [
       n: 1,
     },
   },
-  { cmd: new SelectPaperSensorsToOutputPaperEndSignals() },
-  { cmd: new SelectPaperSensorsToStopPrinting() },
+  {
+    cmd: new SelectPaperSensorsToOutputPaperEndSignals([
+      PaperSensor.NearEnd,
+      PaperSensor.End,
+    ]),
+    bytes: Buffer.from([0x1b, 0x63, 0x33, 0b0101]),
+    checks: {
+      n: 0b0101,
+    },
+  },
+  {
+    cmd: new SelectPaperSensorsToStopPrinting([
+      PaperSensor.NearEnd,
+      PaperSensor.End,
+    ]),
+    bytes: Buffer.from([0x1b, 0x63, 0x34, 0b0101]),
+    checks: {
+      n: 0b0101,
+    },
+  },
   { cmd: new EnableOrDisablePanelButtons() },
   {
     cmd: new PrintAndFeedNLines(1),
