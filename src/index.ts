@@ -278,6 +278,18 @@ const PrintDirectionToNumber: Record<PrintDirection, number> = {
   [PrintDirection.TopToBottom]: 3,
 }
 
+export enum ClockwiseRotationMode {
+  Off = 'ClockwiseRotationMode.Off',
+  OneDotSpacing = 'ClockwiseRotationMode.OneDotSpacing',
+  OneAndHalfDotSpacing = 'ClockwiseRotationMode.OneAndHalfDotSpacing',
+}
+
+const ClockwiseRotationModeToNumber: Record<ClockwiseRotationMode, number> = {
+  [ClockwiseRotationMode.Off]: 0,
+  [ClockwiseRotationMode.OneDotSpacing]: 1,
+  [ClockwiseRotationMode.OneAndHalfDotSpacing]: 2,
+}
+
 // --- COMMANDS ---
 
 /**
@@ -832,8 +844,21 @@ export class SelectPrintDirectionInPageMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cv.html
  */
+@register(['ESC', 'V'])
 export class SetRotationMode extends CmdBase {
   static desc: string = 'Turn 90° clockwise rotation mode on/off'
+
+  @u8([
+    [0, 2],
+    [48, 50],
+  ])
+  n: number
+
+  constructor(rotationMode: ClockwiseRotationMode) {
+    super()
+    this.n = ClockwiseRotationModeToNumber[rotationMode]
+    this.validate()
+  }
 }
 
 /**
@@ -868,6 +893,7 @@ export class SetPrintAreaInPageMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_backslash.html
  */
+@register(['ESC', '\\'])
 export class SetRelativePrintPosition extends CmdBase {
   static desc: string = 'Set relative print position'
 }

@@ -181,6 +181,7 @@ import {
   gs_lv_0,
   gs_lw,
   PrintDirection,
+  ClockwiseRotationMode,
 } from './index'
 
 type TestCase = {
@@ -366,7 +367,13 @@ const testCases: TestCase[] = [
       n: 2,
     },
   },
-  { cmd: new SetRotationMode() },
+  {
+    cmd: new SetRotationMode(ClockwiseRotationMode.OneDotSpacing),
+    bytes: Buffer.from([0x1b, 0x56, 0x1]),
+    checks: {
+      n: 1,
+    },
+  },
   {
     cmd: new SetPrintAreaInPageMode(0xabcd, 0xef12, 0x3456, 0x6789),
     bytes: Buffer.from([
