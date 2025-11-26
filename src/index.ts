@@ -290,6 +290,15 @@ const ClockwiseRotationModeToNumber: Record<ClockwiseRotationMode, number> = {
   [ClockwiseRotationMode.OneAndHalfDotSpacing]: 2,
 }
 
+export enum UpsideDownPrintMode {
+  Off = 'UpsideDownPrintMode.Off',
+  On = 'UpsideDownPrintMode.On',
+}
+
+const UpsideDownPrintModeToNumber: Record<UpsideDownPrintMode, number> = {
+  [UpsideDownPrintMode.Off]: 0,
+  [UpsideDownPrintMode.On]: 1,
+}
 // --- COMMANDS ---
 
 /**
@@ -854,9 +863,9 @@ export class SetRotationMode extends CmdBase {
   ])
   n: number
 
-  constructor(rotationMode: ClockwiseRotationMode) {
+  constructor(mode: ClockwiseRotationMode) {
     super()
-    this.n = ClockwiseRotationModeToNumber[rotationMode]
+    this.n = ClockwiseRotationModeToNumber[mode]
     this.validate()
   }
 }
@@ -1037,8 +1046,18 @@ export class TransmitPaperSensorStatus extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lbrace.html
  */
+@register(['ESC', '{'])
 export class SetUpsideDownPrintMode extends CmdBase {
   static desc: string = 'Turn upside-down print mode on/off'
+
+  @u8([0, 1])
+  n: number
+
+  constructor(mode: UpsideDownPrintMode) {
+    super()
+    this.n = UpsideDownPrintModeToNumber[mode]
+    this.validate()
+  }
 }
 
 /**
