@@ -902,7 +902,6 @@ export class SetPrintAreaInPageMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_backslash.html
  */
-@register(['ESC', '\\'])
 export class SetRelativePrintPosition extends CmdBase {
   static desc: string = 'Set relative print position'
 }
@@ -1050,7 +1049,7 @@ export class TransmitPaperSensorStatus extends CmdBase {
 export class SetUpsideDownPrintMode extends CmdBase {
   static desc: string = 'Turn upside-down print mode on/off'
 
-  @u8([0, 1])
+  @u8([[0, 255]])
   n: number
 
   constructor(mode: UpsideDownPrintMode) {
