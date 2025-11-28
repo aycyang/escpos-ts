@@ -181,6 +181,8 @@ import {
   gs_lv_0,
   gs_lw,
   PrintDirection,
+  ClockwiseRotationMode,
+  UpsideDownPrintMode,
 } from './index'
 
 type TestCase = {
@@ -366,7 +368,13 @@ const testCases: TestCase[] = [
       n: 2,
     },
   },
-  { cmd: new SetRotationMode() },
+  {
+    cmd: new SetRotationMode(ClockwiseRotationMode.OneDotSpacing),
+    bytes: Buffer.from([0x1b, 0x56, 0x1]),
+    checks: {
+      n: 1,
+    },
+  },
   {
     cmd: new SetPrintAreaInPageMode(0xabcd, 0xef12, 0x3456, 0x6789),
     bytes: Buffer.from([
@@ -424,7 +432,13 @@ const testCases: TestCase[] = [
   { cmd: new SelectCharacterCodeTable() },
   { cmd: new TransmitPeripheralDeviceStatus() },
   { cmd: new TransmitPaperSensorStatus() },
-  { cmd: new SetUpsideDownPrintMode() },
+  {
+    cmd: new SetUpsideDownPrintMode(UpsideDownPrintMode.On),
+    bytes: Buffer.from([0x1b, 0x7b, 0x1]),
+    checks: {
+      n: 1,
+    },
+  },
   {
     cmd: new SelectKanjiCharacterFont(0),
     bytes: Buffer.from([0x1c, 0x28, 0x41, 0x02, 0x00, 0x30, 0x00]),

@@ -278,6 +278,27 @@ const PrintDirectionToNumber: Record<PrintDirection, number> = {
   [PrintDirection.TopToBottom]: 3,
 }
 
+export enum ClockwiseRotationMode {
+  Off = 'ClockwiseRotationMode.Off',
+  OneDotSpacing = 'ClockwiseRotationMode.OneDotSpacing',
+  OneAndHalfDotSpacing = 'ClockwiseRotationMode.OneAndHalfDotSpacing',
+}
+
+const ClockwiseRotationModeToNumber: Record<ClockwiseRotationMode, number> = {
+  [ClockwiseRotationMode.Off]: 0,
+  [ClockwiseRotationMode.OneDotSpacing]: 1,
+  [ClockwiseRotationMode.OneAndHalfDotSpacing]: 2,
+}
+
+export enum UpsideDownPrintMode {
+  Off = 'UpsideDownPrintMode.Off',
+  On = 'UpsideDownPrintMode.On',
+}
+
+const UpsideDownPrintModeToNumber: Record<UpsideDownPrintMode, number> = {
+  [UpsideDownPrintMode.Off]: 0,
+  [UpsideDownPrintMode.On]: 1,
+}
 // --- COMMANDS ---
 
 /**
@@ -832,8 +853,21 @@ export class SelectPrintDirectionInPageMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cv.html
  */
+@register(['ESC', 'V'])
 export class SetRotationMode extends CmdBase {
   static desc: string = 'Turn 90° clockwise rotation mode on/off'
+
+  @u8([
+    [0, 2],
+    [48, 50],
+  ])
+  n: number
+
+  constructor(mode: ClockwiseRotationMode) {
+    super()
+    this.n = ClockwiseRotationModeToNumber[mode]
+    this.validate()
+  }
 }
 
 /**
@@ -1011,8 +1045,18 @@ export class TransmitPaperSensorStatus extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_lbrace.html
  */
+@register(['ESC', '{'])
 export class SetUpsideDownPrintMode extends CmdBase {
   static desc: string = 'Turn upside-down print mode on/off'
+
+  @u8([[0, 255]])
+  n: number
+
+  constructor(mode: UpsideDownPrintMode) {
+    super()
+    this.n = UpsideDownPrintModeToNumber[mode]
+    this.validate()
+  }
 }
 
 /**
