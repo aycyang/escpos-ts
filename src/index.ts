@@ -877,6 +877,7 @@ export class SetRelativePrintPosition extends CmdBase {
   @i16([[-32768, 32767]])
   n: number
 
+  // A positive number specifies movement to the right, and a negative number specifies movement to the left.
   constructor(n: number) {
     super()
     this.n = n
@@ -2010,8 +2011,19 @@ export class gs_cw extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_backslash.html
  */
-export class gs_backslash extends CmdBase {
+@register(['GS', '\\'])
+export class SetRelativeVerticalPrintPositionInPageMode extends CmdBase {
   static desc: string = 'Set relative vertical print position in Page mode'
+
+  @i16([[-32768, 32767]])
+  n: number
+
+  // A positive number specifies movement downward, and a negative number specifies movement upward.
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
 }
 
 /**
