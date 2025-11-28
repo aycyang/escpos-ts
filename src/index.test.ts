@@ -379,7 +379,13 @@ const testCases: TestCase[] = [
       dy: 0x6789,
     },
   },
-  { cmd: new SetRelativePrintPosition() },
+  {
+    cmd: new SetRelativePrintPosition(-324),
+    bytes: Buffer.from([0x1b, 0x5c, 0xbc, 0xfe]),
+    checks: {
+      n: -324,
+    },
+  },
   {
     cmd: new SelectJustification(Justification.Center),
     bytes: Buffer.from([0x1b, 0x61, 0x01]),

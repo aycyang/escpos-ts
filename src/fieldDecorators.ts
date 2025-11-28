@@ -116,6 +116,16 @@ function serializeU32(n: number): Buffer {
   return buf
 }
 
+function parseI16(buf: Buffer): [number, Buffer] {
+  return [buf.readInt16LE(), buf.subarray(2)]
+}
+
+function serializeI16(n: number): Buffer {
+  const buf = Buffer.alloc(2)
+  buf.writeInt16LE(n)
+  return buf
+}
+
 function sizedBufferParseFactory(name: string, offset: number): ParseMethod {
   // Caller should bind itself as this.
   function parseSizedBuffer(this: CmdBase, buf: Buffer): [Buffer, Buffer] {
@@ -188,6 +198,17 @@ export function u32(ranges: Range[]): ClassFieldDecorator {
     context.metadata.fields[context.name] = {
       parse: parseU32,
       serialize: serializeU32,
+      validate: throwIfNumberNotInRanges(ranges),
+    }
+  }
+}
+
+export function i16(ranges: Range[]): ClassFieldDecorator {
+  return (_, context) => {
+    context.metadata.fields ??= {}
+    context.metadata.fields[context.name] = {
+      parse: parseI16,
+      serialize: serializeI16,
       validate: throwIfNumberNotInRanges(ranges),
     }
   }

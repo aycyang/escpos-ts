@@ -9,6 +9,7 @@ import {
   u16,
   sizedBuffer,
   nullTerminatedBuffer,
+  i16,
 } from './fieldDecorators'
 import { CmdBase } from './cmd'
 import { ParseError, ValidationError } from './error'
@@ -868,8 +869,19 @@ export class SetPrintAreaInPageMode extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_backslash.html
  */
+@register(['ESC', '\\'])
 export class SetRelativePrintPosition extends CmdBase {
   static desc: string = 'Set relative print position'
+
+  // the docs are opaque but 2 byte signed are little-endian twos complement encoding (i16)
+  @i16([[-32768, 32767]])
+  n: number
+
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
 }
 
 /**
