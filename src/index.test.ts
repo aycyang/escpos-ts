@@ -168,7 +168,7 @@ import {
   gs_cl,
   gs_cp,
   gs_cw,
-  gs_backslash,
+  SetRelativeVerticalPrintPositionInPageMode,
   gs_caret,
   gs_la,
   gs_lb,
@@ -387,7 +387,13 @@ const testCases: TestCase[] = [
       dy: 0x6789,
     },
   },
-  { cmd: new SetRelativePrintPosition() },
+  {
+    cmd: new SetRelativePrintPosition(-324),
+    bytes: Buffer.from([0x1b, 0x5c, 0xbc, 0xfe]),
+    checks: {
+      n: -324,
+    },
+  },
   {
     cmd: new SelectJustification(Justification.Center),
     bytes: Buffer.from([0x1b, 0x61, 0x01]),
@@ -662,7 +668,13 @@ const testCases: TestCase[] = [
   { cmd: new gs_cl() },
   { cmd: new gs_cp() },
   { cmd: new gs_cw() },
-  { cmd: new gs_backslash() },
+  {
+    cmd: new SetRelativeVerticalPrintPositionInPageMode(-32768),
+    bytes: Buffer.from([0x1d, 0x5c, 0x00, 0x80]),
+    checks: {
+      n: -32768,
+    },
+  },
   { cmd: new gs_caret() },
   { cmd: new gs_la() },
   { cmd: new gs_lb() },
