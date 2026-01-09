@@ -91,7 +91,7 @@ import {
   fs_lg_2,
   fs_lp,
   fs_lq,
-  gs_dollarssign,
+  SetAbsolutePrintPositionInPageMode,
   gs_lparen_ca,
   gs_lparen_cd,
   gs_lparen_ce,
@@ -591,7 +591,13 @@ const testCases: TestCase[] = [
   { cmd: new fs_lg_2() },
   { cmd: new fs_lp() },
   { cmd: new fs_lq() },
-  { cmd: new gs_dollarssign() },
+  {
+    cmd: new SetAbsolutePrintPositionInPageMode(0x0201),
+    bytes: Buffer.from([0x1d, 0x24, 0x01, 0x02]),
+    checks: {
+      n: 0x0201,
+    },
+  },
   { cmd: new gs_lparen_ca() },
   { cmd: new gs_lparen_cd() },
   { cmd: new gs_lparen_ce() },

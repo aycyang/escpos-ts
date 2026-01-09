@@ -1438,8 +1438,18 @@ export class SelectCharacterSize extends CmdBase {
 /**
  * https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/gs_dollarssign.html
  */
-export class gs_dollarssign extends CmdBase {
+@register(['GS', '$'])
+export class SetAbsolutePrintPositionInPageMode extends CmdBase {
   static desc: string = 'Set absolute vertical print position in Page mode'
+
+  @u16([[0, 65535]])
+  n: number
+
+  constructor(n: number) {
+    super()
+    this.n = n
+    this.validate()
+  }
 }
 
 /**
