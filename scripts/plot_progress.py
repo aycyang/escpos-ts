@@ -18,7 +18,7 @@ with open(sys.argv[1]) as csvfile:
 fig, ax = plt.subplots()
 ax.step(x, y)
 ax.set_ylim([0, 160])
-ax.set_xlim([datetime.fromisoformat('2025-10-21:00:00Z'), datetime.fromisoformat('2026-01-01T00:00:00Z')])
+ax.set_xlim([datetime.fromisoformat('2025-10-21:00:00Z'), datetime.fromisoformat('2026-03-01T00:00:00Z')])
 ax.set_ylabel('number of passing tests')
 plt.title('ESC/POS commands implemented over time')
 plt.xticks(rotation=20)
