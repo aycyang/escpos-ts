@@ -1,6 +1,19 @@
+import { Buffer } from 'buffer'
+
 import { Ascii, asciiToByte } from './ascii'
 import { CmdClass, CmdClassDecorator } from './cmd'
 import { assert } from './assert'
+
+function toChar(n: number) {
+  if (n < 0x20 || n >= 0x80) {
+    let hexcode = n.toString(16)
+    if (hexcode.length === 1) {
+      hexcode = '0' + hexcode
+    }
+    return `\\x${hexcode}`
+  }
+  return String.fromCharCode(n)
+}
 
 export interface Serializable {
   serialize(): Buffer
@@ -15,6 +28,11 @@ export class Bytes {
 
   serialize(): Buffer {
     return Buffer.from(this.values)
+  }
+
+  toString(): string {
+    const str = this.values.map(toChar).join('')
+    return `"${str}"`
   }
 
   push(...args: number[]) {

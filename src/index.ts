@@ -14,7 +14,7 @@ import {
 import { CmdBase } from './cmd'
 import { ParseError, ValidationError } from './error'
 
-export { parse } from './parse'
+export { parse, Bytes } from './parse'
 export type { CmdBase, CmdClass } from './cmd'
 
 // --- ENUMS ---
