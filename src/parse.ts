@@ -12,7 +12,14 @@ function toChar(n: number) {
     }
     return `\\x${hexcode}`
   }
-  return String.fromCharCode(n)
+  const c = String.fromCharCode(n)
+  if (c == '"') {
+    return '\\"'
+  }
+  if (c == '\\') {
+    return '\\\\'
+  }
+  return c
 }
 
 export interface Serializable {
