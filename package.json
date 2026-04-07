@@ -1,6 +1,6 @@
 {
   "name": "escpos-ts",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "ESC/POS commands with Typescript type definitions",
   "files": [
     "dist"
