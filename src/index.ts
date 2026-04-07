@@ -170,6 +170,12 @@ const UnderlineModeToNumber: Record<UnderlineMode, number> = {
   [UnderlineMode.TwoDotsThick]: 2,
 }
 
+const NumberToUnderlineMode: UnderlineMode[] = [
+  UnderlineMode.Off,
+  UnderlineMode.OneDotThick,
+  UnderlineMode.TwoDotsThick,
+]
+
 export enum SimpleUnderlineMode {
   Off = 'SimpleUnderlineMode.Off',
   On = 'SimpleUnderlineMode.On',
@@ -625,6 +631,10 @@ export class SetUnderlineMode extends CmdBase {
     super()
     this.n = UnderlineModeToNumber[mode]
     this.validate()
+  }
+
+  mode() {
+    return NumberToUnderlineMode[this.n]
   }
 }
 
