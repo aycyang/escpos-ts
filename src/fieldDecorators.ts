@@ -87,6 +87,9 @@ function throwIfNullTerminatedBufferElementsNotInRanges(
 }
 
 function parseU8(buf: Buffer): [number, Buffer] {
+  if (buf.length < 1) {
+    throw new ParseError('not enough bytes to parse an unsigned 8-bit integer')
+  }
   return [buf[0], buf.subarray(1)]
 }
 
@@ -97,6 +100,9 @@ function serializeU8(n: number): Buffer {
 }
 
 function parseU16(buf: Buffer): [number, Buffer] {
+  if (buf.length < 2) {
+    throw new ParseError('not enough bytes to parse an unsigned 16-bit integer')
+  }
   return [buf.readUInt16LE(), buf.subarray(2)]
 }
 
@@ -107,6 +113,9 @@ function serializeU16(n: number): Buffer {
 }
 
 function parseU32(buf: Buffer): [number, Buffer] {
+  if (buf.length < 4) {
+    throw new ParseError('not enough bytes to parse an unsigned 32-bit integer')
+  }
   return [buf.readUInt32LE(), buf.subarray(4)]
 }
 
@@ -117,6 +126,9 @@ function serializeU32(n: number): Buffer {
 }
 
 function parseI16(buf: Buffer): [number, Buffer] {
+  if (buf.length < 2) {
+    throw new ParseError('not enough bytes to parse a signed 16-bit integer')
+  }
   return [buf.readInt16LE(), buf.subarray(2)]
 }
 
@@ -132,6 +144,7 @@ function sizedBufferParseFactory(name: string, offset: number): ParseMethod {
     const fieldValue: number = this[name] as number
     assert(typeof fieldValue === 'number')
     const size: number = fieldValue + offset
+    // TODO throw ParseError if buf ends prematurely
     return [buf.subarray(0, size), buf.subarray(size)]
   }
   return parseSizedBuffer
@@ -141,9 +154,9 @@ function serializeBuffer(buf: Buffer): Buffer {
   return buf
 }
 
-// TODO Instead of throwing a parse error when the size limit is exceeded,
-// should just finalize the current command and parse anything beyond the size
-// limit normally.
+// TODO This may be too strict. Instead of throwing a parse error when the size
+// limit is exceeded, it should just finalize the current command and parse
+// anything beyond the size limit normally.
 // "A maximum of 32 horizontal tab positions can be set. Data exceeding 32
 // horizontal tab positions is processed as normal data."
 // source: https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/esc_cd.html
