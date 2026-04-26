@@ -30,6 +30,7 @@ function cmdFieldToString(value: CmdField): string {
 export class CmdBase {
   static desc: string
 
+  // Used only in test to ensure that validate() is always called.
   isValid: boolean = false
 
   toString(): string {
