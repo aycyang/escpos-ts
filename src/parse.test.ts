@@ -73,14 +73,23 @@ const testCases: TestCase[] = [
     ]),
     result: new ValidationError(),
   },
+  {
+    name: 'SelectBitImageMode: size does not match buffer',
+    bytes: Buffer.from([0x1b, 0x2a, 0x01, 0x03, 0x00, 0x05, 0x06]),
+    result: new ParseError(),
+  },
 ]
 
 for (const testCase of testCases) {
   void test(testCase.name, () => {
     if (testCase.result instanceof Error) {
       try {
-        void parse(testCase.bytes)
-        assert(false, `should have thrown ${testCase.result.constructor.name}`)
+        const parsed = parse(testCase.bytes)
+        const first = parsed[0]
+        assert(
+          false,
+          `should have thrown ${testCase.result.constructor.name}, instead parsed: ${first.toString()}`,
+        )
       } catch (error) {
         const e: Error = error as Error
         assert.deepStrictEqual(

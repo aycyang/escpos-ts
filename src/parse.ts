@@ -24,6 +24,7 @@ function toChar(n: number) {
 
 export interface Serializable {
   serialize(): Buffer
+  toString(): string
 }
 
 export class Bytes {

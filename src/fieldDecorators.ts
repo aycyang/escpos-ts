@@ -144,6 +144,9 @@ function sizedBufferParseFactory(name: string, offset: number): ParseMethod {
     const fieldValue: number = this[name] as number
     assert(typeof fieldValue === 'number')
     const size: number = fieldValue + offset
+    if (buf.length < size) {
+      throw new ParseError(`not enough bytes to parse buffer of size ${size}`)
+    }
     // TODO throw ParseError if buf ends prematurely
     return [buf.subarray(0, size), buf.subarray(size)]
   }
