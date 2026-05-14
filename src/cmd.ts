@@ -88,8 +88,6 @@ export class CmdBase {
    * Assumption: the prefix bytes have already been consumed. The passed-in
    * buffer begins just after the prefix bytes. The buffer may contain more
    * bytes than expected, but any fewer would be unexpected.
-   *
-   * TODO throw parse error if end of buffer is reached prematurely
    */
   static from(buf: Buffer): [CmdBase, Buffer] {
     const metadata = this[Symbol.metadata]

@@ -726,6 +726,7 @@ const testCases: TestCase[] = [
 ]
 
 for (const testCase of testCases) {
+  // TODO test that any truncation of param bytes (after the prefix) results in ParseError
   const testFn = (parseFn: (Buffer) => Serializable[]) => (t: TestContext) => {
     if (!testCase.bytes) {
       t.skip()

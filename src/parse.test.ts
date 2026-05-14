@@ -84,6 +84,7 @@ for (const testCase of testCases) {
   void test(testCase.name, () => {
     if (testCase.result instanceof Error) {
       try {
+        // TODO also test parseGenerator
         const parsed = parse(testCase.bytes)
         const first = parsed[0]
         assert(
