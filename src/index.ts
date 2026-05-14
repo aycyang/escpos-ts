@@ -14,7 +14,7 @@ import {
 import { CmdBase } from './cmd'
 import { ParseError, ValidationError } from './error'
 
-export { parse, Bytes } from './parse'
+export { parse, parseGenerator, Bytes } from './parse'
 export type { CmdBase, CmdClass } from './cmd'
 
 // --- ENUMS ---
@@ -514,8 +514,14 @@ export class DefineUserDefinedCharacters extends CmdBase {
       const numBufs = this.c2 - this.c1 + 1
       const bufs = []
       for (let i = 0; i < numBufs; i++) {
+        if (buf.length < 1) {
+          throw new ParseError(`not enough bytes; need at least 1 more`)
+        }
         const x = buf[0]
         const size = 1 + this.y * x
+        if (buf.length < size) {
+          throw new ParseError(`not enough bytes; need at least ${size} more`)
+        }
         bufs.push(buf.subarray(0, size))
         buf = buf.subarray(size)
       }

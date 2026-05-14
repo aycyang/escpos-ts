@@ -1,6 +1,6 @@
-import test from 'node:test'
+import { test, TestContext } from 'node:test'
 import assert from 'node:assert'
-import { Bytes } from './parse'
+import { Serializable, Bytes } from './parse'
 import { CmdBase } from './cmd'
 import {
   InternationalCharacterSet,
@@ -68,6 +68,7 @@ import {
   CutPaper,
   FeedAndCutPaper,
   parse,
+  parseGenerator,
   DoubleStrikeMode,
   PrintAndLineFeed,
   PrintAndReturnToStandardMode,
@@ -189,6 +190,36 @@ type TestCase = {
   cmd: CmdBase
   bytes?: Buffer
   checks?: object
+}
+
+/**
+ * Use parseGenerator to read bytes in buffer one by one.
+ */
+function parseStream(buf: Buffer): Serializable[] {
+  const pg = parseGenerator()
+  pg.next()
+
+  const cmds: Serializable[] = []
+  let nonCmdBytes: number[] = []
+
+  for (const byte of buf) {
+    const parsed = pg.next(byte)
+    nonCmdBytes.push(byte)
+    if (parsed.value !== undefined) {
+      const { cmd, size } = parsed.value
+      nonCmdBytes = nonCmdBytes.slice(0, nonCmdBytes.length - size)
+      if (nonCmdBytes.length > 0) {
+        cmds.push(Bytes.from(nonCmdBytes))
+        nonCmdBytes = []
+      }
+      cmds.push(cmd)
+    }
+  }
+  if (nonCmdBytes.length > 0) {
+    cmds.push(Bytes.from(nonCmdBytes))
+    nonCmdBytes = []
+  }
+  return cmds
 }
 
 const testCases: TestCase[] = [
@@ -695,16 +726,17 @@ const testCases: TestCase[] = [
 ]
 
 for (const testCase of testCases) {
-  void test(testCase.cmd.toString(), (t) => {
+  const testFn = (parseFn: (Buffer) => Serializable[]) => (t: TestContext) => {
     if (!testCase.bytes) {
       t.skip()
       return
     }
 
-    let cmds = parse(testCase.bytes)
+    let cmds = parseFn(testCase.bytes)
     cmds = cmds.filter((cmd) => !(cmd instanceof Bytes))
     assert.strictEqual(cmds.length, 1, 'failed to parse a command')
     const parsedCmd = cmds[0]
+    assert.notEqual(parsedCmd, undefined)
     assert(parsedCmd instanceof CmdBase)
     assert(parsedCmd.isValid)
 
@@ -728,5 +760,7 @@ for (const testCase of testCases) {
 
     const buf = parsedCmd.serialize()
     assert.deepStrictEqual(buf, testCase.bytes)
-  })
+  }
+  void test(testCase.cmd.toString(), testFn(parse))
+  void test(testCase.cmd.toString() + ' (streaming)', testFn(parseStream))
 }

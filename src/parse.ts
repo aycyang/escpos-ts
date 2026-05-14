@@ -1,8 +1,9 @@
 import { Buffer } from 'buffer'
 
 import { Ascii, asciiToByte } from './ascii'
-import { CmdClass, CmdClassDecorator } from './cmd'
+import { CmdBase, CmdClass, CmdClassDecorator } from './cmd'
 import { assert } from './assert'
+import { ParseError } from './error'
 
 function toChar(n: number) {
   if (n < 0x20 || n >= 0x80) {
@@ -128,7 +129,82 @@ export function register(prefix: Ascii[]): CmdClassDecorator {
   }
 }
 
-// TODO return interface Cmd instead of CmdBase.
+type ParseInfo = {
+  cmd: CmdBase
+  size: number
+}
+
+/**
+ * Returns a generator that parses bytes one-by-one as they are being passed
+ * in as arguments to next(). If the bytes form a valid command, the generator
+ * constructs the command and yields it, along with the number of bytes used to
+ * construct the command (this number can be used by the caller to determine
+ * where the free bytes end and where the command bytes begin). If the bytes
+ * form an incomplete command or otherwise do not form a valid command, the
+ * generator yields nothing and the caller may continue to pass in bytes.
+ *
+ * This function is designed for interactive applications. For batch
+ * processing, parse() may be faster.
+ *
+ * This function assumes all command parsers will throw a ParseError if the
+ * parameter byte buffer ends prematurely. This property is relied upon to
+ * determine when to finally yield the parsed command. If this property is ever
+ * untrue for whatever reason, the command will be constructed prematurely with
+ * invalid data, and subsequent bytes may also be interpreted incorrectly.
+ */
+export function* parseGenerator(): Generator<ParseInfo, ParseInfo, number> {
+  let nextByte = -1
+  while (true) {
+    let size = 0
+    let curNode = kPrefixTree as Node
+    while (Array.isArray(curNode)) {
+      nextByte = yield
+      if (nextByte in curNode) {
+        curNode = curNode[nextByte]
+        size++
+      } else {
+        curNode = kPrefixTree as Node
+        size = 0
+      }
+    }
+
+    const params: number[] = []
+    let cmdClass = curNode as CmdClass
+    if (curNode instanceof FnLookahead) {
+      while (params.length <= curNode.skip) {
+        nextByte = yield
+        params.push(nextByte)
+        size++
+      }
+      const fnByte = params[curNode.skip]
+      if (fnByte in curNode.fns) {
+        cmdClass = curNode.fns[fnByte]
+      } else {
+        continue
+      }
+    }
+
+    let cmd: CmdBase
+    do {
+      try {
+        ;[cmd] = cmdClass.from(Buffer.from(params))
+        break
+      } catch (err: unknown) {
+        assert(
+          err instanceof ParseError,
+          `expected ParseError, got ${err.constructor.name}: ${(err as Error).message}`,
+        )
+        // TODO yield type information of required params so that a client
+        // could potentially construct a form
+        params.push(yield)
+        size++
+      }
+    } while (true)
+
+    nextByte = yield { cmd, size }
+  }
+}
+
 /**
  * Parses a buffer into a list of ESC/POS commands.
  */
