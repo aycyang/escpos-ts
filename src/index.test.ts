@@ -1,6 +1,5 @@
 import { test, TestContext } from 'node:test'
 import assert from 'node:assert'
-import { Serializable, Bytes } from './parse'
 import { CmdBase } from './cmd'
 import {
   InternationalCharacterSet,
@@ -67,8 +66,7 @@ import {
   SetWhiteAndBlackReversePrintMode,
   CutPaper,
   FeedAndCutPaper,
-  parse,
-  parseGenerator,
+  makeParser,
   DoubleStrikeMode,
   PrintAndLineFeed,
   PrintAndReturnToStandardMode,
@@ -190,36 +188,6 @@ type TestCase = {
   cmd: CmdBase
   bytes?: Buffer
   checks?: object
-}
-
-/**
- * Use parseGenerator to read bytes in buffer one by one.
- */
-function parseStream(buf: Buffer): Serializable[] {
-  const pg = parseGenerator()
-  pg.next()
-
-  const cmds: Serializable[] = []
-  let nonCmdBytes: number[] = []
-
-  for (const byte of buf) {
-    const parsed = pg.next(byte)
-    nonCmdBytes.push(byte)
-    if (parsed.value !== undefined) {
-      const { cmd, size } = parsed.value
-      nonCmdBytes = nonCmdBytes.slice(0, nonCmdBytes.length - size)
-      if (nonCmdBytes.length > 0) {
-        cmds.push(Bytes.from(nonCmdBytes))
-        nonCmdBytes = []
-      }
-      cmds.push(cmd)
-    }
-  }
-  if (nonCmdBytes.length > 0) {
-    cmds.push(Bytes.from(nonCmdBytes))
-    nonCmdBytes = []
-  }
-  return cmds
 }
 
 const testCases: TestCase[] = [
@@ -727,41 +695,60 @@ const testCases: TestCase[] = [
 
 for (const testCase of testCases) {
   // TODO test that any truncation of param bytes (after the prefix) results in ParseError
-  const testFn = (parseFn: (Buffer) => Serializable[]) => (t: TestContext) => {
+  void test(testCase.cmd.toString(), (t: TestContext) => {
     if (!testCase.bytes) {
       t.skip()
       return
     }
 
-    let cmds = parseFn(testCase.bytes)
-    cmds = cmds.filter((cmd) => !(cmd instanceof Bytes))
-    assert.strictEqual(cmds.length, 1, 'failed to parse a command')
-    const parsedCmd = cmds[0]
-    assert.notEqual(parsedCmd, undefined)
-    assert(parsedCmd instanceof CmdBase)
-    assert(parsedCmd.isValid)
-
-    assert(
-      testCase.cmd.isValid,
-      'this.validate() must be called at the end of the subclass constructor',
-    )
-    assert.deepStrictEqual(
-      parsedCmd,
-      testCase.cmd,
-      'parsed (actual) differs from constructed (expected)',
-    )
-
-    for (const [key, value] of Object.entries(testCase.checks ?? {})) {
+    // Stream parsing (passing in bytes one-by-one)
+    {
+      const parser = makeParser()
+      parser.next()
+      for (let i = 0; i < testCase.bytes.length - 1; i++) {
+        const result = parser.next(Buffer.from([testCase.bytes[i]]))
+        assert.strictEqual(result.value.parsed.length, 0)
+      }
+      const lastByte = testCase.bytes[testCase.bytes.length - 1]
+      const result = parser.next(Buffer.from([lastByte]))
+      assert.strictEqual(result.value.parsed.length, 1)
+      const parsedCmd = result.value.parsed[0]
       assert.deepStrictEqual(
-        parsedCmd[key],
-        value,
-        `member ${key} is ${parsedCmd[key]}, but expected ${value}`,
+        parsedCmd,
+        testCase.cmd,
+        'parsed (actual) differs from constructed (expected)',
       )
     }
 
-    const buf = parsedCmd.serialize()
-    assert.deepStrictEqual(buf, testCase.bytes)
-  }
-  void test(testCase.cmd.toString(), testFn(parse))
-  void test(testCase.cmd.toString() + ' (streaming)', testFn(parseStream))
+    // Batch parsing
+    {
+      const parser = makeParser()
+      parser.next()
+      const result = parser.next(testCase.bytes)
+      assert.strictEqual(result.value.parsed.length, 1)
+      const parsedCmd = result.value.parsed[0]
+      assert.deepStrictEqual(
+        parsedCmd,
+        testCase.cmd,
+        'parsed (actual) differs from constructed (expected)',
+      )
+
+      assert(parsedCmd.isValid)
+      assert(
+        testCase.cmd.isValid,
+        'this.validate() must be called at the end of the subclass constructor',
+      )
+
+      for (const [key, value] of Object.entries(testCase.checks ?? {})) {
+        assert.deepStrictEqual(
+          parsedCmd[key],
+          value,
+          `member ${key} is ${parsedCmd[key]}, but expected ${value}`,
+        )
+      }
+
+      const buf = parsedCmd.serialize()
+      assert.deepStrictEqual(buf, testCase.bytes)
+    }
+  })
 }

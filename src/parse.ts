@@ -4,6 +4,7 @@ import { Ascii, asciiToByte } from './ascii'
 import { CmdBase, CmdClass, CmdClassDecorator } from './cmd'
 import { assert } from './assert'
 import { ParseError } from './error'
+import { toHexList } from './util'
 
 function toChar(n: number) {
   if (n < 0x20 || n >= 0x80) {
@@ -50,6 +51,30 @@ export class Bytes {
 
   static from(values: number[]) {
     return new Bytes(values)
+  }
+}
+
+export class InvalidCmd {
+  values: number[]
+
+  constructor(values: number[] = []) {
+    this.values = values
+  }
+
+  serialize(): Buffer {
+    return Buffer.from(this.values)
+  }
+
+  toString(): string {
+    return `Invalid command: [${toHexList(this.values)}]`
+  }
+
+  push(...args: number[]) {
+    this.values.push(...args)
+  }
+
+  static from(values: number[]) {
+    return new InvalidCmd(values)
   }
 }
 
@@ -129,9 +154,163 @@ export function register(prefix: Ascii[]): CmdClassDecorator {
   }
 }
 
+function concatBuffers(a: Buffer, b: Buffer): Buffer {
+  const c = Buffer.alloc(a.length + b.length)
+  a.copy(c)
+  b.copy(c, a.length)
+  return c
+}
+
 type ParseInfo = {
   cmd: CmdBase
   size: number
+}
+
+type CmdParamType = {
+  name: string
+  type: 'u8' | 'u16' | 'u32'
+}
+
+type CmdTypeInfo = {
+  desc: string
+  params: CmdParamType[]
+}
+
+type PartialParseInfo = {
+  parsed: Serializable[]
+  midparse: number[]
+  unparsed: Buffer
+  expecting?: CmdTypeInfo // TODO this isn't implemented yet
+}
+
+export function* makeParser(): Generator<
+  PartialParseInfo,
+  PartialParseInfo,
+  Buffer
+> {
+  const parsed: Serializable[] = []
+  let midparse: number[] = [] // TODO this might not need to be a global
+  const emptyBuf = Buffer.from([])
+  let reservoir: Buffer = emptyBuf
+  let nextByte = -1 // TODO this might not need to be a global
+  while (true) {
+    // If reservoir is empty, request more bytes.
+    while (reservoir.length === 0) {
+      reservoir = yield { parsed, midparse, unparsed: reservoir }
+    }
+
+    // Parse any leading free bytes.
+    const indexOfCmdByte = reservoir.findIndex((byte) => byte in kPrefixTree)
+    if (indexOfCmdByte === -1) {
+      parsed.push(Bytes.from([...reservoir]))
+      reservoir = emptyBuf
+      continue
+    }
+
+    // A command byte was detected. Parse any leading free bytes and set up to
+    // descend command parse tree.
+    if (indexOfCmdByte > 0) {
+      parsed.push(Bytes.from([...reservoir.subarray(0, indexOfCmdByte)]))
+    }
+    const cmdByte = reservoir[indexOfCmdByte]
+    let curNode = kPrefixTree[cmdByte]
+    midparse.push(cmdByte)
+    reservoir = reservoir.subarray(indexOfCmdByte + 1)
+
+    // Descend command parse tree.
+    while (Array.isArray(curNode)) {
+      // If reservoir is empty, request more bytes.
+      while (reservoir.length === 0) {
+        reservoir = yield { parsed, midparse, unparsed: reservoir }
+      }
+
+      // Take a byte from the reservoir.
+      nextByte = reservoir[0]
+      reservoir = reservoir.subarray(1)
+      midparse.push(nextByte)
+
+      // Descend down parse tree. If branch doesn't exist, curNode becomes
+      // undefined.
+      curNode = curNode[nextByte]
+    }
+
+    if (!curNode) {
+      // The branch didn't exist. Add a tombstone and continue parsing.
+      parsed.push(InvalidCmd.from(midparse))
+      midparse = []
+      continue
+    }
+
+    // Resolve command constructor.
+    let cmdClass = curNode as CmdClass
+    if (curNode instanceof FnLookahead) {
+      // If reservoir doesn't have enough bytes to perform the lookahead,
+      // request more bytes.
+      while (reservoir.length <= curNode.skip) {
+        const addendum = yield { parsed, midparse, unparsed: reservoir }
+        reservoir = concatBuffers(reservoir, addendum)
+      }
+      const fnByte = reservoir[curNode.skip]
+      if (!(fnByte in curNode.fns)) {
+        // TODO double check this error handling is accurate to device
+        reservoir = reservoir.subarray(curNode.skip + 1)
+        continue
+      }
+      cmdClass = curNode.fns[fnByte]
+    }
+
+    // Yield errors and consume bytes until command constructor succeeds.
+    let cmd: CmdBase
+    let remainder: Buffer
+    do {
+      try {
+        ;[cmd, remainder] = cmdClass.from(reservoir)
+        break
+      } catch (err: unknown) {
+        assert(
+          err instanceof ParseError,
+          `expected ParseError, got ${err.constructor.name}: ${(err as Error).message}`,
+        )
+        // Reservoir didn't have enough bytes to construct the command.
+        // Request more bytes.
+        const addendum = yield { parsed, midparse, unparsed: reservoir }
+        reservoir = concatBuffers(reservoir, addendum)
+      }
+    } while (true)
+    parsed.push(cmd)
+    midparse = []
+    reservoir = remainder
+  }
+}
+
+/**
+ * Use parseGenerator to read bytes in buffer one by one.
+ */
+export function parseStream(buf: Buffer): Serializable[] {
+  const pg = parseGenerator()
+  pg.next()
+
+  const cmds: Serializable[] = []
+  let nonCmdBytes: number[] = []
+
+  for (const byte of buf) {
+    const parsed = pg.next(byte)
+    nonCmdBytes.push(byte)
+    if (parsed.value !== undefined) {
+      const { cmd, size } = parsed.value
+      nonCmdBytes = nonCmdBytes.slice(0, nonCmdBytes.length - size)
+      if (nonCmdBytes.length > 0) {
+        cmds.push(Bytes.from(nonCmdBytes))
+        nonCmdBytes = []
+      }
+      cmds.push(cmd)
+    }
+  }
+  if (nonCmdBytes.length > 0) {
+    cmds.push(Bytes.from(nonCmdBytes))
+    nonCmdBytes = []
+  }
+  return cmds
 }
 
 /**
@@ -157,6 +336,7 @@ export function* parseGenerator(): Generator<ParseInfo, ParseInfo, number> {
   while (true) {
     let size = 0
     let curNode = kPrefixTree as Node
+    // Parse prefix.
     while (Array.isArray(curNode)) {
       nextByte = yield
       if (nextByte in curNode) {
@@ -168,6 +348,7 @@ export function* parseGenerator(): Generator<ParseInfo, ParseInfo, number> {
       }
     }
 
+    // Resolve command constructor.
     const params: number[] = []
     let cmdClass = curNode as CmdClass
     if (curNode instanceof FnLookahead) {
@@ -184,6 +365,7 @@ export function* parseGenerator(): Generator<ParseInfo, ParseInfo, number> {
       }
     }
 
+    // Yield errors and consume bytes until command constructor succeeds.
     let cmd: CmdBase
     do {
       try {

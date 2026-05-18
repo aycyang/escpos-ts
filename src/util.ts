@@ -4,7 +4,7 @@ export function byteToHex(b: number): string {
   return upper.toString(16) + lower.toString(16)
 }
 
-function toHexList(nums: number[]): string {
+export function toHexList(nums: number[]): string {
   return nums.map(byteToHex).join(' ')
 }
 
