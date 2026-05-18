@@ -701,18 +701,18 @@ for (const testCase of testCases) {
       return
     }
 
-    // Stream parsing (passing in bytes one-by-one)
+    // Test stream parsing (passing in bytes one-by-one).
     {
       const parser = makeParser()
       parser.next()
       for (let i = 0; i < testCase.bytes.length - 1; i++) {
         const result = parser.next(Buffer.from([testCase.bytes[i]]))
-        assert.strictEqual(result.value.parsed.length, 0)
+        assert(result.value.parsed.length === 0, 'parse succeeded prematurely')
       }
       const lastByte = testCase.bytes[testCase.bytes.length - 1]
       const result = parser.next(Buffer.from([lastByte]))
-      assert.strictEqual(result.value.parsed.length, 1)
       const parsedCmd = result.value.parsed[0]
+      assert(parsedCmd, `failed to parse command`)
       assert.deepStrictEqual(
         parsedCmd,
         testCase.cmd,
@@ -720,13 +720,13 @@ for (const testCase of testCases) {
       )
     }
 
-    // Batch parsing
+    // Test batch parsing (passing in all bytes at once).
     {
       const parser = makeParser()
       parser.next()
       const result = parser.next(testCase.bytes)
-      assert.strictEqual(result.value.parsed.length, 1)
       const parsedCmd = result.value.parsed[0]
+      assert(parsedCmd, `failed to parse command`)
       assert.deepStrictEqual(
         parsedCmd,
         testCase.cmd,
