@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert'
-import { InvalidCmd, Bytes, Serializable, makeParser } from './parse'
+import { InvalidCmd, Bytes, Serializable, Parser } from './parse'
 import { InitializePrinter, SetUnderlineMode, UnderlineMode } from './index'
 new InitializePrinter() // necessary to prevent dead code elimination
 import { ParseError } from './error'
@@ -90,15 +90,14 @@ const testCases: TestCase[] = [
 
 for (const testCase of testCases) {
   void test(testCase.name, () => {
-    const parser = makeParser()
-    parser.next()
-    const result = parser.next(testCase.bytes)
-    assert.deepStrictEqual(result.value.parsed, testCase.parsed)
-    assert.deepStrictEqual(result.value.buffered, testCase.buffered)
+    const parser = new Parser()
+    const result = parser.consume(testCase.bytes)
+    assert.deepStrictEqual(result.parsed, testCase.parsed)
+    assert.deepStrictEqual(result.buffered, testCase.buffered)
     if (testCase.error) {
-      assert(result.value.error)
+      assert(result.error)
       assert.deepStrictEqual(
-        result.value.error.constructor,
+        result.error.constructor,
         testCase.error.constructor,
       )
     }

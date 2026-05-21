@@ -66,7 +66,7 @@ import {
   SetWhiteAndBlackReversePrintMode,
   CutPaper,
   FeedAndCutPaper,
-  makeParser,
+  Parser,
   DoubleStrikeMode,
   PrintAndLineFeed,
   PrintAndReturnToStandardMode,
@@ -703,15 +703,14 @@ for (const testCase of testCases) {
 
     // Test stream parsing (passing in bytes one-by-one).
     {
-      const parser = makeParser()
-      parser.next()
+      const parser = new Parser()
       for (let i = 0; i < testCase.bytes.length - 1; i++) {
-        const result = parser.next(Buffer.from([testCase.bytes[i]]))
-        assert(result.value.parsed.length === 0, 'parse succeeded prematurely')
+        const result = parser.consume(Buffer.from([testCase.bytes[i]]))
+        assert(result.parsed.length === 0, 'parse succeeded prematurely')
       }
       const lastByte = testCase.bytes[testCase.bytes.length - 1]
-      const result = parser.next(Buffer.from([lastByte]))
-      const parsedCmd = result.value.parsed[0]
+      const result = parser.consume(Buffer.from([lastByte]))
+      const parsedCmd = result.parsed[0]
       assert(parsedCmd, `failed to parse command`)
       assert.deepStrictEqual(
         parsedCmd,
@@ -722,10 +721,9 @@ for (const testCase of testCases) {
 
     // Test batch parsing (passing in all bytes at once).
     {
-      const parser = makeParser()
-      parser.next()
-      const result = parser.next(testCase.bytes)
-      const parsedCmd = result.value.parsed[0]
+      const parser = new Parser()
+      const result = parser.consume(testCase.bytes)
+      const parsedCmd = result.parsed[0]
       assert(parsedCmd, `failed to parse command`)
       assert.deepStrictEqual(
         parsedCmd,
