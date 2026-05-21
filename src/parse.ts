@@ -169,10 +169,9 @@ type CmdTypeInfo = {
   params: CmdParamType[]
 }
 
-type PartialParseInfo = {
+export type PartialParseInfo = {
   parsed: Serializable[]
-  midparse: number[]
-  unparsed: Buffer
+  buffered: Buffer
   error?: Error
   expecting?: CmdTypeInfo // TODO this isn't implemented yet
 }
@@ -183,55 +182,59 @@ export function* makeParser(): Generator<
   Buffer
 > {
   const parsed: Serializable[] = []
-  let midparse: number[] = [] // TODO this might not need to be a global
   let reservoir: Buffer = Buffer.from([])
-  let nextByte = -1 // TODO this might not need to be a global
-  let error: Error
   while (true) {
     // If reservoir is empty, request more bytes.
     while (reservoir.length === 0) {
-      reservoir = yield { parsed, midparse, unparsed: reservoir, error }
+      reservoir = yield { parsed, buffered: reservoir }
     }
 
     // Parse any leading free bytes.
-    const indexOfCmdByte = reservoir.findIndex((byte) => byte in kPrefixTree)
-    if (indexOfCmdByte === -1) {
+    const indexOfFirstCmdByte = reservoir.findIndex(
+      (byte) => byte in kPrefixTree,
+    )
+    if (indexOfFirstCmdByte === -1) {
       parsed.push(Bytes.from([...reservoir]))
       reservoir = Buffer.from([])
       continue
     }
 
-    // A command byte was detected. Parse any leading free bytes and set up to
-    // descend command parse tree.
-    if (indexOfCmdByte > 0) {
-      parsed.push(Bytes.from([...reservoir.subarray(0, indexOfCmdByte)]))
+    // A command byte was detected. Parse any leading free bytes.
+    if (indexOfFirstCmdByte > 0) {
+      parsed.push(Bytes.from([...reservoir.subarray(0, indexOfFirstCmdByte)]))
     }
-    const cmdByte = reservoir[indexOfCmdByte]
-    let curNode = kPrefixTree[cmdByte]
-    midparse.push(cmdByte)
-    reservoir = reservoir.subarray(indexOfCmdByte + 1)
+    // Remove the leading free bytes from the reservoir.
+    reservoir = reservoir.subarray(indexOfFirstCmdByte)
+    // Use the first byte (the detected command byte) to walk down the first
+    // level of the tree. Start a pointer at the second byte, to be incremented
+    // in the subsequent loop.
+    let curNode = kPrefixTree[reservoir[0]]
+    let curIdx = 1
 
     // Descend command parse tree.
     while (Array.isArray(curNode)) {
-      // If reservoir is empty, request more bytes.
-      while (reservoir.length === 0) {
-        reservoir = yield { parsed, midparse, unparsed: reservoir, error }
+      // If pointer is currently beyond the bounds of the reservoir,
+      // request more bytes.
+      while (reservoir.length <= curIdx) {
+        const addendum = yield { parsed, buffered: reservoir }
+        reservoir = Buffer.concat([reservoir, addendum])
       }
 
-      // Take a byte from the reservoir.
-      nextByte = reservoir[0]
-      reservoir = reservoir.subarray(1)
-      midparse.push(nextByte)
+      // Advance pointer in reservoir.
+      const nextByte = reservoir[curIdx]
+      curIdx++
 
       // Descend down parse tree. If branch doesn't exist, curNode becomes
       // undefined.
       curNode = curNode[nextByte]
     }
 
+    const prefixLength = curIdx
+
     if (!curNode) {
       // The branch didn't exist. Add a tombstone and continue parsing.
-      parsed.push(InvalidCmd.from(midparse))
-      midparse = []
+      parsed.push(InvalidCmd.from([...reservoir.subarray(0, prefixLength)]))
+      reservoir = reservoir.subarray(prefixLength)
       continue
     }
 
@@ -240,14 +243,17 @@ export function* makeParser(): Generator<
     if (curNode instanceof FnLookahead) {
       // If reservoir doesn't have enough bytes to perform the lookahead,
       // request more bytes.
-      while (reservoir.length <= curNode.skip) {
-        const addendum = yield { parsed, midparse, unparsed: reservoir }
+      while (reservoir.length <= prefixLength + curNode.skip) {
+        const error = new ParseError(
+          'not enough bytes to perform function number lookahead',
+        )
+        const addendum = yield { parsed, buffered: reservoir, error }
         reservoir = Buffer.concat([reservoir, addendum])
       }
-      const fnByte = reservoir[curNode.skip]
+      const fnByte = reservoir[prefixLength + curNode.skip]
       if (!(fnByte in curNode.fns)) {
         // TODO double check this error handling is accurate to device
-        reservoir = reservoir.subarray(curNode.skip + 1)
+        reservoir = reservoir.subarray(prefixLength + curNode.skip + 1)
         continue
       }
       cmdClass = curNode.fns[fnByte]
@@ -258,23 +264,21 @@ export function* makeParser(): Generator<
     let remainder: Buffer
     do {
       try {
-        ;[cmd, remainder] = cmdClass.from(reservoir)
-        error = undefined
+        ;[cmd, remainder] = cmdClass.from(reservoir.subarray(prefixLength))
         break
       } catch (untypedError: unknown) {
-        error = untypedError as Error
+        const error = untypedError as Error
         assert(
           error instanceof ParseError,
           `expected ParseError, got ${error.constructor.name}: ${error.message}`,
         )
         // Reservoir didn't have enough bytes to construct the command.
         // Request more bytes.
-        const addendum = yield { parsed, midparse, unparsed: reservoir, error }
+        const addendum = yield { parsed, buffered: reservoir, error }
         reservoir = Buffer.concat([reservoir, addendum])
       }
     } while (true)
     parsed.push(cmd)
-    midparse = []
     reservoir = remainder
   }
 }
