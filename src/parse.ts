@@ -265,7 +265,6 @@ export function* makeParser(): Generator<
     do {
       try {
         ;[cmd, remainder] = cmdClass.from(reservoir.subarray(prefixLength))
-        break
       } catch (untypedError: unknown) {
         const error = untypedError as Error
         assert(
@@ -277,7 +276,7 @@ export function* makeParser(): Generator<
         const addendum = yield { parsed, buffered: reservoir, error }
         reservoir = Buffer.concat([reservoir, addendum])
       }
-    } while (true)
+    } while (!cmd)
     parsed.push(cmd)
     reservoir = remainder
   }
