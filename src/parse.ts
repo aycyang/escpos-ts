@@ -154,13 +154,6 @@ export function register(prefix: Ascii[]): CmdClassDecorator {
   }
 }
 
-function concatBuffers(a: Buffer, b: Buffer): Buffer {
-  const c = Buffer.alloc(a.length + b.length)
-  a.copy(c)
-  b.copy(c, a.length)
-  return c
-}
-
 type ParseInfo = {
   cmd: CmdBase
   size: number
@@ -180,6 +173,7 @@ type PartialParseInfo = {
   parsed: Serializable[]
   midparse: number[]
   unparsed: Buffer
+  error?: Error
   expecting?: CmdTypeInfo // TODO this isn't implemented yet
 }
 
@@ -190,20 +184,20 @@ export function* makeParser(): Generator<
 > {
   const parsed: Serializable[] = []
   let midparse: number[] = [] // TODO this might not need to be a global
-  const emptyBuf = Buffer.from([])
-  let reservoir: Buffer = emptyBuf
+  let reservoir: Buffer = Buffer.from([])
   let nextByte = -1 // TODO this might not need to be a global
+  let error: Error
   while (true) {
     // If reservoir is empty, request more bytes.
     while (reservoir.length === 0) {
-      reservoir = yield { parsed, midparse, unparsed: reservoir }
+      reservoir = yield { parsed, midparse, unparsed: reservoir, error }
     }
 
     // Parse any leading free bytes.
     const indexOfCmdByte = reservoir.findIndex((byte) => byte in kPrefixTree)
     if (indexOfCmdByte === -1) {
       parsed.push(Bytes.from([...reservoir]))
-      reservoir = emptyBuf
+      reservoir = Buffer.from([])
       continue
     }
 
@@ -221,7 +215,7 @@ export function* makeParser(): Generator<
     while (Array.isArray(curNode)) {
       // If reservoir is empty, request more bytes.
       while (reservoir.length === 0) {
-        reservoir = yield { parsed, midparse, unparsed: reservoir }
+        reservoir = yield { parsed, midparse, unparsed: reservoir, error }
       }
 
       // Take a byte from the reservoir.
@@ -248,7 +242,7 @@ export function* makeParser(): Generator<
       // request more bytes.
       while (reservoir.length <= curNode.skip) {
         const addendum = yield { parsed, midparse, unparsed: reservoir }
-        reservoir = concatBuffers(reservoir, addendum)
+        reservoir = Buffer.concat([reservoir, addendum])
       }
       const fnByte = reservoir[curNode.skip]
       if (!(fnByte in curNode.fns)) {
@@ -265,16 +259,18 @@ export function* makeParser(): Generator<
     do {
       try {
         ;[cmd, remainder] = cmdClass.from(reservoir)
+        error = undefined
         break
-      } catch (err: unknown) {
+      } catch (untypedError: unknown) {
+        error = untypedError as Error
         assert(
-          err instanceof ParseError,
-          `expected ParseError, got ${err.constructor.name}: ${(err as Error).message}`,
+          error instanceof ParseError,
+          `expected ParseError, got ${error.constructor.name}: ${error.message}`,
         )
         // Reservoir didn't have enough bytes to construct the command.
         // Request more bytes.
-        const addendum = yield { parsed, midparse, unparsed: reservoir }
-        reservoir = concatBuffers(reservoir, addendum)
+        const addendum = yield { parsed, midparse, unparsed: reservoir, error }
+        reservoir = Buffer.concat([reservoir, addendum])
       }
     } while (true)
     parsed.push(cmd)
