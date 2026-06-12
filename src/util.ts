@@ -1,3 +1,14 @@
+export function sizeOf(u: UnsignedInt) {
+  switch (u) {
+    case 'u8':
+      return 1
+    case 'u16':
+      return 2
+    case 'u32':
+      return 4
+  }
+}
+
 export function byteToHex(b: number): string {
   const upper = (b >> 4) & 0x0f
   const lower = b & 0x0f

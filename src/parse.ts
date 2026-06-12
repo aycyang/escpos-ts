@@ -4,7 +4,7 @@ import { Ascii, asciiToByte } from './ascii'
 import { CmdBase, CmdClass, CmdClassDecorator } from './cmd'
 import { assert } from './assert'
 import { ParseError } from './error'
-import { toHexList } from './util'
+import { sizeOf, toHexList } from './util'
 
 function toChar(n: number) {
   if (n < 0x20 || n >= 0x80) {
@@ -78,7 +78,7 @@ export class InvalidCmd {
   }
 }
 
-type Node = Node[] | CmdClass | FnLookahead
+type Node = Node[] | CmdClass | FnCond | VarSize
 const kPrefixTree: Node[] = []
 
 function getFromTree(prefix: Ascii[]): Node {
@@ -107,37 +107,66 @@ function addToTree(prefix: Ascii[], target: Node) {
   curNode[b] = target
 }
 
-class FnLookahead {
+class FnCond {
   fns: CmdClass[]
-  skip: number
-  constructor(skip: number) {
+  constructor() {
     this.fns = []
-    this.skip = skip
   }
   put(fn: number, ctor: CmdClass) {
     this.fns[fn] = ctor
   }
 }
 
-export function registerMultiFn(
+class VarSize {
+  fns: CmdClass[]
+  fnOffset: number
+  ptype: UnsignedInt
+  constructor(ptype: UnsignedInt, fnOffset: number = 0) {
+    this.fns = []
+    this.ptype = ptype
+    this.fnOffset = fnOffset
+  }
+  put(fn: number, ctor: CmdClass) {
+    this.fns[fn] = ctor
+  }
+}
+
+export function registerFnCond(
   prefix: Ascii[],
-  config: { skip: number; fns: number[] },
+  config: { fns: number[] },
 ): CmdClassDecorator {
   return (value: CmdClass, context: ClassDecoratorContext) => {
-    let lookahead = getFromTree(prefix) as FnLookahead
-    if (!lookahead) {
-      lookahead = new FnLookahead(config.skip)
+    let fnCond = getFromTree(prefix) as FnCond
+    if (!fnCond) {
+      fnCond = new FnCond()
+    }
+    for (const fn of config.fns) {
+      fnCond.put(fn, value)
+    }
+    addToTree(prefix, fnCond)
+    context.metadata.prefix = prefix
+  }
+}
+
+export function registerVarSize(
+  prefix: Ascii[],
+  config: { ptype: UnsignedInt; fnOffset?: number; fns: number[] },
+): CmdClassDecorator {
+  return (value: CmdClass, context: ClassDecoratorContext) => {
+    let varSize = getFromTree(prefix) as VarSize
+    if (!varSize) {
+      varSize = new VarSize(config.ptype, config.fnOffset)
     }
     assert(
-      lookahead.skip === config.skip,
-      `skip value should be fixed for a given multi-function command.
-      Tried to define skip value of: ${config.skip}
-      Previously defined skip value: ${lookahead.skip}`,
+      varSize.ptype === config.ptype,
+      `ptype value should be fixed for a given variable-size command.
+      Tried to define ptype of: ${config.ptype}
+      Previously defined ptype: ${varSize.ptype}`,
     )
     for (const fn of config.fns) {
-      lookahead.put(fn, value)
+      varSize.put(fn, value)
     }
-    addToTree(prefix, lookahead)
+    addToTree(prefix, varSize)
     context.metadata.prefix = prefix
   }
 }
@@ -237,20 +266,51 @@ function* chunkParser(): Generator<PartialParseInfo, PartialParseInfo, Buffer> {
 
     // Resolve command constructor.
     let cmdClass = curNode as CmdClass
-    if (curNode instanceof FnLookahead) {
-      // If buffer doesn't have enough bytes to perform the lookahead,
-      // request more bytes.
-      while (buffered.length <= prefixLength + curNode.skip) {
+    if (curNode instanceof VarSize) {
+      const psize = sizeOf(curNode.ptype)
+      // Request enough bytes to parse p.
+      while (buffered.length < prefixLength + psize) {
+        const error = new ParseError(`expecting p of size ${psize}`)
+        const addendum = yield { parsed, buffered, error }
+        buffered = Buffer.concat([buffered, addendum])
+      }
+      const p = buffered.readUintLE(prefixLength, psize)
+
+      // Request p additional bytes upfront.
+      while (buffered.length < prefixLength + psize + p) {
         const error = new ParseError(
-          'not enough bytes to perform function number lookahead',
+          `expecting p=${p} additional bytes ` +
+            `(currently at ${buffered.length - prefixLength - psize})`,
         )
         const addendum = yield { parsed, buffered, error }
         buffered = Buffer.concat([buffered, addendum])
       }
-      const fnByte = buffered[prefixLength + curNode.skip]
+      // Find fn byte.
+      const fnByte = buffered[prefixLength + psize + curNode.fnOffset]
       if (!(fnByte in curNode.fns)) {
+        // fn byte not registered. Add a tombstone and continue parsing.
+        parsed.push(
+          InvalidCmd.from([...buffered.subarray(0, prefixLength + psize + p)]),
+        )
+        buffered = buffered.subarray(prefixLength + psize + p)
+        continue
+      }
+      cmdClass = curNode.fns[fnByte]
+    } else if (curNode instanceof FnCond) {
+      // Request the fn byte.
+      while (buffered.length <= prefixLength) {
+        const error = new ParseError('expecting fn byte')
+        const addendum = yield { parsed, buffered, error }
+        buffered = Buffer.concat([buffered, addendum])
+      }
+      const fnByte = buffered[prefixLength]
+      if (!(fnByte in curNode.fns)) {
+        // fn byte not registered. Add a tombstone and continue parsing.
         // TODO double check this error handling is accurate to device
-        buffered = buffered.subarray(prefixLength + curNode.skip + 1)
+        parsed.push(
+          InvalidCmd.from([...buffered.subarray(0, prefixLength + 1)]),
+        )
+        buffered = buffered.subarray(prefixLength + 1)
         continue
       }
       cmdClass = curNode.fns[fnByte]
